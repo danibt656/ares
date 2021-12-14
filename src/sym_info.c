@@ -1,4 +1,4 @@
-#include "inlcude/sym_info.h"
+#include "include/sym_info.h"
 #include "include/alfa.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,6 +39,7 @@ sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categori
             sym->pos_var_loc = e2;
         if (catg == ESCALAR) { /*funct and escalar??*/
             sym->valor = e1;
+            sym->size = 1;
         } else if (catg == VECTOR) {
             sym->size = e1;
         }

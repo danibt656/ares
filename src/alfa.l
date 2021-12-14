@@ -10,13 +10,10 @@
 /* Antes de cada regla, avanzamos el contador de columna */
 #define YY_USER_ACTION { alfa_utils_T.col += yyleng; }
 %}
-    /* SECCION DE DEFINICIONES */
-%option noyywrap
-    
+/* SECCION DE DEFINICIONES */
+%option noyywrap 
 DIGITO [0-9]
-LETRA [a-zA-Z]
-
-    
+LETRA [a-zA-Z]  
 %%
     /* SECCION DE REGLAS */
     /* Define la creacion de tokens */
