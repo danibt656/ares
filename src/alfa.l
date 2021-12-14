@@ -5,6 +5,7 @@
 #include "include/y.tab.h"
 #include "include/alfa.h"
 
+/* Imprime token en un fichero de debug */
 #define SHIFT() fprintf(alfa_utils_T.fdbg, ";D:\t%s\n", yytext)
 
 /* Antes de cada regla, avanzamos el contador de columna */

@@ -8,6 +8,7 @@
 /* Inicializar valores default */
 struct ALFA_UTILS alfa_utils_T = {
     .fin = NULL,
+    .fin_name = NULL,
     .fasm = NULL,
     .fdbg = NULL,
     .ferr = NULL,
@@ -56,9 +57,17 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    /* Abrir fichero entrada */
+    /* Comprobar extension de fichero de entrada */
+    const char *dot = strrchr(argv[1], '.');
+    if(dot != INPUT_EXTENSION) {
+        printf("Los ficheros de entrada deben acabar en [%s]", INPUT_EXTENSION);
+        return EXIT_FAILURE;
+    }
+
+    /* Abrir fichero entrada y guardar su nombre */
     if (!(alfa_utils_T.fin = fopen(argv[1], "r")))
         return EXIT_FAILURE;
+    alfa_utils_T.fin_name = argv[1];
 
     /* Abrir fichero debug */
     if (!(alfa_utils_T.fdbg = fopen(DEBUG_FILE, "w"))) {

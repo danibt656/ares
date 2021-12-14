@@ -4,6 +4,9 @@
 #define MAX_LONG_ID 100
 #define MAX_LONG_VECTOR 64
 
+/* Extension de los ficheros en lenguaje ALFA */
+#define INPUT_EXTENSION ".a"
+
 /* Codigos de errores */
 typedef enum ErrorCode
 {
@@ -26,6 +29,7 @@ typedef enum
 extern struct ALFA_UTILS
 {
     FILE *fin;          /* Fichero de entrada */
+    char *fin_name;     /* Nombre de fichero de entrada */
     FILE *fasm;         /* Fichero de compilacion */
     FILE *fdbg;         /* Fichero de debug (logs de flex/bison) */
     FILE *ferr;         /* Fichero de salida de errores */

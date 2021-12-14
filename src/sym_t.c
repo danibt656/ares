@@ -70,10 +70,12 @@ int sym_t_add_symb(sym_info *sym)
     }
     /*primero compruebo si hay tabla local*/
     if(tabla->tabla_local){
+        sym->is_var_loc=1;
         hash_set(tabla->tabla_local, sym->lexema, sym);
         if(tabla->symbolsLocal!=NULL){
             tabla->symbolsLocal[tabla->tamL]=key;
             tabla->tamL++;
+            sym->pos_param=tabla->tamL;
         }
         return 0;
     }

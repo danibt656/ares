@@ -5,7 +5,7 @@
 #include <string.h>
 
 /* SIMBOLOS */
-sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categoria catg, int e1, int e2, int is_var_loc)
+sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categoria catg, int e1, int e2)
 {
     sym_info* sym = NULL;
     
@@ -25,7 +25,7 @@ sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categori
         sym->size = UNDEFINED;
         sym->num_params = UNDEFINED;
         sym->num_vars_loc = UNDEFINED;
-        sym->is_var_loc = is_var_loc;
+        sym->is_var_loc = UNDEFINED;
         sym->pos_var_loc = UNDEFINED;
         sym->pos_param = UNDEFINED;
         /* e1 valor si escalar, long si vector, número de parámetros si función */
@@ -35,8 +35,6 @@ sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categori
             sym->num_vars_loc = e2;
         } else if (elem == PARAMETRO)
             sym->pos_param = e2;
-        else if (elem == VARIABLE && is_var_loc)
-            sym->pos_var_loc = e2;
         if (catg == ESCALAR) { /*funct and escalar??*/
             sym->valor = e1;
             sym->size = 1;

@@ -739,10 +739,6 @@ void escribirVariableLocal(FILE *fpasm, int posicion_variable_local)
                 printf("Error fallo en compilador, fichero fpasm nulo");
                 return;
         }
-        if(!fpasm){
-                printf("Error fallo en compilador, fichero fpasm nulo\n");
-                return;
-        }
         int d_ebp = 4 * posicion_variable_local;
         fprintf(fpasm, "lea eax, [ebp - %d]\n", d_ebp);
         fprintf(fpasm, "push dword eax\n");
