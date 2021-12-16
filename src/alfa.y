@@ -78,8 +78,7 @@
 %token TOK_MENORIGUAL         
 %token TOK_MAYORIGUAL            
 
-%token <atributos> TOK_IDENTIFICADOR      
-
+%token <atributos> TOK_IDENTIFICADOR
 %token <atributos> TOK_CONSTANTE_ENTERA   
 %token TOK_TRUE               
 %token TOK_FALSE             
@@ -207,18 +206,18 @@ asignacion : TOK_IDENTIFICADOR '=' exp {
                 /* Comprueba que exista el identificador */
                 sprintf(err_msg, "Identificador [%d] inexistente", $1.lexema);
                 sym = sym_t_get_symb($1.lexema);
-                CHECK_ERROR(sym==NULL, err_msg);
+                CHECK_ERROR(sym!=NULL, err_msg);
 
                 /* Comprueba que no sea ni FUNCION ni VECTOR */
                 sprintf(err_msg, "Identificador [%d] no es variable", $1.lexema);
-                CHECK_ERROR(sym.CATEGORIA==VECTOR, err_msg);
-                CHECK_ERROR(sym.ELEMENTO==FUNCION, err_msg);
+                CHECK_ERROR(sym.CATEGORIA!=VECTOR, err_msg);
+                CHECK_ERROR(sym.ELEMENTO!=FUNCION, err_msg);
 
                 /* Asignar */
                 if (sym.is_var_loc!=-1) //comprueba si es variable global
-                    asignar(alfa_utils_T.fasm, $1.lexema, $3.es_direccion)
+                    asignar(alfa_utils_T.fasm, $1.lexema, sym.elem)
                 else //en caso contrario asigna destino en pila al ser local
-                    asignarDestinoEnPila(alfa_utils_T.fasm, $3.es_direccion)
+                    asignarDestinoEnPila(alfa_utils_T.fasm, sym.elem)
             }
            | elemento_vector '=' exp {
                 P_RULE(44,"<parametros_funcion> ::= <elemento_vector> = <exp>");
@@ -227,13 +226,13 @@ asignacion : TOK_IDENTIFICADOR '=' exp {
                 /* Comprueba que exista el identificador */
                 sprintf(err_msg, "Identificador [%d] inexistente", $1.lexema);
                 sym = sym_t_get_symb($1.lexema);
-                CHECK_ERROR(sym==NULL, err_msg);
+                CHECK_ERROR(sym!=NULL, err_msg);
 
                 /* Comprueba que no sea FUNCION */
                 sprintf(err_msg, "Identificador [%d] no es variable", $1.lexema);
-                CHECK_ERROR(sym.ELEMENTO==FUNCION, err_msg);
+                CHECK_ERROR(sym.ELEMENTO!=FUNCION, err_msg);
 
-                escribir_elemento_vector(alfa_utils_T.fasm, $3.lexema, sym.size, $3.es_direccion)
+                escribir_elemento_vector(alfa_utils_T.fasm, $3.lexema, sym.size, sym.elem)
             };
 
 elemento_vector : TOK_IDENTIFICADOR '[' exp ']' {P_RULE(48,"<elemento_vector> ::= identificador [ <exp> ]");};
@@ -251,7 +250,7 @@ lectura : TOK_SCANF TOK_IDENTIFICADOR {
             char err_msg[125] = "";
             sprintf(err_msg, "Identificador [%d] no existe", $1.lexema);
             sym_info* info = sym_t_check($2.lexema);
-            CHECK_ERROR(info ==NULL, err_msg);
+            CHECK_ERROR(info!=NULL, err_msg);
 
             /* Si el identificador existe */
             CHECK_ERROR((info->elem != FUNCION), "scanf no admite funciones como entrada");
@@ -260,23 +259,12 @@ lectura : TOK_SCANF TOK_IDENTIFICADOR {
             /* NASM: Apilar direccion de identificador */
             if (info->elem == PARAMETRO) {
                 escribirParametro(alfa_utils_T.fasm, pos_parametro_actual, info->num_params);
-            } else if (info->elem == VARIABLE) {
-                /* Si es variable global, su direccion es su lexema */
-                if (info->is_var_loc == -1)
-                    
-                else
-                    escribirVariableLocal(alfa_utils_T.fasm, pos_variable_local_actual);
+            } else if (info->elem == VARIABLE && info->is_var_loc == 1) {
+                escribirVariableLocal(alfa_utils_T.fasm, pos_variable_local_actual);
             }
 
-            /* NASM: llamar a funcion scanf de alfalib.o */
-            if (info->tipo == INT) {
-                /* Llamar a scan_int */
-
-            } else if (info->tipo == BOOLEAN) {
-                /* Llamar a scan_bool */
-
-            }
-            /* NASM: Restaurar la pila */
+            /* TODO Llamar a scanf */
+            leer(alfa_utils_T.fasm, LEXEMA, info->tipo);
         };
 
 escritura : TOK_PRINTF exp {P_RULE(56,"<escritura> ::= printf <exp>");};
@@ -291,7 +279,28 @@ exp : exp '+' exp {P_RULE(72,"<exp> ::= <exp> + <exp>");}
     | exp TOK_AND exp {P_RULE(77,"<exp> ::= <exp> && <exp>");}
     | exp TOK_OR exp {P_RULE(78,"<exp> ::= <exp> || <exp>");}
     | '!' exp {P_RULE(79,"<exp> ::= ! <exp>");}
-    | TOK_IDENTIFICADOR {P_RULE(80,"<exp> ::= identificador");}
+    | TOK_IDENTIFICADOR {
+        P_RULE(80,"<exp> ::= identificador");
+
+        char err_msg[125] = "";
+        sprintf(err_msg, "Identificador [%d] duplicado", $1.lexema);
+        CHECK_ERROR(sym_t_check($1.lexema)!=NULL, err_msg);
+
+        sym_info* sym = NULL;
+        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1, -1)
+        CHECK_ERROR(sym!=NULL, "Sin memoria");
+
+        /* Comprueba que no sea ni FUNCION ni VECTOR */
+        sprintf(err_msg, "Identificador [%d] no es variable", $1.lexema);
+        CHECK_ERROR(sym.CATEGORIA!=VECTOR, err_msg);
+        CHECK_ERROR(sym.ELEMENTO!=FUNCION, err_msg);
+
+        /* Variable global */
+        if(!sym.is_var_local){
+            escribir_operando(alfa_utils_T.fasm, $1.lexema, 1);
+            $$.tipo = sym->tipo;
+        }
+      }
     | constante {P_RULE(81,"<exp> ::= <constante>");}
     | '(' exp ')' {P_RULE(82,"<exp> ::= ( <exp> )");}
     | '(' comparacion ')' {P_RULE(83,"<exp> ::= ( <comparacion> )");}
@@ -314,33 +323,33 @@ comparacion : exp TOK_IGUAL exp {P_RULE(93,"<comparacion> ::= <exp> == <exp>");}
 constante : constante_logica {
                 P_RULE(99,"<constante> ::= <constante_logica>");
                 $$.tipo = $1.tipo;
-                $$.es_direccion = $1.es_direccion;
                 $$.valor_entero = $1.valor_entero;
+                        // @TODO Modificar el campo .elem
             }
           | constante_entera {
                 P_RULE(100,"<comparacion> ::= <constante_entera>");
                 $$.tipo = $1.tipo;
-                $$.es_direccion = $1.es_direccion;
+                        // @TODO Modificar el campo .elem
             };
 
 constante_logica : TOK_TRUE {
                         P_RULE(102,"<constante_logica> ::= true");
                         $$.tipo = BOOLEANO;
-                        $$.es_direccion = 0;
                         $$.valor_entero = 1;
+                        // @TODO Modificar el campo .elem
                     }
                  | TOK_FALSE {
                         P_RULE(103,"<constante_logica> ::= false");
                         $$.tipo = BOOLEANO;
-                        $$.es_direccion = 0;
                         $$.valor_entero = 0;
+                        // @TODO Modificar el campo .elem
                     };
 
 constante_entera : TOK_CONSTANTE_ENTERA {
                         P_RULE(104,"<constante_entera> ::= TOK_CONSTANTE_ENTERA");
                         $$.tipo = ENTERO;
-                        $$.es_direccion = 0;
                         $$.valor_entero = $1.valor_entero
+                        // @TODO Modificar el campo .elem
                     };
 
 identificador : TOK_IDENTIFICADOR {
@@ -351,9 +360,9 @@ identificador : TOK_IDENTIFICADOR {
 
         //si llega a aqui el check error lo permite
         sym_info* sym = NULL;
-        //DUDA
+
         sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1, -1)
-        CHECK_ERROR(sym==NULL, "Sin memoria");
+        CHECK_ERROR(sym!=NULL, "Sin memoria");
 
         sym_t_add_symb(sym) //insertas el símbolo donde toque (global o local, de eso se encarga la tabla)
         pos_variable_local_actual++;
