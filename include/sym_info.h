@@ -58,7 +58,7 @@ typedef struct STRUCT_SYM_INFO
  * 
  * @return Puntero a info de simbolo 
  */
-sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categoria catg, int e1, int e2, int is_var_loc);
+sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categoria catg, int e1, int e2);
 
 
 

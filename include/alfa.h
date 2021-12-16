@@ -43,9 +43,10 @@ typedef struct TIPO_ATRIBUTOS
 {
     char *lexema[MAX_LONG_ID+1];    /* lexema de Identificador */
     int valor_entero;               /* valor de constante entera */
+
+    int es_direccion;               /* Variable o Constante*/
     
     Tipo tipo;                      /* boolean o entero */
-    int es_direccion;               /* ¿es puntero? */
 
     int etiqueta;                   /* para generacion NASM */
 } tipo_atributos;

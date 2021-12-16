@@ -1,9 +1,9 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
-    #include "include/alfa.h"
-    #include "include/sym_t.h"
-    #include "include/generacion.h"
+    #include "../include/alfa.h"
+    #include "../include/sym_t.h"
+    #include "../include/generacion.h"
 
     /* Imprime err_msg si no se cumple la condicion cond */
     #define CHECK_ERROR(cond, err_msg)\
@@ -99,7 +99,7 @@
 %type <atributos> lista_expresiones resto_lista_expresiones
 
 /* %type <atributos> if_exp if_exp_sentencias */
-%type <atributos> while
+%type <atributos> bucle
 /* %type <atributos> while_exp */
 
 /* %type <atributos> compare_with compare_less compare_equal compare_greater */
@@ -199,7 +199,7 @@ sentencia_simple : asignacion {P_RULE(34,"<sentencia_simple> ::= <asignacion>");
 bloque : condicional {P_RULE(40,"<bloque> ::= <condicional>");}
        | bucle {P_RULE(41,"<bloque> ::= <bucle>");};
 
-asignacion : TOK_IDENTIFICADOR '=' exp {
+asignacion  : TOK_IDENTIFICADOR '=' exp {
                 P_RULE(43,"<asignacion> ::= identificador = <exp>");
                 char err_msg[128] = "";
 
@@ -210,16 +210,20 @@ asignacion : TOK_IDENTIFICADOR '=' exp {
 
                 /* Comprueba que no sea ni FUNCION ni VECTOR */
                 sprintf(err_msg, "Identificador [%d] no es variable", $1.lexema);
-                CHECK_ERROR(sym.CATEGORIA!=VECTOR, err_msg);
-                CHECK_ERROR(sym.ELEMENTO!=FUNCION, err_msg);
+                CHECK_ERROR(sym.catg != VECTOR, err_msg);
+                CHECK_ERROR(sym.elem != FUNCION, err_msg);
+
+                /* Comprueba que el tipo sea el mismo */
+                sprintf(err_msg, "Asignacion entre tipos distintos");
+                CHECK_ERROR($3.tipo == sym->tipo, err_msg);
 
                 /* Asignar */
                 if (sym.is_var_loc!=-1) //comprueba si es variable global
-                    asignar(alfa_utils_T.fasm, $1.lexema, sym.elem)
+                    asignar(alfa_utils_T.fasm, $1.lexema, $3.es_direccion);
                 else //en caso contrario asigna destino en pila al ser local
-                    asignarDestinoEnPila(alfa_utils_T.fasm, sym.elem)
+                    asignarDestinoEnPila(alfa_utils_T.fasm, $3.es_direccion);
             }
-           | elemento_vector '=' exp {
+            | elemento_vector '=' exp {
                 P_RULE(44,"<parametros_funcion> ::= <elemento_vector> = <exp>");
                 char err_msg[128] = "";
 
@@ -248,7 +252,7 @@ lectura : TOK_SCANF TOK_IDENTIFICADOR {
 
             /* Buscar si el identificador existe */
             char err_msg[125] = "";
-            sprintf(err_msg, "Identificador [%d] no existe", $1.lexema);
+            sprintf(err_msg, "Identificador [%d] no existe", $2.lexema);
             sym_info* info = sym_t_check($2.lexema);
             CHECK_ERROR(info!=NULL, err_msg);
 
@@ -263,11 +267,14 @@ lectura : TOK_SCANF TOK_IDENTIFICADOR {
                 escribirVariableLocal(alfa_utils_T.fasm, pos_variable_local_actual);
             }
 
-            /* TODO Llamar a scanf */
-            leer(alfa_utils_T.fasm, LEXEMA, info->tipo);
+            /* Llamar a scanf */
+            leer(alfa_utils_T.fasm, info->lexema, info->tipo);
         };
 
-escritura : TOK_PRINTF exp {P_RULE(56,"<escritura> ::= printf <exp>");};
+escritura : TOK_PRINTF exp {
+                P_RULE(56,"<escritura> ::= printf <exp>");
+                escribir(pfasm, $2.es_direccion, $2.tipo);
+          };
 
 retorno_funcion : TOK_RETURN exp {P_RULE(61,"<retorno_funcion> ::= return <exp>");};
 
@@ -292,12 +299,20 @@ exp : exp '+' exp {P_RULE(72,"<exp> ::= <exp> + <exp>");}
 
         /* Comprueba que no sea ni FUNCION ni VECTOR */
         sprintf(err_msg, "Identificador [%d] no es variable", $1.lexema);
-        CHECK_ERROR(sym.CATEGORIA!=VECTOR, err_msg);
-        CHECK_ERROR(sym.ELEMENTO!=FUNCION, err_msg);
+        CHECK_ERROR(sym.catg != VECTOR, err_msg);
+        CHECK_ERROR(sym.elem != FUNCION, err_msg);
 
         /* Variable global */
-        if(!sym.is_var_local){
+        if (sym->elem == VARIABLE && !sym->is_var_local) {
             escribir_operando(alfa_utils_T.fasm, $1.lexema, 1);
+            $$.tipo = sym->tipo;
+        /* Variable local */
+        } else if (sym->elem == VARIABLE && sym->is_var_local) {
+            escribirVariableLocal(alfa_utils_T.fasm, pos_variable_local_actual);
+            $$.tipo = sym->tipo;
+        /* Parametro */
+        } else if (sym->elem == PARAMETRO) {
+            escribirParametro(alfa_utils_T.fasm, pos_parametro_actual, sym->num_params);
             $$.tipo = sym->tipo;
         }
       }
@@ -324,32 +339,32 @@ constante : constante_logica {
                 P_RULE(99,"<constante> ::= <constante_logica>");
                 $$.tipo = $1.tipo;
                 $$.valor_entero = $1.valor_entero;
-                        // @TODO Modificar el campo .elem
+                $$.es_direccion = $1.es_direccion;
             }
           | constante_entera {
                 P_RULE(100,"<comparacion> ::= <constante_entera>");
                 $$.tipo = $1.tipo;
-                        // @TODO Modificar el campo .elem
+                $$.es_direccion = $1.es_direccion;
             };
 
 constante_logica : TOK_TRUE {
                         P_RULE(102,"<constante_logica> ::= true");
                         $$.tipo = BOOLEANO;
                         $$.valor_entero = 1;
-                        // @TODO Modificar el campo .elem
+                        $$.es_direccion = 0;
                     }
                  | TOK_FALSE {
                         P_RULE(103,"<constante_logica> ::= false");
                         $$.tipo = BOOLEANO;
                         $$.valor_entero = 0;
-                        // @TODO Modificar el campo .elem
+                        $$.es_direccion = 0;
                     };
 
 constante_entera : TOK_CONSTANTE_ENTERA {
                         P_RULE(104,"<constante_entera> ::= TOK_CONSTANTE_ENTERA");
                         $$.tipo = ENTERO;
+                        $$.es_direccion = 0;
                         $$.valor_entero = $1.valor_entero
-                        // @TODO Modificar el campo .elem
                     };
 
 identificador : TOK_IDENTIFICADOR {

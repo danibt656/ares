@@ -7,7 +7,7 @@
  *      @author Daniel Barahona Martin
  *      @author David Garitagoitia Romero
 */
-#include "generacion.h"
+#include "../include/generacion.h"
 
 
 void escribir_cabecera_bss(FILE *fpasm)

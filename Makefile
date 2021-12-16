@@ -30,14 +30,16 @@ $(DOBJ)/%.o: $(DSRC)/%.c
 
 # Bison
 $(DSRC)/y.tab.c: $(DSRC)/alfa.y
-	$(BISON) $(BISONFLAGS) alfa.y
+	$(BISON) $(BISONFLAGS) $(DSRC)/alfa.y
+	mv y.tab.c $(DSRC)/y.tab.c
 
 $(IDIR)/y.tab.h: $(DSRC)/alfa.y
-	$(BISON) $(BISONFLAGS) alfa.y
+	$(BISON) $(BISONFLAGS) $(DSRC)/alfa.y
+	mv y.tab.h $(IDIR)/y.tab.h
 
 # Lex
 $(DSRC)/lex.yy.c: $(DSRC)/alfa.l $(DINC)/y.tab.h
-	$(FLEX) alfa.l
+	$(FLEX) $(DSRC)/alfa.l
 
 clean:
-	rm -rvf $(BIN) *.o lex.yy.c *.tab.h *.tab.c y.output *.output
+	rm -rvf $(BIN) $(DOBJ)/*.o lex.yy.c $(IDIR)/*.tab.h $(DSRC)/*.tab.c *.output

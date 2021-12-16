@@ -1,5 +1,5 @@
-#include "include/sym_t.h"
-#include "include/alfa.h"
+#include "../include/sym_t.h"
+#include "../include/alfa.h"
 
 #define SIZE_T_GLOBAL 400
 #define SIZE_T_LOCAL 400

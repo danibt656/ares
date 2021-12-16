@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "include/y.tab.h"
-#include "include/alfa.h"
+#include "../include/y.tab.h"
+#include "../include/alfa.h"
 
 /* Imprime token en un fichero de debug */
 #define SHIFT() fprintf(alfa_utils_T.fdbg, ";D:\t%s\n", yytext)
