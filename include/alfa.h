@@ -1,8 +1,16 @@
+#ifndef ALFA_H
+#define ALFA_H 1
+
+#include <stdio.h>
+
+/* Macro para cuerpo de funciones en macros */
+#define F_BLOCK(block) do { block } while (0)
+
 #define MAX_LONG_ID 100
 #define MAX_LONG_VECTOR 64
 
 /* Extension de los ficheros en lenguaje ALFA */
-#define INPUT_EXTENSION ".a"
+#define INPUT_EXTENSION ".alf"
 
 /* Codigos de errores */
 typedef enum ErrorCode
@@ -19,9 +27,6 @@ typedef enum
     INT
 } Tipo;
 
-/* Macro para cuerpo de funciones en macros */
-#define F_BLOCK(instrucciones) do { instrucciones } while (0)
-
 /* Estructura para ficheros de entrada y salida */
 extern struct ALFA_UTILS
 {
@@ -36,20 +41,23 @@ extern struct ALFA_UTILS
     unsigned int line, col;/* Numeros de linea y columna */
 } alfa_utils_T;
 
-typedef struct TIPO_ATRIBUTOS
-{
-    char *lexema[MAX_LONG_ID+1];    /* lexema de Identificador */
+typedef struct {
+    char lexema[MAX_LONG_ID+1];    /* lexema de Identificador */
     int valor_entero;               /* valor de constante entera */
-
     int es_direccion;               /* Variable o Constante*/
-    
+
     Tipo tipo;                      /* boolean o entero */
 
     int etiqueta;                   /* para generacion NASM */
 } tipo_atributos;
+
+
 
 /* Funcion para manejar errores */
 void manage_error(char *msg, char *s);
 
 /* Funcion Principal que llama al analizador */
 int main(int argc, char *argv[]);
+
+
+#endif /* ALFA_H */

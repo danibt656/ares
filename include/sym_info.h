@@ -1,3 +1,7 @@
+#ifndef SYM_INFO_H
+#define SYM_INFO_H 1
+#include "alfa.h"
+
 #define UNDEFINED -1    /* enteros no inicializados */
 
 #define DOUBLE_ID -1
@@ -68,3 +72,5 @@ sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categori
  * @param sym Simbolo
  */
 void sym_info_free(sym_info *sym);
+
+#endif

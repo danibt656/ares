@@ -9,15 +9,13 @@
 */
 
 #ifndef GENERACION_H
-#define GENERACION_H
+#define GENERACION_H 1
 
 #include <stdio.h>
 #include <stdlib.h>
 
 
 /* Declaraciones de tipos de datos del compilador */
-#define ENTERO	0
-#define BOOLEANO 	1
 #define MAX_ETIQUETAS 1000
 
 

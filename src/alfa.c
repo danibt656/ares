@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "y.tab.h"
 #include "alfa.h"
+#include "y.tab.h"
 
 #define DEBUG_FILE "debug"
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
     /* Comprobar extension de fichero de entrada */
     const char *dot = strrchr(argv[1], '.');
-    if(dot != INPUT_EXTENSION) {
+    if(strcmp(dot, INPUT_EXTENSION) != 0) {
         printf("Los ficheros de entrada deben acabar en [%s]", INPUT_EXTENSION);
         return EXIT_FAILURE;
     }

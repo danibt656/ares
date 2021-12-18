@@ -7,7 +7,8 @@
  *      @author Daniel Barahona Martin
  *      @author David Garitagoitia Romero
 */
-#include "../include/generacion.h"
+#include "generacion.h"
+#include "alfa.h"
 
 
 void escribir_cabecera_bss(FILE *fpasm)
@@ -35,7 +36,7 @@ void declarar_variable(FILE *fpasm, char *nombre, int tipo, int tamano)
 /*
    Para ser invocada en la sección .bss cada vez que se quiera declarar una variable:
     • El argumento nombre es el de la variable.
-    • tipo puede ser ENTERO o BOOLEANO (observa la declaración de las constantes del principio del fichero).
+    • tipo puede ser INT o BOOLEAN (observa la declaración de las constantes del principio del fichero).
     • Esta misma función se invocará cuando en el compilador se declaren vectores, por eso se adjunta un argumento final (tamano) que para esta primera práctica siempre recibirá el valor 1.
 */
 {
@@ -47,10 +48,7 @@ void declarar_variable(FILE *fpasm, char *nombre, int tipo, int tamano)
                 printf("Error fallo en compilador, nombre de la variable nulo");
                 return;
         }
-        if (tipo == ENTERO)
-                fprintf(fpasm, "_%s resd %d\n", nombre, tamano);
-        else if (tipo == BOOLEANO)
-                fprintf(fpasm, "_%s resd %d\n", nombre, tamano);
+        fprintf(fpasm, "_%s resd %d\n", nombre, tamano);
         
 }
 
@@ -118,7 +116,7 @@ void escribir_fin(FILE *fpasm)
 void suma_iterativa(FILE *fpasm, char *nombre1, char *nombre2, char *nombre3)
 /*
 Genera el código NASM necesario para:
- * leer al menos dos operandos enteros del teclado
+ * leer al menos dos operandos INTs del teclado
  * si el segundo operando es igual a 0, no hace nada más
  * si el segundo operando es distinto de 0
      * realizar y presentar por el terminal el resultado de la suma de los dos operandos
@@ -543,7 +541,7 @@ void leer(FILE *fpasm, char *nombre, int tipo)
         }
         fprintf(fpasm, "push dword _%s\n", nombre);
         fprintf(fpasm, 
-                (tipo==ENTERO)
+                (tipo==INT)
                         ?"call scan_int\n"
                         :"call scan_boolean\n");
         fprintf(fpasm, "add esp, 4\n");
@@ -561,10 +559,10 @@ void escribir(FILE *fpasm, int es_variable, int tipo)
                         "mov eax, [eax]\n"
                         "push eax\n");
         }
-        if(tipo == ENTERO){
+        if(tipo == INT){
               fprintf(fpasm, "call print_int\n"); 
         }
-        else if(tipo == BOOLEANO){
+        else if(tipo == BOOLEAN){
                 fprintf(fpasm, "call print_boolean\n");
         }else{
                 fprintf(fpasm, "call print_endofline\n");

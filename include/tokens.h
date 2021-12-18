@@ -3,7 +3,7 @@ Nombre: tokens.h
 Descripcion: Definicion de tokens para el lenguaje ALFA
 ******************************************************/
 #ifndef _TOKENS_H
-#define _TOKENS_H
+#define _TOKENS_H 1
 
 
 /* Palabras reservadas */ 

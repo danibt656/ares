@@ -1,5 +1,5 @@
 #ifndef HASH_T
-#define HASH_T
+#define HASH_T 1
 
 #include <stdlib.h>
 #include <stdio.h>

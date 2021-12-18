@@ -1,5 +1,5 @@
 #ifndef SYM_T_H
-#define SYM_T_H
+#define SYM_T_H 1
 
 #include <stdio.h>
 #include <stdlib.h>

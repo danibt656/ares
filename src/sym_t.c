@@ -1,5 +1,5 @@
-#include "include/sym_t.h"
-#include "include/sym_info.h"
+#include "sym_t.h"
+#include "sym_info.h"
 
 #define SIZE_T_GLOBAL 400
 #define SIZE_T_LOCAL 400
@@ -139,12 +139,12 @@ void open_scope(char* key, int value){
     if((tabla->symbolsLocal = (char**)calloc(SIZE_T_LOCAL, sizeof(char*)))==NULL){
         return;
     }
-    sym_info *info1 = sym_info_create(key, FUNCION, INT, ESCALAR, -1, -1, -1); //int y escalar está x poner
+    sym_info *info1 = sym_info_create(key, FUNCION, INT, ESCALAR, -1, -1); //int y escalar está x poner
     info1->valor=value;
     tabla->tabla_local = hash_create(SIZE_T_LOCAL);
     //insertamos simbolo tanto en tabla local como global
     hash_set(tabla->tabla_global, info1->lexema, info1);
-    sym_info *info2 = sym_info_create(key, FUNCION, INT, ESCALAR, -1, -1, -1); //int y escalar está x poner
+    sym_info *info2 = sym_info_create(key, FUNCION, INT, ESCALAR, -1, -1); //int y escalar está x poner
     info2->valor=value;
     hash_set(tabla->tabla_local, info2->lexema, info2);
 

@@ -1,6 +1,6 @@
 %{
-    #include "include/y.tab.h"
-    #include "include/alfa.h"
+    #include "alfa.h"
+    #include "y.tab.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
@@ -64,8 +64,10 @@ return      { SHIFT(); return TOK_RETURN; }
     /* Constantes */
 true        { SHIFT(); return TOK_TRUE; }
 false       { SHIFT(); return TOK_FALSE; }
-{DIGITO}+   { SHIFT(); yylval.atributos.valor_entero = atoi(yytext); 
-              return TOK_CONSTANTE_ENTERA; 
+{DIGITO}+   { 
+                #include "alfa.h"
+                SHIFT(); yylval.atributos.valor_entero = atoi(yytext); 
+                return TOK_CONSTANTE_ENTERA; 
             }   
 
     /* Identificadores */

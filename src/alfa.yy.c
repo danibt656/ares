@@ -1,5 +1,6 @@
+#line 2 "src/alfa.yy.c"
 
-#line 3 "lex.yy.c"
+#line 4 "src/alfa.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -507,8 +508,8 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "src/alfa.l"
 #line 2 "src/alfa.l"
-    #include "include/y.tab.h"
-    #include "include/alfa.h"
+    #include "alfa.h"
+    #include "y.tab.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
@@ -517,9 +518,9 @@ char *yytext;
 
     /* Antes de cada regla, avanzamos el contador de columna */
     #define YY_USER_ACTION { alfa_utils_T.col += yyleng; }
-#line 521 "lex.yy.c"
+#line 522 "src/alfa.yy.c"
 /* SECCION DE DEFINICIONES */
-#line 523 "lex.yy.c"
+#line 524 "src/alfa.yy.c"
 
 #define INITIAL 0
 
@@ -742,7 +743,7 @@ YY_DECL
     /* SECCION DE REGLAS */
     /* Define la creacion de tokens */
 
-#line 746 "lex.yy.c"
+#line 747 "src/alfa.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1001,14 +1002,16 @@ YY_RULE_SETUP
 case 40:
 YY_RULE_SETUP
 #line 68 "src/alfa.l"
-{ SHIFT(); yylval.atributos.valor_entero = atoi(yytext); 
-              return TOK_CONSTANTE_ENTERA; 
+{ 
+                #include "alfa.h"
+                SHIFT(); yylval.atributos.valor_entero = atoi(yytext); 
+                return TOK_CONSTANTE_ENTERA; 
             }   
 	YY_BREAK
 /* Identificadores */
 case 41:
 YY_RULE_SETUP
-#line 73 "src/alfa.l"
+#line 75 "src/alfa.l"
 {
                                 SHIFT();
                                 /* Error de longitud */
@@ -1025,15 +1028,15 @@ YY_RULE_SETUP
 /* Error de simbolos no permitidos */
 case 42:
 YY_RULE_SETUP
-#line 87 "src/alfa.l"
+#line 89 "src/alfa.l"
 { alfa_utils_T.col -= 1; alfa_utils_T.error = ERR_MORFOLOGICO; manage_error("simbolo no permitido", yytext); return TOK_ERROR; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 89 "src/alfa.l"
+#line 91 "src/alfa.l"
 ECHO;
 	YY_BREAK
-#line 1037 "lex.yy.c"
+#line 1040 "src/alfa.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2038,6 +2041,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 89 "src/alfa.l"
+#line 91 "src/alfa.l"
 
 

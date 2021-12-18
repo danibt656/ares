@@ -1,4 +1,5 @@
-#include "include/hash_t.h"
+#include "hash_t.h"
+#include <string.h>
 
 
 hash_t *hash_create(int size )
@@ -56,8 +57,13 @@ entry_t *hash_newpair(char *key, sym_info *value)
 	entry_t *newpair;
 	if (!(newpair = malloc(sizeof(entry_t))))
 		return NULL;
-	if(!(newpair->key = strdup(key)))
+	
+	if(!(newpair->key = malloc(sizeof(key))))
 		return NULL;
+
+	if(!strcpy(newpair->key, key))
+		return NULL;
+
 	if(!(newpair->value = value))
 		return NULL;
 

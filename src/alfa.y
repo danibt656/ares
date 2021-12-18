@@ -1,21 +1,26 @@
 %{
+    #include "alfa.h"
+    #include "y.tab.h"
+    #include "sym_t.h"
+    #include "generacion.h"
+
     #include <stdio.h>
     #include <stdlib.h>
-    #include "include/alfa.h"
-    #include "include/sym_t.h"
-    #include "include/generacion.h"
 
     /* Imprime err_msg si no se cumple la condicion cond */
     #define CHECK_ERROR(cond, err_msg) \
         F_BLOCK( \
-            if(!cond) \
+            if(!(cond)){ \
             fprintf(alfa_utils_T.ferr, "[%s]: linea %d[%d] ERROR: %s\n", \
                     (alfa_utils_T.fin_name), \
                     (alfa_utils_T.line), \
                     (alfa_utils_T.col), \
                     (err_msg)); \
              YYABORT; \
+            } \
         )
+
+    #define TAM_ERRMSG 200
     
     /* Imprime regla gramatical en un fichero de debug */
     #define P_RULE(n, msg) \
@@ -31,11 +36,13 @@
 
         alfa_utils_T.error = ERR_SINTACTICO;
         manage_error(NULL, NULL);
+        return 1;
     }
 
     /* Para declaraciones */
     static Tipo tipo_actual;
     static Categoria clase_actual;
+    static int ambito_actual;
 
     /* Para vectores */
     static int tamanio_vector_actual = 0;
@@ -52,7 +59,7 @@
 	static int en_explist = 0;
 %}
 
-%union{
+%union {
     tipo_atributos atributos;
 }
 
@@ -92,7 +99,7 @@
 %type <atributos> constante
 %type <atributos> constante_entera
 %type <atributos> constante_logica
-%type <atributos> identificador funcion
+%type <atributos> identificador_new identificador_use idpf funcion
 /* %type <atributos> idpf fn_name fn_declaration */
 /* %type <atributos> idf_llamada_funcion */
 %type <atributos> lista_expresiones resto_lista_expresiones
@@ -133,7 +140,6 @@ dec_vars:   {
                 char** simbolos = sym_t_getGlobalSymbols();
                 int i = 0;
                 sym_info* sym = NULL;
-
                 for (i = 0; simbolos[i] != NULL; i++) {
                     sym = sym_t_get_symb(simbolos[i]);
                     if (sym && VARIABLE == sym->elem)
@@ -149,13 +155,19 @@ declaraciones : declaracion {P_RULE(2,"<declaraciones> ::= <declaracion>");}
 
 declaracion : clase identificadores ';' {P_RULE(4,"<declaracion> ::= <clase> <identificadores> ;");};
 
-clase : clase_escalar {P_RULE(5,"<clase> ::= <clase_escalar>"); clase_actual = ESCALAR;}
-      | clase_vector {P_RULE(7,"<clase> ::= <clase_vector>"); clase_actual = VECTOR;};
+clase : clase_escalar {
+            P_RULE(5,"<clase> ::= <clase_escalar>");
+            clase_actual = ESCALAR;
+        }
+      | clase_vector {
+          P_RULE(7,"<clase> ::= <clase_vector>");
+          clase_actual = VECTOR;
+        };
 
 clase_escalar : tipo {P_RULE(9,"<clase_escalar> ::= <tipo>");};
 
-tipo : TOK_INT {P_RULE(10,"<tipo> ::= int"); tipo_actual = ENTERO;}
-     | TOK_BOOLEAN {P_RULE(11,"<tipo> ::= boolean"); tipo_actual = BOOLEANO;};
+tipo : TOK_INT {P_RULE(10,"<tipo> ::= int"); tipo_actual = INT;}
+     | TOK_BOOLEAN {P_RULE(11,"<tipo> ::= boolean"); tipo_actual = BOOLEAN;};
 
 clase_vector : TOK_ARRAY tipo '[' TOK_CONSTANTE_ENTERA ']' {
         P_RULE(15,"<clase_vector> ::= array <tipo> [ constante_entera ]");
@@ -164,13 +176,13 @@ clase_vector : TOK_ARRAY tipo '[' TOK_CONSTANTE_ENTERA ']' {
         CHECK_ERROR(tamanio_vector_actual <= MAX_LONG_VECTOR, "Tamaño de vector invalido");
     };
 
-identificadores : identificador {P_RULE(18,"<identificadores> ::= <identificador>");}
-                | identificador ',' identificadores {P_RULE(19,"<identificadores> ::= <identificador> , <identificadores>");};
+identificadores : identificador_new {P_RULE(18,"<identificadores> ::= <identificador>");}
+                | identificador_new ',' identificadores {P_RULE(19,"<identificadores> ::= <identificador> , <identificadores>");};
 
 funciones : funcion funciones {P_RULE(20,"<funciones> ::= <funcion> <funciones>");}
           | /* lambda */ {P_RULE(21,"<funciones> ::=");};
 
-funcion : TOK_FUNCTION tipo identificador '(' parametros_funcion ')' '{' declaraciones_funcion sentencias '}'
+funcion : TOK_FUNCTION tipo identificador_use '(' parametros_funcion ')' '{' declaraciones_funcion sentencias '}'
         {P_RULE(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }");};
 
 parametros_funcion : parametro_funcion resto_parametros_funcion {P_RULE(23,"<parametros_funcion> ::= <parametro_funcion> <resto_parametros_funcion>");}
@@ -179,7 +191,12 @@ parametros_funcion : parametro_funcion resto_parametros_funcion {P_RULE(23,"<par
 resto_parametros_funcion : ';' parametro_funcion resto_parametros_funcion {P_RULE(25,"<resto_parametros_funcion> ::= <parametro_funcion> <resto_parametros_funcion>");}
                          | /* lambda */ {P_RULE(26,"<resto_parametros_funcion> ::=");};
 
-parametro_funcion : tipo identificador {P_RULE(27,"<parametro_funcion> ::= <tipo> <identificador>");};
+idpf : identificador_use {
+        $$ = $1;
+        clase_actual = ESCALAR;
+     };
+
+parametro_funcion : tipo idpf {P_RULE(27,"<parametro_funcion> ::= <tipo> <identificador>");};
 
 declaraciones_funcion : declaraciones {P_RULE(28,"<declaraciones_funcion> ::= <declaraciones>");}
                       | /* lambda */ {P_RULE(29,"<declaraciones_funcion> ::=");};
@@ -198,8 +215,8 @@ sentencia_simple : asignacion {P_RULE(34,"<sentencia_simple> ::= <asignacion>");
 bloque : condicional {P_RULE(40,"<bloque> ::= <condicional>");}
        | bucle {P_RULE(41,"<bloque> ::= <bucle>");};
 
-asignacion  : TOK_IDENTIFICADOR '=' exp {
-                char err_msg[836] = "";
+asignacion  : identificador_use '=' exp {
+                char err_msg[TAM_ERRMSG] = "";
                 sym_info* sym = NULL;
                 P_RULE(43,"<asignacion> ::= identificador = <exp>");
                 /* Comprueba que exista el identificador */
@@ -224,7 +241,7 @@ asignacion  : TOK_IDENTIFICADOR '=' exp {
             }
             | elemento_vector '=' exp {
                 sym_info* sym = NULL;
-                char err_msg[129] = "";
+                char err_msg[TAM_ERRMSG] = "";
                 P_RULE(44,"<parametros_funcion> ::= <elemento_vector> = <exp>");
 
                 /* Comprueba que exista el identificador */
@@ -243,7 +260,7 @@ asignacion  : TOK_IDENTIFICADOR '=' exp {
                 escribir_elemento_vector(alfa_utils_T.fasm, $3.lexema, sym->size, sym->elem);
             };
 
-elemento_vector : TOK_IDENTIFICADOR '[' exp ']' {P_RULE(48,"<elemento_vector> ::= identificador [ <exp> ]");};
+elemento_vector : identificador_use '[' exp ']' {P_RULE(48,"<elemento_vector> ::= identificador [ <exp> ]");};
 
 condicional : TOK_IF '(' exp ')' '{' sentencias '}' {P_RULE(50,"<condicional> ::= if ( <exp> ) { <sentencias> }");}
             | TOK_IF '(' exp ')' '{' sentencias '}' TOK_ELSE '{' sentencias '}'
@@ -251,8 +268,8 @@ condicional : TOK_IF '(' exp ')' '{' sentencias '}' {P_RULE(50,"<condicional> ::
 
 bucle : TOK_WHILE '(' exp ')' '{' sentencias '}' {P_RULE(52,"<bucle> ::= while ( <exp> ) { <sentencias> }");};
 
-lectura : TOK_SCANF TOK_IDENTIFICADOR {
-            char err_msg[130] = "";
+lectura : TOK_SCANF identificador_use {
+            char err_msg[TAM_ERRMSG] = "";
             sym_info* info = sym_t_check($2.lexema);
             P_RULE(54,"<lectura> ::= scanf identificador"); 
 
@@ -290,16 +307,16 @@ exp : exp '+' exp {P_RULE(72,"<exp> ::= <exp> + <exp>");}
     | exp TOK_AND exp {P_RULE(77,"<exp> ::= <exp> && <exp>");}
     | exp TOK_OR exp {P_RULE(78,"<exp> ::= <exp> || <exp>");}
     | '!' exp {P_RULE(79,"<exp> ::= ! <exp>");}
-    | TOK_IDENTIFICADOR {
-        char err_msg[834] = "";
+    | identificador_use {
+        char err_msg[TAM_ERRMSG] = "";
         sym_info* sym = NULL;
 
         P_RULE(80,"<exp> ::= identificador");
 
         sprintf(err_msg, "Identificador [%s] duplicado", $1.lexema);
-        CHECK_ERROR(sym_t_check($1.lexema), err_msg);
+        CHECK_ERROR(sym_t_check($1.lexema) != NULL, err_msg);
 
-        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1)
+        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1);
         CHECK_ERROR(sym, "Sin memoria");
 
         /* Comprueba que no sea ni FUNCION ni VECTOR */
@@ -325,7 +342,7 @@ exp : exp '+' exp {P_RULE(72,"<exp> ::= <exp> + <exp>");}
     | '(' exp ')' {P_RULE(82,"<exp> ::= ( <exp> )");}
     | '(' comparacion ')' {P_RULE(83,"<exp> ::= ( <comparacion> )");}
     | elemento_vector {P_RULE(85,"<exp> ::= <elemento_vector>");}
-    | identificador '(' lista_expresiones ')' {P_RULE(88,"<identificador> ( <lista_expresiones> )");};
+    | identificador_use '(' lista_expresiones ')' {P_RULE(88,"<identificador> ( <lista_expresiones> )");};
 
 lista_expresiones : exp resto_lista_expresiones {P_RULE(89,"<lista_expresiones> ::= <exp> <resto_lista_expresiones>");}
                   | /* lambda */ {P_RULE(90,"<lista_expresiones> ::=");};
@@ -354,36 +371,43 @@ constante : constante_logica {
 
 constante_logica : TOK_TRUE {
                         P_RULE(102,"<constante_logica> ::= true");
-                        $$.tipo = BOOLEANO;
+                        $$.tipo = BOOLEAN;
                         $$.valor_entero = 1;
                         $$.es_direccion = 0;
                     }
                  | TOK_FALSE {
                         P_RULE(103,"<constante_logica> ::= false");
-                        $$.tipo = BOOLEANO;
+                        $$.tipo = BOOLEAN;
                         $$.valor_entero = 0;
                         $$.es_direccion = 0;
                     };
 
 constante_entera : TOK_CONSTANTE_ENTERA {
                         P_RULE(104,"<constante_entera> ::= TOK_CONSTANTE_ENTERA");
-                        $$.tipo = ENTERO;
+                        $$.tipo = INT;
                         $$.es_direccion = 0;
                         $$.valor_entero = $1.valor_entero;
                     };
 
-identificador : TOK_IDENTIFICADOR {
-        char err_msg[130] = "";
+identificador_use: TOK_IDENTIFICADOR
+                {
+                    P_RULE(108,"<identificador> ::= TOK_IDENTIFICADOR");
+                    $$ = $1;
+                }
+
+identificador_new : TOK_IDENTIFICADOR {
+        char err_msg[TAM_ERRMSG] = "";
         sym_info* sym = NULL;
         P_RULE(108,"<identificador> ::= TOK_IDENTIFICADOR");
         sprintf(err_msg, "Identificador [%s] duplicado", $1.lexema);
-        CHECK_ERROR(sym_t_check($1.lexema), err_msg);
-
+        CHECK_ERROR(sym_t_check($1.lexema) == NULL, err_msg);
+        
         /*si llega a aqui el check error lo permite*/
-        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1)
+        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1);
         CHECK_ERROR(sym, "Sin memoria");
-
+        
         sym_t_add_symb(sym); /*insertas el símbolo donde toque (global o local, de eso se encarga la tabla)*/
+        declarar_variable(alfa_utils_T.fasm, sym->lexema, sym->tipo, sym->size);
         pos_variable_local_actual++;
     };
 
