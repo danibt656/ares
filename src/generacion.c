@@ -28,8 +28,8 @@ void escribir_subseccion_data(FILE *fpasm)
                 return;
         }
         fprintf(fpasm, "segment .data\n");
-        fprintf(fpasm, "msg_error_division db \"Cant divide by 0\", 0\n");
-        fprintf(fpasm, "msg_error_indice_vector db \"Index out of range\", 0\n");
+        fprintf(fpasm, "msg_error_division db \"**** Division por 0 no permitida\", 0\n");
+        fprintf(fpasm, "msg_error_indice_vector db \"**** Indice fuera de rango\", 0\n");
 }
 
 void declarar_variable(FILE *fpasm, char *nombre, int tipo, int tamano)
@@ -98,18 +98,18 @@ void escribir_fin(FILE *fpasm)
         fprintf(fpasm, "fin_error_division: ; división por cero\n");
         fprintf(fpasm, "push dword msg_error_division\n");
         fprintf(fpasm, "call print_string\n");
-        fprintf(fpasm, "add esp, 4\n");
         fprintf(fpasm, "call print_endofline\n");
+        fprintf(fpasm, "add esp, 4\n");
         fprintf(fpasm, "jmp near fin ; salta al final\n");
         fprintf(fpasm, "fin_indice_fuera_rango: ; error de índice fuera de rango\n");
         fprintf(fpasm, "push dword msg_error_indice_vector\n");
         fprintf(fpasm, "call print_string\n");
-        fprintf(fpasm, "add esp, 4\n");
         fprintf(fpasm, "call print_endofline\n");
+        fprintf(fpasm, "add esp, 4\n");
         fprintf(fpasm, "jmp near fin ; salta al final\n");
         fprintf(fpasm, "fin:\n");
-        fprintf(fpasm, "call print_endofline\n");
-        fprintf(fpasm, "mov esp, [__esp] ; recupera el puntero de pila\n");
+        /*fprintf(fpasm, "call print_endofline\n");*/
+        fprintf(fpasm, "mov dword esp, [__esp] ; recupera el puntero de pila\n");
         fprintf(fpasm, "ret\n");
 }
 
@@ -185,8 +185,8 @@ Genera el código NASM necesario para:
         fprintf(fpasm, "mov eax, [eax]\n");
         fprintf(fpasm, "push dword eax\n");
         fprintf(fpasm, "call print_int\n");
-        fprintf(fpasm, "add esp, 4\n");
         fprintf(fpasm, "call print_endofline\n");
+        fprintf(fpasm, "add esp, 4\n");
         /* scanf y */
         fprintf(fpasm, "push dword _y\n");
         fprintf(fpasm, "call scan_int\n");
@@ -208,7 +208,7 @@ void escribir_operando(FILE *fpasm, char *nombre, int es_variable)
         }
         else
         { // Variable
-                fprintf(fpasm, "mov eax, _%s\n", nombre);
+                fprintf(fpasm, "mov eax, [_%s]\n", nombre);
         }
         fprintf(fpasm, "push eax\n");
 }
@@ -221,11 +221,25 @@ void asignar(FILE *fpasm, char *nombre, int es_variable)
         }
         fprintf(fpasm, "pop dword eax\n");
         if (es_variable == 0){ // Numero
-                fprintf(fpasm, "mov [_%s], eax\n", nombre);
+                fprintf(fpasm, "mov dword [_%s], eax\n", nombre);
         }else{ // Variable
-                fprintf(fpasm, "mov eax, [eax]\n");
-                fprintf(fpasm, "mov [_%s], eax\n", nombre);
+                fprintf(fpasm, "mov dword eax, [eax]\n");
+                fprintf(fpasm, "mov dword [_%s], eax\n", nombre);
         }
+}
+
+void apilar_constante(FILE *fpasm, int valor)
+{
+        fprintf(fpasm, "push dword %d\n", valor);
+}
+
+void apilar_valor(FILE* fpasm, int es_referencia)
+{
+    if (es_referencia) {
+        fprintf(fpasm, "pop dword ebx");
+        fprintf(fpasm, "mov ebx, [ebx]");
+        fprintf(fpasm, "push dword ebx");
+    }
 }
 
 /* FUNCIONES ARITMÉTICO-LÓGICAS BINARIAS */
@@ -556,11 +570,10 @@ void escribir(FILE *fpasm, int es_variable, int tipo)
         if(es_variable) {
                 fprintf(fpasm,
                         "pop eax\n"
-                        "mov eax, [eax]\n"
-                        "push eax\n");
+                        "push dword [eax]\n");
         }
         if(tipo == INT){
-              fprintf(fpasm, "call print_int\n"); 
+                fprintf(fpasm, "call print_int\n"); 
         }
         else if(tipo == BOOLEAN){
                 fprintf(fpasm, "call print_boolean\n");
@@ -568,8 +581,8 @@ void escribir(FILE *fpasm, int es_variable, int tipo)
                 fprintf(fpasm, "call print_endofline\n");
                 return;
         }
-        fprintf(fpasm, "add esp, 4\n");
         fprintf(fpasm, "call print_endofline\n");
+        fprintf(fpasm, "add esp, 4\n");
 }
 
 void ifthenelse_inicio(FILE *fpasm, int exp_es_variable, int etiqueta)
@@ -582,10 +595,8 @@ void ifthenelse_inicio(FILE *fpasm, int exp_es_variable, int etiqueta)
     fprintf(fpasm, "pop eax\n");
     if(exp_es_variable)
         fprintf(fpasm, "mov dword eax, [eax]\n");
-
     fprintf(fpasm, "cmp eax, 0\n");
-    fprintf(fpasm, "je near fin_then%d\n", etiqueta);        
-    /* Aqui va el codigo del bloque IF */
+    fprintf(fpasm, "je near fin_then%d\n", etiqueta);
 }
 
 void ifthen_inicio(FILE *fpasm, int exp_es_variable, int etiqueta)
@@ -598,8 +609,7 @@ void ifthen_inicio(FILE *fpasm, int exp_es_variable, int etiqueta)
         if(exp_es_variable)
             fprintf(fpasm, "mov dword eax, [eax]\n");
         fprintf(fpasm, "cmp eax, 0\n");
-        fprintf(fpasm, "je near fin_then%d\n", etiqueta);        
-        /* Aqui va el codigo del bloque IF */
+        fprintf(fpasm, "je near fin_then%d\n", etiqueta);
 }
 
 void ifthen_fin(FILE *fpasm, int etiqueta)
@@ -663,7 +673,7 @@ void while_fin(FILE *fpasm, int etiqueta)
                 printf("Error fallo en compilador, fichero fpasm nulo");
                 return;
         }
-        /* Saltar al comienzo del loop */
+/* Saltar al comienzo del loop */
         fprintf(fpasm, "jmp near inicio_while%d\n", etiqueta);
         fprintf(fpasm, "fin_while%d:\n", etiqueta);
         /* Codigo posterior al while */
@@ -692,6 +702,28 @@ void escribir_elemento_vector(FILE *fpasm, char *nombre_vector, int tam_max, int
     fprintf(fpasm, "mov dword edx, _%s\n", nombre_vector);  // Direccion vector
     fprintf(fpasm, "lea eax, [edx + eax*4]\n");             // Dirección del elemento indexado en eax
     fprintf(fpasm, "push dword eax\n");                     // Almacenamos la dirección al elemento
+}
+
+void comprobar_indice_vector(FILE *fpasm, const char *nombre, int es_direccion, int tam)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "pop dword eax\n");
+        
+        if (es_direccion)
+                fprintf(fpasm, "mov dword eax, [eax]\n");
+        /* Mirar que indice no sea negativo */
+        fprintf(fpasm, "cmp eax, 0\n");
+        fprintf(fpasm, "jl fin_indice_fuera_rango\n");
+
+        /* Mirar que indice no sea mayor que tam vector */
+        fprintf(fpasm, "cmp eax, %d\n", tam);
+        fprintf(fpasm, "jge fin_indice_fuera_rango\n");
+
+        fprintf(fpasm, "lea eax, [_%s + eax*4]\n", nombre); // Dirección del elemento indexado en eax
+        fprintf(fpasm, "push dword eax\n");         // Almacenamos la dirección al elemento 
 }
 
 void declararFuncion(FILE *fpasm, char *nombre_funcion, int num_var_loc)

@@ -5,12 +5,13 @@
 
 /* Macro para cuerpo de funciones en macros */
 #define F_BLOCK(block) do { block } while (0)
+#define NO_USO(arg) ((void)(arg))
 
 #define MAX_LONG_ID 100
 #define MAX_LONG_VECTOR 64
 
 /* Extension de los ficheros en lenguaje ALFA */
-#define INPUT_EXTENSION ".alf"
+#define INPUT_EXTENSION ".alfa"
 
 /* Codigos de errores */
 typedef enum ErrorCode
@@ -49,6 +50,8 @@ typedef struct {
     Tipo tipo;                      /* boolean o entero */
 
     int etiqueta;                   /* para generacion NASM */
+
+    int num_parametros_llamada_actual; /* Para llamadas a funciones */
 } tipo_atributos;
 
 

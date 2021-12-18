@@ -89,6 +89,11 @@ una referencia (1) o ya un valor explícito (0).
 */
 void asignar(FILE* fpasm, char* nombre, int es_variable);
 
+/*
+- Apila el valor de una variable
+*/
+void apilar_valor(FILE* fpasm, int es_referencia);
+
 /* FUNCIONES ARITMÉTICO-LÓGICAS BINARIAS */
 /*
 En todas ellas se realiza la operación como se ha resumido anteriormente:

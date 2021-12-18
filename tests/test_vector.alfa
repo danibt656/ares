@@ -1,0 +1,9 @@
+main {
+    array boolean[3] vector; 
+
+    vector[0] =  false;
+	vector[1] = true;
+	vector[2] = false;
+
+    printf vector[1];
+}

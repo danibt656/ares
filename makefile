@@ -1,51 +1,6 @@
 .DEFAULT_GOAL = all
-.PHONY: all test debug clean zip help graph nasm astyle pruebas
+.PHONY: all test debug clean zip help graph nasm astyle
 .SUFFIXES:
-
-##########################################################
-#                                                        #
-#  Makefile Proyecto de automatas y lenguajes            #
-#  23-oct-2017                                           #
-#                                                        #
-# Carpetas del proyecto (definidas en las variables):    #
-#                                                        #
-#  BDIR - Carpeta donde se crearan los ejecutables       #
-#         tanto del objetivo all como de test            #
-#                                                        #
-#  SDIR - Carpeta con los ficheros fuente con el         #
-#         codigo de los modulos                          #
-#                                                        #
-#  IDIR - Carpeta con todas las cabeceras de los         #
-#         modulos                                        #
-#                                                        #
-#  ODIR - Carpeta con todos los objetos .o compilados    #
-#         y los .o adicionales (alfalib.o)               #
-#                                                        #
-#  EDIR - Carpeta con los mains que se van a generar     #
-#         al hacer make all, por comodidad se            #
-#         permite que esta carpeta sea la misma que      #
-#         la de los ficheros fuente (SDIR)               #
-#                                                        #
-#  MDIR - Carpeta con otros ficheros. Ej: entrada para   #
-#         las pruebas. (Carpeta no utilizada en el       #
-#         makefile, en el proyecto es misc)              #
-#                                                        #
-#  Tan solo hay que definir las variables de las         #
-#  carpetas y la variable EXES con los mains que         #
-#  generaran los binarios al hacer make all. El resto    #
-#  lo hace solo el makefile. Tiene en cuenta si un       #
-#  .c esta actualizado para no recompilarlo.             #
-#  Para definir alguna de las carpetas como el           #
-#  directorio raiz bastara darle el valor ' . '          #
-#  Make clean elimina exclusivamente los ficheros        #
-#  generados por el propio makefile.                     #
-#  Make zip utiliza la utilidad git archive para añadir  #
-#  a un zip la version en el commit local del branch     #
-#  activo mas reciente (HEAD). En la carpeta raiz del    #
-#  proyecto debe estar ubicado el repositorio. junto     #
-#  al makefile.                                          #
-#                                                        #
-##########################################################
 
 ## Definiciones de carpetas
 BDIR := .
@@ -155,8 +110,6 @@ $(SDIR)/%.yy.c: $(SDIR)/%.l $(BISON_GENERATED_FILES)
 	$(LEX) $(LFLAGS) -o $@ $<
 
 ## Generacion de .tab.c a partir de .y
-# Permitimos que falle el mover el grafico ya que no
-# es imprescindible
 $(SDIR)/%.tab.c: $(SDIR)/%.y
 	$(BISON) $(BFLAGS) -o $@ $<
 	# mv $(BISON_HEADERS_ORIG) $(IDIR)
@@ -181,32 +134,26 @@ $(NASM_BIN): $(BDIR)/%: $(ODIR)/%.o $(ALFALIB)
 	$(CC) $(CCNASMFLAGS) -o $@ $^ $(CFLAGS)
 
 clean:
+	@$(RM) alfa exe
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(DEPEND_FILES)
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
 	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
 	@$(RM) $(BISON_GRAPH_ORIG) $(BISON_GRAPH)
 	@$(RM) $(NASM_OBJ) $(NASM_BIN) debug *.asm
 
-zip:
-	git archive --format zip -o $(ZIP) HEAD
-
 help:
 	@echo "Posibles comandos:"
-	@echo "    all      - construye el/los ejecutable $(EBIN)"
-	@echo "    debug    - compila todo usando con simbolos de depuracion"
-	@echo "    clean    - borra todos los ficheros generados"
-	@echo "    pruebas  - ejecuta el script de pruebas $(PRUEBAS_SCRIPT)"
-	@echo "    zip      - comprime la rama activa del repositorio"
-	@echo "    astyle   - estiliza el codigo acorde al fichero fichero $(ARTISTIC_STYLE_OPTIONS)"
-	@echo "    graph    - genera un diagrama utilizando $(DOT) a partir de la salida de bison"
-	@echo "    nasm     - compila los nasm junto con alfalib situados en la carpeta $(NDIR)/"
-	@echo "    help     - muestra esta ayuda"
+	@echo "    	all      			- construye el/los ejecutable $(EBIN)"
+	@echo "    	debug    			- compila todo usando con simbolos de depuracion"
+	@echo "    	clean    			- borra todos los ficheros generados"
+	@echo "    	compile_file		- compila un fichero de prueba en ALFA y lo ejecuta"
+	@echo "	   							- USO: make compile_file src=<FICHERO_ALFA>"
 
-astyle:
-	astyle --options=$(ARTISTIC_STYLE_OPTIONS) $(IDIR)/*.h $(SDIR)/*.c
-
-graph: $(BISON_GENERATED_FILES)
-	$(DOT) $(DOTFLAGS) $(BISON_GRAPH)
+compile_file:
+	./alfa $(src) exe.asm
+	nasm -f elf32 exe.asm
+	gcc -m32 -o exe exe.o obj/alfalib.o 
+	./exe
 
 ## Deteccion de dependencias automatica, v2
 CFLAGS += -MMD
