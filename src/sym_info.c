@@ -1,5 +1,4 @@
-#include "../include/sym_info.h"
-#include "../include/alfa.h"
+#include "include/sym_info.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

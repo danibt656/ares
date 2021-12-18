@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/y.tab.h"
-#include "../include/alfa.h"
+#include <string.h>
+#include "include/y.tab.h"
+#include "include/alfa.h"
 
 #define DEBUG_FILE "debug"
 

@@ -1,9 +1,9 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
-    #include "../include/alfa.h"
-    #include "../include/sym_t.h"
-    #include "../include/generacion.h"
+    #include "include/alfa.h"
+    #include "include/sym_t.h"
+    #include "include/generacion.h"
 
     /* Imprime err_msg si no se cumple la condicion cond */
     #define CHECK_ERROR(cond, err_msg) \
@@ -199,43 +199,48 @@ bloque : condicional {P_RULE(40,"<bloque> ::= <condicional>");}
        | bucle {P_RULE(41,"<bloque> ::= <bucle>");};
 
 asignacion  : TOK_IDENTIFICADOR '=' exp {
+                char err_msg[836] = "";
+                sym_info* sym = NULL;
                 P_RULE(43,"<asignacion> ::= identificador = <exp>");
-                char err_msg[128] = "";
-
                 /* Comprueba que exista el identificador */
-                sprintf(err_msg, "Identificador [%d] inexistente", $1.lexema);
+                sprintf(err_msg, "Identificador [%s] inexistente", $1.lexema);
                 sym = sym_t_get_symb($1.lexema);
-                CHECK_ERROR(sym!=NULL, err_msg);
+                CHECK_ERROR(sym, err_msg);
 
                 /* Comprueba que no sea ni FUNCION ni VECTOR */
-                sprintf(err_msg, "Identificador [%d] no es variable", $1.lexema);
-                CHECK_ERROR(sym.catg != VECTOR, err_msg);
-                CHECK_ERROR(sym.elem != FUNCION, err_msg);
+                sprintf(err_msg, "Identificador [%s] no es variable", $1.lexema);
+                CHECK_ERROR(sym->catg != VECTOR, err_msg);
+                CHECK_ERROR(sym->elem != FUNCION, err_msg);
 
                 /* Comprueba que el tipo sea el mismo */
                 sprintf(err_msg, "Asignacion entre tipos distintos");
                 CHECK_ERROR($3.tipo == sym->tipo, err_msg);
 
                 /* Asignar */
-                if (sym.is_var_loc!=-1) //comprueba si es variable global
+                if (sym->is_var_loc!=-1) /*comprueba si es variable global*/
                     asignar(alfa_utils_T.fasm, $1.lexema, $3.es_direccion);
-                else //en caso contrario asigna destino en pila al ser local
+                else /*en caso contrario asigna destino en pila al ser local*/
                     asignarDestinoEnPila(alfa_utils_T.fasm, $3.es_direccion);
             }
             | elemento_vector '=' exp {
+                sym_info* sym = NULL;
+                char err_msg[129] = "";
                 P_RULE(44,"<parametros_funcion> ::= <elemento_vector> = <exp>");
-                char err_msg[128] = "";
 
                 /* Comprueba que exista el identificador */
-                sprintf(err_msg, "Identificador [%d] inexistente", $1.lexema);
+                if($1.lexema!=NULL)
+                    sprintf(err_msg, "Identificador [%s] inexistente", $1.lexema);
+                else{
+                    sprintf(err_msg, "Identificador nulo");
+                }
                 sym = sym_t_get_symb($1.lexema);
-                CHECK_ERROR(sym!=NULL, err_msg);
+                CHECK_ERROR(sym, err_msg);
 
                 /* Comprueba que no sea FUNCION */
-                sprintf(err_msg, "Identificador [%d] no es variable", $1.lexema);
-                CHECK_ERROR(sym.ELEMENTO!=FUNCION, err_msg);
+                sprintf(err_msg, "Identificador [%s] no es variable", $1.lexema);
+                CHECK_ERROR(sym->elem!=FUNCION, err_msg);
 
-                escribir_elemento_vector(alfa_utils_T.fasm, $3.lexema, sym.size, sym.elem)
+                escribir_elemento_vector(alfa_utils_T.fasm, $3.lexema, sym->size, sym->elem);
             };
 
 elemento_vector : TOK_IDENTIFICADOR '[' exp ']' {P_RULE(48,"<elemento_vector> ::= identificador [ <exp> ]");};
@@ -247,13 +252,13 @@ condicional : TOK_IF '(' exp ')' '{' sentencias '}' {P_RULE(50,"<condicional> ::
 bucle : TOK_WHILE '(' exp ')' '{' sentencias '}' {P_RULE(52,"<bucle> ::= while ( <exp> ) { <sentencias> }");};
 
 lectura : TOK_SCANF TOK_IDENTIFICADOR {
+            char err_msg[130] = "";
+            sym_info* info = sym_t_check($2.lexema);
             P_RULE(54,"<lectura> ::= scanf identificador"); 
 
             /* Buscar si el identificador existe */
-            char err_msg[125] = "";
-            sprintf(err_msg, "Identificador [%d] no existe", $2.lexema);
-            sym_info* info = sym_t_check($2.lexema);
-            CHECK_ERROR(info!=NULL, err_msg);
+            sprintf(err_msg, "Identificador [%s] no existe", $2.lexema);
+            CHECK_ERROR(info, err_msg);
 
             /* Si el identificador existe */
             CHECK_ERROR((info->elem != FUNCION), "scanf no admite funciones como entrada");
@@ -272,7 +277,7 @@ lectura : TOK_SCANF TOK_IDENTIFICADOR {
 
 escritura : TOK_PRINTF exp {
                 P_RULE(56,"<escritura> ::= printf <exp>");
-                escribir(pfasm, $2.es_direccion, $2.tipo);
+                escribir(alfa_utils_T.fasm, $2.es_direccion, $2.tipo);
           };
 
 retorno_funcion : TOK_RETURN exp {P_RULE(61,"<retorno_funcion> ::= return <exp>");};
@@ -286,27 +291,28 @@ exp : exp '+' exp {P_RULE(72,"<exp> ::= <exp> + <exp>");}
     | exp TOK_OR exp {P_RULE(78,"<exp> ::= <exp> || <exp>");}
     | '!' exp {P_RULE(79,"<exp> ::= ! <exp>");}
     | TOK_IDENTIFICADOR {
+        char err_msg[834] = "";
+        sym_info* sym = NULL;
+
         P_RULE(80,"<exp> ::= identificador");
 
-        char err_msg[125] = "";
-        sprintf(err_msg, "Identificador [%d] duplicado", $1.lexema);
-        CHECK_ERROR(sym_t_check($1.lexema)!=NULL, err_msg);
+        sprintf(err_msg, "Identificador [%s] duplicado", $1.lexema);
+        CHECK_ERROR(sym_t_check($1.lexema), err_msg);
 
-        sym_info* sym = NULL;
-        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1, -1)
-        CHECK_ERROR(sym!=NULL, "Sin memoria");
+        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1)
+        CHECK_ERROR(sym, "Sin memoria");
 
         /* Comprueba que no sea ni FUNCION ni VECTOR */
-        sprintf(err_msg, "Identificador [%d] no es variable", $1.lexema);
-        CHECK_ERROR(sym.catg != VECTOR, err_msg);
-        CHECK_ERROR(sym.elem != FUNCION, err_msg);
+        sprintf(err_msg, "Identificador [%s] no es variable", $1.lexema);
+        CHECK_ERROR(sym->catg != VECTOR, err_msg);
+        CHECK_ERROR(sym->elem != FUNCION, err_msg);
 
         /* Variable global */
-        if (sym->elem == VARIABLE && !sym->is_var_local) {
+        if (sym->elem == VARIABLE && !sym->is_var_loc) {
             escribir_operando(alfa_utils_T.fasm, $1.lexema, 1);
             $$.tipo = sym->tipo;
         /* Variable local */
-        } else if (sym->elem == VARIABLE && sym->is_var_local) {
+        } else if (sym->elem == VARIABLE && sym->is_var_loc) {
             escribirVariableLocal(alfa_utils_T.fasm, pos_variable_local_actual);
             $$.tipo = sym->tipo;
         /* Parametro */
@@ -363,22 +369,21 @@ constante_entera : TOK_CONSTANTE_ENTERA {
                         P_RULE(104,"<constante_entera> ::= TOK_CONSTANTE_ENTERA");
                         $$.tipo = ENTERO;
                         $$.es_direccion = 0;
-                        $$.valor_entero = $1.valor_entero
+                        $$.valor_entero = $1.valor_entero;
                     };
 
 identificador : TOK_IDENTIFICADOR {
-    P_RULE(108,"<identificador> ::= TOK_IDENTIFICADOR");
-        char err_msg[125] = "";
-        sprintf(err_msg, "Identificador [%d] duplicado", $1.lexema);
-        CHECK_ERROR(sym_t_check($1.lexema)!=NULL, err_msg);
-
-        //si llega a aqui el check error lo permite
+        char err_msg[130] = "";
         sym_info* sym = NULL;
+        P_RULE(108,"<identificador> ::= TOK_IDENTIFICADOR");
+        sprintf(err_msg, "Identificador [%s] duplicado", $1.lexema);
+        CHECK_ERROR(sym_t_check($1.lexema), err_msg);
 
-        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1, -1)
-        CHECK_ERROR(sym!=NULL, "Sin memoria");
+        /*si llega a aqui el check error lo permite*/
+        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1)
+        CHECK_ERROR(sym, "Sin memoria");
 
-        sym_t_add_symb(sym) //insertas el símbolo donde toque (global o local, de eso se encarga la tabla)
+        sym_t_add_symb(sym); /*insertas el símbolo donde toque (global o local, de eso se encarga la tabla)*/
         pos_variable_local_actual++;
     };
 

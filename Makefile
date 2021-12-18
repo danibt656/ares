@@ -3,43 +3,56 @@ BISON = bison
 FLEX = flex
 
 BIN = alfa
-CFLAGS = -Wall -std=c99 -pedantic
+CFLAGS = -g -Wall -std=c99 -pedantic
 CYYFLAGS = -ansi -pedantic
 BISONFLAGS = -dyv
 
-DSRC = src
-DINC = include
-DTEST = test
-DOBJ = obj
+DSRC = src/
+DINC = include/
+DTEST = test/
+DOBJ = obj/
 
 
-all: ${BIN}
+all: $(BIN)
 
-${BIN}:%: $(DOBJ)/y.tab.o $(DOBJ)/lex.yy.o $(DOBJ)/%.o
+$(BIN): y.tab.o lex.yy.o alfa.o
 	$(CC) -o $@ $^
 
-$(DOBJ)/lex.yy.o: $(DSRC)/lex.yy.c
-	$(CC) ${CYYFLAGS} -c -o $@ $<
+lex.yy.o: lex.yy.c
+	$(CC) $(CYYFLAGS) -c -o $(DOBJ)lex.yy.o $(DSRC)lex.yy.c
 
-$(DOBJ)/y.tab.o: $(DSRC)/y.tab.c
-	$(CC) ${CYYFLAGS} -c -o $@ $<
+y.tab.o: y.tab.c
+	$(CC) $(CYYFLAGS) -c -o $(DOBJ)$@ $(DSRC)$<
 
 # Compilacion de archivos .c
-$(DOBJ)/%.o: $(DSRC)/%.c
-	$(CC) ${CFLAGS} -c -o $@ $<
+# %.o: %.c $(DSRC)$(DINC)%.h
+# 	$(CC) ${CFLAGS} -c -o $(DOBJ)$@ $(DSRC)$<
 
 # Bison
-$(DSRC)/y.tab.c: $(DSRC)/alfa.y
-	$(BISON) $(BISONFLAGS) $(DSRC)/alfa.y
-	mv y.tab.c $(DSRC)/y.tab.c
-
-$(IDIR)/y.tab.h: $(DSRC)/alfa.y
-	$(BISON) $(BISONFLAGS) $(DSRC)/alfa.y
-	mv y.tab.h $(IDIR)/y.tab.h
+y.tab.c:
+	bison -dyv src/alfa.y
+	mv y.tab.c src/
+	mv y.tab.h src/include/y.tab.h
 
 # Lex
-$(DSRC)/lex.yy.c: $(DSRC)/alfa.l $(DINC)/y.tab.h
-	$(FLEX) $(DSRC)/alfa.l
+lex.yy.c: $(DSRC)alfa.l $(DSRC)$(DINC)y.tab.h
+	$(FLEX) $(DSRC)alfa.l
+	mv lex.yy.c src/
+
+alfa.o: alfa.c
+	$(CC) $(CFLAGS) -c $(DSRC)$< -o $(DOBJ)$@
+
+generacion.o: generacion.c
+	$(CC) $(CFLAGS) -c $(DSRC)$< -o $(DOBJ)$@
+
+hash_t.o: hash_t.c
+	$(CC) $(CFLAGS) -c $(DSRC)$< -o $(DOBJ)$@
+
+sym_info.o: sym_info.c
+	$(CC) $(CFLAGS) -c $(DSRC)$< -o $(DOBJ)$@
+
+sym_t.o: sym_t.c
+	$(CC) $(CFLAGS) -c $(DSRC)$^ -o $(DOBJ)$@
 
 clean:
-	rm -rvf $(BIN) $(DOBJ)/*.o lex.yy.c $(IDIR)/*.tab.h $(DSRC)/*.tab.c *.output
+	rm -rvf $(BIN) $(DOBJ)*.o $(DSRC)lex.yy.c $(DSRC)$(DINC)*.tab.h $(DSRC)*.tab.c *.output

@@ -1,4 +1,4 @@
-#include "../include/hash_t.h"
+#include "include/hash_t.h"
 
 
 hash_t *hash_create(int size )
