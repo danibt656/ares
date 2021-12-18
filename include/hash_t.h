@@ -29,7 +29,6 @@ void hash_free(hash_t *hashtable);
 /* Hashear una cadena */
 int hash_hash(hash_t *hashtable, char *key);
 
-// @TODO strdup funciona sobre strings, no sobre nuestra estructura!!
 /* Crear un par clave_valor */
 entry_t *hash_newpair(char *key, sym_info *value);
 

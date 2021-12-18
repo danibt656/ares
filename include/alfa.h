@@ -1,6 +1,3 @@
-#ifndef ALFA_H
-#define ALFA_H
-
 #define MAX_LONG_ID 100
 #define MAX_LONG_VECTOR 64
 
@@ -56,5 +53,3 @@ void manage_error(char *msg, char *s);
 
 /* Funcion Principal que llama al analizador */
 int main(int argc, char *argv[]);
-
-#endif

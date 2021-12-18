@@ -6,16 +6,15 @@
     #include "../include/generacion.h"
 
     /* Imprime err_msg si no se cumple la condicion cond */
-    #define CHECK_ERROR(cond, err_msg)\
+    #define CHECK_ERROR(cond, err_msg) \
         F_BLOCK( \
-            if(!cond)
-            fprintf(alfa_utils_T.ferr, "[%s]: linea %d[%d] ERROR: %s\n", 
-                    (alfa_utils_T.fin_name),
-                    (alfa_utils_T.line),
-                    (alfa_utils_T.col),
-                    (err_msg));
-             YYABORT;
-            \
+            if(!cond) \
+            fprintf(alfa_utils_T.ferr, "[%s]: linea %d[%d] ERROR: %s\n", \
+                    (alfa_utils_T.fin_name), \
+                    (alfa_utils_T.line), \
+                    (alfa_utils_T.col), \
+                    (err_msg)); \
+             YYABORT; \
         )
     
     /* Imprime regla gramatical en un fichero de debug */
@@ -35,8 +34,8 @@
     }
 
     /* Para declaraciones */
-    static TIPO tipo_actual;
-    static CATEGORIA clase_actual:
+    static Tipo tipo_actual;
+    static Categoria clase_actual;
 
     /* Para vectores */
     static int tamanio_vector_actual = 0;

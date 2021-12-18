@@ -75,16 +75,15 @@
     #include "../include/generacion.h"
 
     /* Imprime err_msg si no se cumple la condicion cond */
-    #define CHECK_ERROR(cond, err_msg)\
+    #define CHECK_ERROR(cond, err_msg) \
         F_BLOCK( \
-            if(!cond)
-            fprintf(alfa_utils_T.ferr, "[%s]: linea %d[%d] ERROR: %s\n", 
-                    (alfa_utils_T.fin_name),
-                    (alfa_utils_T.line),
-                    (alfa_utils_T.col),
-                    (err_msg));
-             YYABORT;
-            \
+            if(!cond) \
+            fprintf(alfa_utils_T.ferr, "[%s]: linea %d[%d] ERROR: %s\n", \
+                    (alfa_utils_T.fin_name), \
+                    (alfa_utils_T.line), \
+                    (alfa_utils_T.col), \
+                    (err_msg)); \
+             YYABORT; \
         )
     
     /* Imprime regla gramatical en un fichero de debug */
@@ -104,8 +103,8 @@
     }
 
     /* Para declaraciones */
-    static TIPO tipo_actual;
-    static CATEGORIA clase_actual:
+    static Tipo tipo_actual;
+    static Categoria clase_actual;
 
     /* Para vectores */
     static int tamanio_vector_actual = 0;
@@ -121,7 +120,7 @@
 	static int fn_return = 0;
 	static int en_explist = 0;
 
-#line 125 "y.tab.c"
+#line 124 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -221,11 +220,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 56 "src/alfa.y"
+#line 55 "src/alfa.y"
 
     tipo_atributos atributos;
 
-#line 229 "y.tab.c"
+#line 228 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -602,14 +601,14 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   120,   120,   122,   128,   133,   146,   148,   149,   151,
-     153,   154,   156,   158,   159,   161,   168,   169,   171,   172,
-     174,   177,   178,   180,   181,   183,   185,   186,   188,   189,
-     191,   192,   194,   195,   196,   197,   199,   200,   202,   226,
-     242,   244,   245,   248,   250,   274,   279,   281,   282,   283,
-     284,   285,   286,   287,   288,   289,   319,   320,   321,   322,
-     323,   325,   326,   328,   329,   331,   332,   333,   334,   335,
-     336,   338,   344,   350,   356,   363,   370
+       0,   119,   119,   121,   127,   132,   145,   147,   148,   150,
+     152,   153,   155,   157,   158,   160,   167,   168,   170,   171,
+     173,   176,   177,   179,   180,   182,   184,   185,   187,   188,
+     190,   191,   193,   194,   195,   196,   198,   199,   201,   225,
+     241,   243,   244,   247,   249,   273,   278,   280,   281,   282,
+     283,   284,   285,   286,   287,   288,   318,   319,   320,   321,
+     322,   324,   325,   327,   328,   330,   331,   332,   333,   334,
+     335,   337,   343,   349,   355,   362,   369
 };
 #endif
 
@@ -1506,32 +1505,32 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 120 "src/alfa.y"
+#line 119 "src/alfa.y"
                                                                                                {P_RULE(1,"<programa> ::= main { <declaraciones> <funciones> <sentencias> }");}
-#line 1512 "y.tab.c"
+#line 1511 "y.tab.c"
     break;
 
   case 3:
-#line 122 "src/alfa.y"
+#line 121 "src/alfa.y"
            {
                 sym_t_create();
                 escribir_subseccion_data(alfa_utils_T.fasm);
                 escribir_cabecera_bss(alfa_utils_T.fasm);
             }
-#line 1522 "y.tab.c"
+#line 1521 "y.tab.c"
     break;
 
   case 4:
-#line 128 "src/alfa.y"
+#line 127 "src/alfa.y"
            {
                 sym_t_free();
                 escribir_fin(alfa_utils_T.fasm);
             }
-#line 1531 "y.tab.c"
+#line 1530 "y.tab.c"
     break;
 
   case 5:
-#line 133 "src/alfa.y"
+#line 132 "src/alfa.y"
             {
                 char** simbolos = sym_t_getGlobalSymbols();
                 int i = 0;
@@ -1544,208 +1543,208 @@ yyreduce:
                 }
                 escribir_segmento_codigo(alfa_utils_T.fasm);
             }
-#line 1548 "y.tab.c"
+#line 1547 "y.tab.c"
     break;
 
   case 6:
-#line 146 "src/alfa.y"
+#line 145 "src/alfa.y"
             {   escribir_inicio_main(alfa_utils_T.fasm);}
-#line 1554 "y.tab.c"
+#line 1553 "y.tab.c"
     break;
 
   case 7:
-#line 148 "src/alfa.y"
+#line 147 "src/alfa.y"
                             {P_RULE(2,"<declaraciones> ::= <declaracion>");}
-#line 1560 "y.tab.c"
+#line 1559 "y.tab.c"
     break;
 
   case 8:
-#line 149 "src/alfa.y"
+#line 148 "src/alfa.y"
                                             {P_RULE(3,"<declaraciones> ::= <declaracion> <declaraciones>");}
-#line 1566 "y.tab.c"
+#line 1565 "y.tab.c"
     break;
 
   case 9:
-#line 151 "src/alfa.y"
+#line 150 "src/alfa.y"
                                         {P_RULE(4,"<declaracion> ::= <clase> <identificadores> ;");}
-#line 1572 "y.tab.c"
+#line 1571 "y.tab.c"
     break;
 
   case 10:
-#line 153 "src/alfa.y"
+#line 152 "src/alfa.y"
                       {P_RULE(5,"<clase> ::= <clase_escalar>"); clase_actual = ESCALAR;}
-#line 1578 "y.tab.c"
+#line 1577 "y.tab.c"
     break;
 
   case 11:
-#line 154 "src/alfa.y"
+#line 153 "src/alfa.y"
                      {P_RULE(7,"<clase> ::= <clase_vector>"); clase_actual = VECTOR;}
-#line 1584 "y.tab.c"
+#line 1583 "y.tab.c"
     break;
 
   case 12:
-#line 156 "src/alfa.y"
+#line 155 "src/alfa.y"
                      {P_RULE(9,"<clase_escalar> ::= <tipo>");}
-#line 1590 "y.tab.c"
+#line 1589 "y.tab.c"
     break;
 
   case 13:
-#line 158 "src/alfa.y"
+#line 157 "src/alfa.y"
                {P_RULE(10,"<tipo> ::= int"); tipo_actual = ENTERO;}
-#line 1596 "y.tab.c"
+#line 1595 "y.tab.c"
     break;
 
   case 14:
-#line 159 "src/alfa.y"
+#line 158 "src/alfa.y"
                    {P_RULE(11,"<tipo> ::= boolean"); tipo_actual = BOOLEANO;}
-#line 1602 "y.tab.c"
+#line 1601 "y.tab.c"
     break;
 
   case 15:
-#line 161 "src/alfa.y"
+#line 160 "src/alfa.y"
                                                            {
         P_RULE(15,"<clase_vector> ::= array <tipo> [ constante_entera ]");
         tamanio_vector_actual = (yyvsp[-1].atributos).valor_entero;
         CHECK_ERROR(tamanio_vector_actual >= 1, "Tamaño de vector invalido");
         CHECK_ERROR(tamanio_vector_actual <= MAX_LONG_VECTOR, "Tamaño de vector invalido");
     }
-#line 1613 "y.tab.c"
+#line 1612 "y.tab.c"
     break;
 
   case 16:
-#line 168 "src/alfa.y"
+#line 167 "src/alfa.y"
                                 {P_RULE(18,"<identificadores> ::= <identificador>");}
-#line 1619 "y.tab.c"
+#line 1618 "y.tab.c"
     break;
 
   case 17:
-#line 169 "src/alfa.y"
+#line 168 "src/alfa.y"
                                                     {P_RULE(19,"<identificadores> ::= <identificador> , <identificadores>");}
-#line 1625 "y.tab.c"
+#line 1624 "y.tab.c"
     break;
 
   case 18:
-#line 171 "src/alfa.y"
+#line 170 "src/alfa.y"
                               {P_RULE(20,"<funciones> ::= <funcion> <funciones>");}
-#line 1631 "y.tab.c"
+#line 1630 "y.tab.c"
     break;
 
   case 19:
-#line 172 "src/alfa.y"
+#line 171 "src/alfa.y"
                          {P_RULE(21,"<funciones> ::=");}
-#line 1637 "y.tab.c"
+#line 1636 "y.tab.c"
     break;
 
   case 20:
-#line 175 "src/alfa.y"
+#line 174 "src/alfa.y"
         {P_RULE(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }");}
-#line 1643 "y.tab.c"
+#line 1642 "y.tab.c"
     break;
 
   case 21:
-#line 177 "src/alfa.y"
+#line 176 "src/alfa.y"
                                                                 {P_RULE(23,"<parametros_funcion> ::= <parametro_funcion> <resto_parametros_funcion>");}
-#line 1649 "y.tab.c"
+#line 1648 "y.tab.c"
     break;
 
   case 22:
-#line 178 "src/alfa.y"
+#line 177 "src/alfa.y"
                                   {P_RULE(24,"<parametros_funcion> ::=");}
-#line 1655 "y.tab.c"
+#line 1654 "y.tab.c"
     break;
 
   case 23:
-#line 180 "src/alfa.y"
+#line 179 "src/alfa.y"
                                                                           {P_RULE(25,"<resto_parametros_funcion> ::= <parametro_funcion> <resto_parametros_funcion>");}
-#line 1661 "y.tab.c"
+#line 1660 "y.tab.c"
     break;
 
   case 24:
-#line 181 "src/alfa.y"
+#line 180 "src/alfa.y"
                                         {P_RULE(26,"<resto_parametros_funcion> ::=");}
-#line 1667 "y.tab.c"
+#line 1666 "y.tab.c"
     break;
 
   case 25:
-#line 183 "src/alfa.y"
+#line 182 "src/alfa.y"
                                        {P_RULE(27,"<parametro_funcion> ::= <tipo> <identificador>");}
-#line 1673 "y.tab.c"
+#line 1672 "y.tab.c"
     break;
 
   case 26:
-#line 185 "src/alfa.y"
+#line 184 "src/alfa.y"
                                       {P_RULE(28,"<declaraciones_funcion> ::= <declaraciones>");}
-#line 1679 "y.tab.c"
+#line 1678 "y.tab.c"
     break;
 
   case 27:
-#line 186 "src/alfa.y"
+#line 185 "src/alfa.y"
                                      {P_RULE(29,"<declaraciones_funcion> ::=");}
-#line 1685 "y.tab.c"
+#line 1684 "y.tab.c"
     break;
 
   case 28:
-#line 188 "src/alfa.y"
+#line 187 "src/alfa.y"
                        {P_RULE(30,"<sentencias> ::= <sentencia>");}
-#line 1691 "y.tab.c"
+#line 1690 "y.tab.c"
     break;
 
   case 29:
-#line 189 "src/alfa.y"
+#line 188 "src/alfa.y"
                                   {P_RULE(31,"<sentencias> ::= <sentencia> <sentencias>");}
-#line 1697 "y.tab.c"
+#line 1696 "y.tab.c"
     break;
 
   case 30:
-#line 191 "src/alfa.y"
+#line 190 "src/alfa.y"
                                  {P_RULE(32,"<sentencia> ::= <sentencia_simple> ;");}
-#line 1703 "y.tab.c"
+#line 1702 "y.tab.c"
     break;
 
   case 31:
-#line 192 "src/alfa.y"
+#line 191 "src/alfa.y"
                    {P_RULE(33,"<sentencia> ::= <bloque>");}
-#line 1709 "y.tab.c"
+#line 1708 "y.tab.c"
     break;
 
   case 32:
-#line 194 "src/alfa.y"
+#line 193 "src/alfa.y"
                               {P_RULE(34,"<sentencia_simple> ::= <asignacion>");}
-#line 1715 "y.tab.c"
+#line 1714 "y.tab.c"
     break;
 
   case 33:
-#line 195 "src/alfa.y"
+#line 194 "src/alfa.y"
                            {P_RULE(35,"<sentencia_simple> ::= <lectura>");}
-#line 1721 "y.tab.c"
+#line 1720 "y.tab.c"
     break;
 
   case 34:
-#line 196 "src/alfa.y"
+#line 195 "src/alfa.y"
                              {P_RULE(36,"<sentencia_simple> ::= <escritura>");}
-#line 1727 "y.tab.c"
+#line 1726 "y.tab.c"
     break;
 
   case 35:
-#line 197 "src/alfa.y"
+#line 196 "src/alfa.y"
                                    {P_RULE(38,"<sentencia_simple> ::= <retorno_funcion>");}
-#line 1733 "y.tab.c"
+#line 1732 "y.tab.c"
     break;
 
   case 36:
-#line 199 "src/alfa.y"
+#line 198 "src/alfa.y"
                      {P_RULE(40,"<bloque> ::= <condicional>");}
-#line 1739 "y.tab.c"
+#line 1738 "y.tab.c"
     break;
 
   case 37:
-#line 200 "src/alfa.y"
+#line 199 "src/alfa.y"
                {P_RULE(41,"<bloque> ::= <bucle>");}
-#line 1745 "y.tab.c"
+#line 1744 "y.tab.c"
     break;
 
   case 38:
-#line 202 "src/alfa.y"
+#line 201 "src/alfa.y"
                                         {
                 P_RULE(43,"<asignacion> ::= identificador = <exp>");
                 char err_msg[128] = "";
@@ -1770,11 +1769,11 @@ yyreduce:
                 else //en caso contrario asigna destino en pila al ser local
                     asignarDestinoEnPila(alfa_utils_T.fasm, (yyvsp[0].atributos).es_direccion);
             }
-#line 1774 "y.tab.c"
+#line 1773 "y.tab.c"
     break;
 
   case 39:
-#line 226 "src/alfa.y"
+#line 225 "src/alfa.y"
                                       {
                 P_RULE(44,"<parametros_funcion> ::= <elemento_vector> = <exp>");
                 char err_msg[128] = "";
@@ -1790,35 +1789,35 @@ yyreduce:
 
                 escribir_elemento_vector(alfa_utils_T.fasm, (yyvsp[0].atributos).lexema, sym.size, sym.elem)
             }
-#line 1794 "y.tab.c"
+#line 1793 "y.tab.c"
     break;
 
   case 40:
-#line 242 "src/alfa.y"
+#line 241 "src/alfa.y"
                                                 {P_RULE(48,"<elemento_vector> ::= identificador [ <exp> ]");}
-#line 1800 "y.tab.c"
+#line 1799 "y.tab.c"
     break;
 
   case 41:
-#line 244 "src/alfa.y"
+#line 243 "src/alfa.y"
                                                     {P_RULE(50,"<condicional> ::= if ( <exp> ) { <sentencias> }");}
-#line 1806 "y.tab.c"
+#line 1805 "y.tab.c"
     break;
 
   case 42:
-#line 246 "src/alfa.y"
+#line 245 "src/alfa.y"
                 {P_RULE(51,"<condicional> ::= if ( <exp> ) { <sentencias> } else { <sentencias> }");}
-#line 1812 "y.tab.c"
+#line 1811 "y.tab.c"
     break;
 
   case 43:
-#line 248 "src/alfa.y"
+#line 247 "src/alfa.y"
                                                  {P_RULE(52,"<bucle> ::= while ( <exp> ) { <sentencias> }");}
-#line 1818 "y.tab.c"
+#line 1817 "y.tab.c"
     break;
 
   case 44:
-#line 250 "src/alfa.y"
+#line 249 "src/alfa.y"
                                       {
             P_RULE(54,"<lectura> ::= scanf identificador"); 
 
@@ -1842,74 +1841,74 @@ yyreduce:
             /* Llamar a scanf */
             leer(alfa_utils_T.fasm, info->lexema, info->tipo);
         }
-#line 1846 "y.tab.c"
+#line 1845 "y.tab.c"
     break;
 
   case 45:
-#line 274 "src/alfa.y"
+#line 273 "src/alfa.y"
                            {
                 P_RULE(56,"<escritura> ::= printf <exp>");
                 escribir(pfasm, (yyvsp[0].atributos).es_direccion, (yyvsp[0].atributos).tipo);
           }
-#line 1855 "y.tab.c"
+#line 1854 "y.tab.c"
     break;
 
   case 46:
-#line 279 "src/alfa.y"
+#line 278 "src/alfa.y"
                                  {P_RULE(61,"<retorno_funcion> ::= return <exp>");}
-#line 1861 "y.tab.c"
+#line 1860 "y.tab.c"
     break;
 
   case 47:
-#line 281 "src/alfa.y"
+#line 280 "src/alfa.y"
                   {P_RULE(72,"<exp> ::= <exp> + <exp>");}
-#line 1867 "y.tab.c"
+#line 1866 "y.tab.c"
     break;
 
   case 48:
-#line 282 "src/alfa.y"
+#line 281 "src/alfa.y"
                   {P_RULE(73,"<exp> ::= <exp> - <exp>");}
-#line 1873 "y.tab.c"
+#line 1872 "y.tab.c"
     break;
 
   case 49:
-#line 283 "src/alfa.y"
+#line 282 "src/alfa.y"
                   {P_RULE(74,"<exp> ::= <exp> / <exp>");}
-#line 1879 "y.tab.c"
+#line 1878 "y.tab.c"
     break;
 
   case 50:
-#line 284 "src/alfa.y"
+#line 283 "src/alfa.y"
                   {P_RULE(75,"<exp> ::= <exp> * <exp>");}
-#line 1885 "y.tab.c"
+#line 1884 "y.tab.c"
     break;
 
   case 51:
-#line 285 "src/alfa.y"
+#line 284 "src/alfa.y"
               {P_RULE(76,"<exp> ::= - <exp>");}
-#line 1891 "y.tab.c"
+#line 1890 "y.tab.c"
     break;
 
   case 52:
-#line 286 "src/alfa.y"
+#line 285 "src/alfa.y"
                       {P_RULE(77,"<exp> ::= <exp> && <exp>");}
-#line 1897 "y.tab.c"
+#line 1896 "y.tab.c"
     break;
 
   case 53:
-#line 287 "src/alfa.y"
+#line 286 "src/alfa.y"
                      {P_RULE(78,"<exp> ::= <exp> || <exp>");}
-#line 1903 "y.tab.c"
+#line 1902 "y.tab.c"
     break;
 
   case 54:
-#line 288 "src/alfa.y"
+#line 287 "src/alfa.y"
               {P_RULE(79,"<exp> ::= ! <exp>");}
-#line 1909 "y.tab.c"
+#line 1908 "y.tab.c"
     break;
 
   case 55:
-#line 289 "src/alfa.y"
+#line 288 "src/alfa.y"
                         {
         P_RULE(80,"<exp> ::= identificador");
 
@@ -1940,155 +1939,155 @@ yyreduce:
             (yyval.atributos).tipo = sym->tipo;
         }
       }
-#line 1944 "y.tab.c"
+#line 1943 "y.tab.c"
     break;
 
   case 56:
-#line 319 "src/alfa.y"
+#line 318 "src/alfa.y"
                 {P_RULE(81,"<exp> ::= <constante>");}
-#line 1950 "y.tab.c"
+#line 1949 "y.tab.c"
     break;
 
   case 57:
-#line 320 "src/alfa.y"
+#line 319 "src/alfa.y"
                   {P_RULE(82,"<exp> ::= ( <exp> )");}
-#line 1956 "y.tab.c"
+#line 1955 "y.tab.c"
     break;
 
   case 58:
-#line 321 "src/alfa.y"
+#line 320 "src/alfa.y"
                           {P_RULE(83,"<exp> ::= ( <comparacion> )");}
-#line 1962 "y.tab.c"
+#line 1961 "y.tab.c"
     break;
 
   case 59:
-#line 322 "src/alfa.y"
+#line 321 "src/alfa.y"
                       {P_RULE(85,"<exp> ::= <elemento_vector>");}
-#line 1968 "y.tab.c"
+#line 1967 "y.tab.c"
     break;
 
   case 60:
-#line 323 "src/alfa.y"
+#line 322 "src/alfa.y"
                                               {P_RULE(88,"<identificador> ( <lista_expresiones> )");}
-#line 1974 "y.tab.c"
+#line 1973 "y.tab.c"
     break;
 
   case 61:
-#line 325 "src/alfa.y"
+#line 324 "src/alfa.y"
                                                 {P_RULE(89,"<lista_expresiones> ::= <exp> <resto_lista_expresiones>");}
-#line 1980 "y.tab.c"
+#line 1979 "y.tab.c"
     break;
 
   case 62:
-#line 326 "src/alfa.y"
+#line 325 "src/alfa.y"
                                  {P_RULE(90,"<lista_expresiones> ::=");}
-#line 1986 "y.tab.c"
+#line 1985 "y.tab.c"
     break;
 
   case 63:
-#line 328 "src/alfa.y"
+#line 327 "src/alfa.y"
                                                           {P_RULE(91,"<resto_lista_expresiones> ::= , <exp> <resto_lista_expresiones>");}
-#line 1992 "y.tab.c"
+#line 1991 "y.tab.c"
     break;
 
   case 64:
-#line 329 "src/alfa.y"
+#line 328 "src/alfa.y"
                                        {P_RULE(92,"<resto_lista_expresiones> ::=");}
-#line 1998 "y.tab.c"
+#line 1997 "y.tab.c"
     break;
 
   case 65:
-#line 331 "src/alfa.y"
+#line 330 "src/alfa.y"
                                 {P_RULE(93,"<comparacion> ::= <exp> == <exp>");}
-#line 2004 "y.tab.c"
+#line 2003 "y.tab.c"
     break;
 
   case 66:
-#line 332 "src/alfa.y"
+#line 331 "src/alfa.y"
                                    {P_RULE(94,"<comparacion> ::= <exp> != <exp>");}
-#line 2010 "y.tab.c"
+#line 2009 "y.tab.c"
     break;
 
   case 67:
-#line 333 "src/alfa.y"
+#line 332 "src/alfa.y"
                                      {P_RULE(95,"<comparacion> ::= <exp> <= <exp>");}
-#line 2016 "y.tab.c"
+#line 2015 "y.tab.c"
     break;
 
   case 68:
-#line 334 "src/alfa.y"
+#line 333 "src/alfa.y"
                                      {P_RULE(96,"<comparacion> ::= <exp> >= <exp>");}
-#line 2022 "y.tab.c"
+#line 2021 "y.tab.c"
     break;
 
   case 69:
-#line 335 "src/alfa.y"
+#line 334 "src/alfa.y"
                           {P_RULE(97,"<comparacion> ::= <exp> < <exp>");}
-#line 2028 "y.tab.c"
+#line 2027 "y.tab.c"
     break;
 
   case 70:
-#line 336 "src/alfa.y"
+#line 335 "src/alfa.y"
                           {P_RULE(98,"<comparacion> ::= <exp> > <exp>");}
-#line 2034 "y.tab.c"
+#line 2033 "y.tab.c"
     break;
 
   case 71:
-#line 338 "src/alfa.y"
+#line 337 "src/alfa.y"
                              {
                 P_RULE(99,"<constante> ::= <constante_logica>");
                 (yyval.atributos).tipo = (yyvsp[0].atributos).tipo;
                 (yyval.atributos).valor_entero = (yyvsp[0].atributos).valor_entero;
                 (yyval.atributos).es_direccion = (yyvsp[0].atributos).es_direccion;
             }
-#line 2045 "y.tab.c"
+#line 2044 "y.tab.c"
     break;
 
   case 72:
-#line 344 "src/alfa.y"
+#line 343 "src/alfa.y"
                              {
                 P_RULE(100,"<comparacion> ::= <constante_entera>");
                 (yyval.atributos).tipo = (yyvsp[0].atributos).tipo;
                 (yyval.atributos).es_direccion = (yyvsp[0].atributos).es_direccion;
             }
-#line 2055 "y.tab.c"
+#line 2054 "y.tab.c"
     break;
 
   case 73:
-#line 350 "src/alfa.y"
+#line 349 "src/alfa.y"
                             {
                         P_RULE(102,"<constante_logica> ::= true");
                         (yyval.atributos).tipo = BOOLEANO;
                         (yyval.atributos).valor_entero = 1;
                         (yyval.atributos).es_direccion = 0;
                     }
-#line 2066 "y.tab.c"
+#line 2065 "y.tab.c"
     break;
 
   case 74:
-#line 356 "src/alfa.y"
+#line 355 "src/alfa.y"
                              {
                         P_RULE(103,"<constante_logica> ::= false");
                         (yyval.atributos).tipo = BOOLEANO;
                         (yyval.atributos).valor_entero = 0;
                         (yyval.atributos).es_direccion = 0;
                     }
-#line 2077 "y.tab.c"
+#line 2076 "y.tab.c"
     break;
 
   case 75:
-#line 363 "src/alfa.y"
+#line 362 "src/alfa.y"
                                         {
                         P_RULE(104,"<constante_entera> ::= TOK_CONSTANTE_ENTERA");
                         (yyval.atributos).tipo = ENTERO;
                         (yyval.atributos).es_direccion = 0;
                         (yyval.atributos).valor_entero = (yyvsp[0].atributos).valor_entero
                     }
-#line 2088 "y.tab.c"
+#line 2087 "y.tab.c"
     break;
 
   case 76:
-#line 370 "src/alfa.y"
+#line 369 "src/alfa.y"
                                   {
     P_RULE(108,"<identificador> ::= TOK_IDENTIFICADOR");
         char err_msg[125] = "";
@@ -2104,11 +2103,11 @@ yyreduce:
         sym_t_add_symb(sym) //insertas el símbolo donde toque (global o local, de eso se encarga la tabla)
         pos_variable_local_actual++;
     }
-#line 2108 "y.tab.c"
+#line 2107 "y.tab.c"
     break;
 
 
-#line 2112 "y.tab.c"
+#line 2111 "y.tab.c"
 
       default: break;
     }
@@ -2340,4 +2339,4 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 386 "src/alfa.y"
+#line 385 "src/alfa.y"

@@ -44,7 +44,7 @@ int hash_hash(hash_t *hashtable, char *key)
 	unsigned long int hashval=0;
 	int len =  strlen(key);
 	for (int i=0; hashval < ULONG_MAX && i < len; i++) {
-		hashval = hashval << 8; //hashval=hashval*256
+		hashval = hashval << 8; /*hashval=hashval*256*/
 		hashval += key[i]; /*hashvla+=valor ascii de la pos i de la cadena*/
 	}
 	return hashval % hashtable->size;
