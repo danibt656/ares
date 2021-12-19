@@ -1,5 +1,5 @@
 .DEFAULT_GOAL = all
-.PHONY: all test debug clean zip help graph nasm astyle
+.PHONY: all test debug clean help graph nasm astyle
 .SUFFIXES:
 
 ## Definiciones de carpetas
@@ -9,14 +9,6 @@ IDIR := include
 ODIR := obj
 EDIR := src
 NDIR := .
-
-# Fichero con configuracion de astyle
-# Respeta la variable de entorno en caso de estar definida
-ARTISTIC_STYLE_OPTIONS ?= .astylerc
-
-
-## Nombre fichero compresion
-ZIP := ../G8_CARLOS_ANIVARRO_DANIEL_BARAHONA_DAVID_GARITAGOITIA.zip
 
 ## Configuracion de las herramientas
 CC       ?= gcc
@@ -69,67 +61,39 @@ NASM_SOURCES := $(wildcard $(NDIR)/*.nasm)
 NASM_OBJ := $(patsubst $(NDIR)/%.nasm, $(ODIR)/%.o, $(NASM_SOURCES))
 NASM_BIN := $(patsubst %.nasm, %, $(NASM_SOURCES))
 
-
-# Flags de compilacion extras para ficheros generados por flex
 $(FLEX_OBJ): CFLAGS += -Wno-sign-compare -D_XOPEN_SOURCE=700
 
-## Flags adicionales
-all: CFLAGS += -O3 -DNDEBUG
+all: CFLAGS += -O3 -DNDEBUG -g
 test: CFLAGS += -g
 debug: CFLAGS += -g
 
-## Objetivos
 all: $(EBIN)
 
 nasm: $(NASM_BIN)
 
 debug: $(EBIN)
 
-## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
-# La siguiente regla le dice a make como generar el fichero .depend
-# Solo ejecuta el cpp sobre los fuentes, y acumula las dependencias
-# (flag -MM) en un formato que puede procesar make
-#CFLAGS += -MMD
-# Lo incluimos en este make solo si no estamos haciendo un clean
-# (para no crearlo y destruirlo inmediatamente)
-# y lo prefijamos con un - para que no falle aunque no se pueda incluir
-# (como la primera vez que se ejecuta este makefile)
-#ifneq ($(MAKECMDGOALS),clean)
-#-include $(patsubst $(wildcard $(SDIR)/*.c,$(ODIR)/%.o),:.c=.d)
-#endif
-
-## Reglas de compilacion
-
-## Compilacion de .c de src
 $(SOBJ):$(ODIR)/%.o: $(SDIR)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-## Generacion de .yy.c a partir de .l
-## Debe estar generada la cabecera de bison
 $(SDIR)/%.yy.c: $(SDIR)/%.l $(BISON_GENERATED_FILES)
 	$(LEX) $(LFLAGS) -o $@ $<
 
-## Generacion de .tab.c a partir de .y
 $(SDIR)/%.tab.c: $(SDIR)/%.y
 	$(BISON) $(BFLAGS) -o $@ $<
 	# mv $(BISON_HEADERS_ORIG) $(IDIR)
 	# mv $(BISON_OUTPUT_ORIG) $(MDIR)
 	# mv $(BISON_GRAPH_ORIG) $(MDIR)
 
-## Compilacion de .c de exes
 $(EOBJ):$(ODIR)/%.o: $(EDIR)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $< 
 
-## Linkado de exes
 $(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-
-## Compilacion de .nasm
 $(NASM_OBJ):$(ODIR)/%.o: $(NDIR)/%.nasm
 	$(NASM) $(NFLAGS) -o $@ $<
 
-## Linkado de los nasm junto con alfalib
 $(NASM_BIN): $(BDIR)/%: $(ODIR)/%.o $(ALFALIB)
 	$(CC) $(CCNASMFLAGS) -o $@ $^ $(CFLAGS)
 
@@ -142,18 +106,19 @@ clean:
 	@$(RM) $(NASM_OBJ) $(NASM_BIN) debug *.asm
 
 help:
-	@echo "Posibles comandos:"
-	@echo "    	all      			- construye el/los ejecutable $(EBIN)"
-	@echo "    	debug    			- compila todo usando con simbolos de depuracion"
-	@echo "    	clean    			- borra todos los ficheros generados"
-	@echo "    	compile_file		- compila un fichero de prueba en ALFA y lo ejecuta"
-	@echo "		valdrind			- ejecuta valgrind en el compilador sobre un fichero dado"
-	@echo "	   							- USO: make compile_file src=<FICHERO_ALFA>"
+	@echo "Flags de Makefile:"
+	@echo "    debug               - compila todo usando con simbolos de depuracion"
+	@echo "    clean               - borra todos los ficheros generados"
+	@echo "    compile_file        - compila un fichero de prueba en ALFA y lo ejecuta"
+	@echo "                             -> Uso: make compile_file src=<FICHERO_ALFA>"
+	@echo "    valdrind            - ejecuta valgrind en el compilador sobre un fichero dado"
 
 compile_file:
+	@echo "-------------------------------"
 	./alfa $(src) exe.asm
 	nasm -f elf32 exe.asm
-	gcc -m32 -o exe exe.o obj/alfalib.o 
+	gcc -m32 -o exe exe.o obj/alfalib.o
+	@echo "-------------------------------"
 	./exe
 
 valgrind:

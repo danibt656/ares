@@ -60,9 +60,8 @@ entry_t *hash_newpair(char *key, sym_info *value)
 	if (!(newpair = malloc(sizeof(entry_t))))
 		return NULL;
 	
-	if(!(newpair->key = malloc(sizeof(key))))
+	if(!(newpair->key = (char*)calloc(strlen(key)+1, sizeof(char))))
 		return NULL;
-
 	if(!strcpy(newpair->key, key))
 		return NULL;
 
@@ -81,7 +80,6 @@ void hash_set(hash_t *hashtable, char *key, sym_info *value)
 	struct STRUCT_ENTRY_T *newpair = NULL;
 	struct STRUCT_ENTRY_T *next = NULL;
 	struct STRUCT_ENTRY_T *last = NULL;
-
 	index = hash_hash(hashtable, key);
 
 	next = hashtable->table[index];
@@ -90,7 +88,6 @@ void hash_set(hash_t *hashtable, char *key, sym_info *value)
 		last = next;
 		next = next->next;
 	}
-
 	if (next != NULL && next->key != NULL && strcmp(key, next->key) == 0) {
 		sym_info_free(next->value);
 		next->value = value;

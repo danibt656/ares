@@ -11,6 +11,20 @@
 #include "alfa.h"
 
 
+void escribir_cabecera_presentacion(FILE *fpasm, char *input_filename)
+{
+      if(!fpasm){
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, ";-------------------------------\n");
+        fprintf(fpasm, "; %s\n", input_filename);
+        fprintf(fpasm, ";   Autor: Carlos Anivarro\n");
+        fprintf(fpasm, ";   Autor: Daniel Barahona\n");
+        fprintf(fpasm, ";   Autor: David Garitagoitia\n");
+        fprintf(fpasm, ";-------------------------------\n");
+}
+
 void escribir_cabecera_bss(FILE *fpasm)
 {
         if(!fpasm){
@@ -44,6 +58,8 @@ void declarar_variable(FILE *fpasm, char *nombre, int tipo, int tamano)
                 printf("Error fallo en compilador, fichero fpasm nulo");
                 return;
         }
+        NO_USO(tipo);
+
         if(!nombre){
                 printf("Error fallo en compilador, nombre de la variable nulo");
                 return;
@@ -111,88 +127,6 @@ void escribir_fin(FILE *fpasm)
         /*fprintf(fpasm, "call print_endofline\n");*/
         fprintf(fpasm, "mov dword esp, [__esp] ; recupera el puntero de pila\n");
         fprintf(fpasm, "ret\n");
-}
-
-void suma_iterativa(FILE *fpasm, char *nombre1, char *nombre2, char *nombre3)
-/*
-Genera el código NASM necesario para:
- * leer al menos dos operandos INTs del teclado
- * si el segundo operando es igual a 0, no hace nada más
- * si el segundo operando es distinto de 0
-     * realizar y presentar por el terminal el resultado de la suma de los dos operandos
-     * seguir leyendo operandos, acumulando la suma de cada operando al resultado y presentando este resultado por pantalla para cada operando introducido, hasta que el usuario introduzca un operando de valor igual a 0
-*/
-{
-        if(!fpasm){
-                printf("Error fallo en compilador, fichero fpasm nulo\n");
-                return;
-        }
-        if(!nombre1){
-                printf("Error fallo en compilador, nombre1 nulo\n");
-                return;
-        }
-        if(!nombre2){
-                printf("Error fallo en compilador, nombre2 nulo\n");
-                return;
-        }
-        if(!nombre3){
-                printf("Error fallo en compilador, fichero fpasm nulo\n");
-                return;
-        }
-        /* scanf x */
-        fprintf(fpasm, "push dword _x\n");
-        fprintf(fpasm, "call scan_int\n");
-        fprintf(fpasm, "add esp, 4\n");
-        /* scanf y */
-        fprintf(fpasm, "push dword _y\n");
-        fprintf(fpasm, "call scan_int\n");
-        fprintf(fpasm, "add esp, 4\n");
-        /* while begin */
-        fprintf(fpasm, "inicio_while0:\n");
-        fprintf(fpasm, "push dword _y\n");
-        fprintf(fpasm, "push dword 0\n");
-        fprintf(fpasm, "pop dword ebx\n");
-        fprintf(fpasm, "pop dword eax\n");
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-        /* while y != 0 */
-        fprintf(fpasm, "cmp eax, ebx\n");
-        fprintf(fpasm, "jne near si_igual0\n");
-        fprintf(fpasm, "push dword 0\n");
-        fprintf(fpasm, "jmp near fin_igual0\n");
-        fprintf(fpasm, "si_igual0:\n");
-        fprintf(fpasm, "push dword 1\n");
-        fprintf(fpasm, "fin_igual0:\n");
-        fprintf(fpasm, "pop dword  eax\n");
-        fprintf(fpasm, "cmp eax, 0\n");
-        fprintf(fpasm, "je near fin_while0\n");
-        /* interior del while */
-        /* x = x + y */
-        fprintf(fpasm, "push dword _x\n");
-        fprintf(fpasm, "push dword _y\n");
-        fprintf(fpasm, "pop dword ebx\n");
-        fprintf(fpasm, "pop dword eax\n");
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-        fprintf(fpasm, "mov dword ebx, [ebx]\n");
-        fprintf(fpasm, "add eax, ebx\n");
-        fprintf(fpasm, "push dword eax\n");
-        fprintf(fpasm, "push dword _x\n");
-        fprintf(fpasm, "pop dword ebx\n");
-        fprintf(fpasm, "pop dword eax\n");
-        fprintf(fpasm, "mov dword [ebx], eax\n");
-        /* printf x */
-        fprintf(fpasm, "push dword _x\n");
-        fprintf(fpasm, "pop dword eax\n");
-        fprintf(fpasm, "mov eax, [eax]\n");
-        fprintf(fpasm, "push dword eax\n");
-        fprintf(fpasm, "call print_int\n");
-        fprintf(fpasm, "call print_endofline\n");
-        fprintf(fpasm, "add esp, 4\n");
-        /* scanf y */
-        fprintf(fpasm, "push dword _y\n");
-        fprintf(fpasm, "call scan_int\n");
-        fprintf(fpasm, "add esp, 4\n");
-        fprintf(fpasm, "jmp near inicio_while0\n");
-        fprintf(fpasm, "fin_while0:\n");
 }
 
 void escribir_operando(FILE *fpasm, char *nombre, int es_variable)
@@ -547,17 +481,16 @@ void mayor(FILE *fpasm, int es_variable1, int es_variable2, int etiqueta)
 }
 
 /* FUNCIONES DE ESCRITURA Y LECTURA */
-void leer(FILE *fpasm, char *nombre, int tipo)
+/* Hay que distinguir entre Global, y Parametro o Variable Local*/
+void leer(FILE *fpasm, char *nombre, int tipo, int es_global)
 {
         if (!fpasm || !nombre) {
                 printf("Error fallo en compilador, fichero fpasm o nombre nulo");
                 return;
         }
-        fprintf(fpasm, "push dword _%s\n", nombre);
-        fprintf(fpasm, 
-                (tipo==INT)
-                        ?"call scan_int\n"
-                        :"call scan_boolean\n");
+        if (es_global)
+                fprintf(fpasm, "push dword _%s\n", nombre);
+        fprintf(fpasm, (tipo==INT) ? "call scan_int\n" : "call scan_boolean\n");
         fprintf(fpasm, "add esp, 4\n");
 }
 
@@ -682,17 +615,28 @@ void escribir_elemento_vector(FILE *fpasm, char *nombre_vector, int tam_max, int
         printf("Error fallo en compilador, fichero fpasm nulo");
         return;
     }
-
+    NO_USO(nombre_vector);
+    NO_USO(tam_max);
     // Extraemos de la pila el valor del índice a un registro
     fprintf(fpasm, "pop dword eax\n");
     
     // En el caso en el que sea una dirección, accedemos al valor
     if (exp_es_direccion == 1) {
-        fprintf(fpasm, "mov dword eax, [eax]\n");
+        fprintf(fpasm, "mov eax, dword [eax]\n");
     }
 
     fprintf(fpasm, "pop dword ebx\n");
     fprintf(fpasm, "mov dword [ebx], eax\n");
+}
+
+void apilar_valor_elemento_vector(FILE *fpasm)
+{
+    if (!fpasm) {
+        printf("Error fallo en compilador, fichero fpasm nulo");
+        return;
+    }
+    fprintf(fpasm, "pop dword eax\n");
+    fprintf(fpasm, "push dword [eax]\n");
 }
 
 void comprobar_indice_vector(FILE *fpasm, const char *nombre, int es_direccion, int tam)
@@ -765,7 +709,6 @@ void escribirVariableLocal(FILE *fpasm, int direccion, int posicion_variable_loc
                 return;
         }
         int d_ebp = 4 * posicion_variable_local;
-
         if (direccion == 1) {
                 fprintf(fpasm, "lea eax, [ebp - %d]\n", d_ebp);
         } else {
@@ -774,19 +717,36 @@ void escribirVariableLocal(FILE *fpasm, int direccion, int posicion_variable_loc
         fprintf(fpasm, "push dword eax\n");
 }
 
-void asignarDestinoEnPila(FILE* fpasm, int es_variable)
+void asignarParametro(FILE* fpasm, int es_variable, int pos_param, int num_params)
 {
+    int d_ebp = 4 + 4*(num_params - pos_param);
     if (!fpasm) {
             printf("Error fallo en compilador, fichero fpasm nulo");
             return;
     }
 
-    fprintf(fpasm, "pop dword eax\n"); // Valor a asignar
-    fprintf(fpasm, "pop dword ebx\n");  // Direccion
-
+    fprintf(fpasm, "pop dword eax\n");
     if (es_variable)
-        fprintf(fpasm, "mov dword ebx, [ebx]\n");
-    fprintf(fpasm, "mov dword [eax], ebx\n");
+        fprintf(fpasm, "mov eax, dword [eax]\n");
+
+    fprintf(fpasm, "lea ebx, [ebp + %d]\n", d_ebp);
+    fprintf(fpasm, "mov [ebx], eax\n");
+}
+
+void asignarVariableLocal(FILE* fpasm, int es_variable, int pos_var_loc)
+{
+    int d_ebp = 4*pos_var_loc;
+    if (!fpasm) {
+            printf("Error fallo en compilador, fichero fpasm nulo");
+            return;
+    }
+
+    fprintf(fpasm, "pop dword eax\n");
+    if (es_variable)
+        fprintf(fpasm, "mov eax, dword [eax]\n");
+
+    fprintf(fpasm, "lea ebx, [ebp - %d]\n", d_ebp);
+    fprintf(fpasm, "mov [ebx], eax\n");  
 }
 
 void operandoEnPilaAArgumento(FILE *fpasm, int es_variable)

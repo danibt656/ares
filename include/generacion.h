@@ -18,6 +18,10 @@
 /* Declaraciones de tipos de datos del compilador */
 #define MAX_ETIQUETAS 1000
 
+/*
+   Escribe una cabecera con nombres de autores y del fichero de entrada
+*/
+void escribir_cabecera_presentacion(FILE *fpasm, char *input_filename);
 
 /*
    Código para el principio de la sección .bss.
@@ -57,17 +61,6 @@ void escribir_inicio_main(FILE* fpasm);
          ·Salir del programa (ret).
 */
 void escribir_fin(FILE* fpasm);
-
-/*
-Genera el código NASM necesario para:
-
- * leer al menos dos operandos enteros del teclado
- * si el segundo operando es igual a 0, no hace nada más
- * si el segundo operando es distinto de 0
-     * realizar y presentar por el terminal el resultado de la suma de los dos operandos
-     * seguir leyendo operandos, acumulando la suma de cada operando al resultado y presentando este resultado por pantalla para cada operando introducido, hasta que el usuario introduzca un operando de valor igual a 0
-*/
-void suma_iterativa(FILE *fpasm, char *nombre1, char *nombre2, char *nombre3);
 
 /*
 Función que debe ser invocada cuando se sabe un operando de una operación
@@ -157,7 +150,7 @@ tipo.
 Se deben insertar en la pila los argumentos necesarios, realizar la llamada
 (call) a la función de librería correspondiente y limpiar la pila.
 */
-void leer(FILE* fpasm, char* nombre, int tipo);
+void leer(FILE* fpasm, char* nombre, int tipo, int es_global);
 void escribir(FILE* fpasm, int es_variable, int tipo);
 
 /* FUNCIONES DE CONDICIONALES */
@@ -258,6 +251,17 @@ tarea.
 */
 void escribir_elemento_vector(FILE * fpasm,char * nombre_vector, int tam_max, int exp_es_direccion);
 
+/*
+   Apila el valor contenido en el elemento de un vector
+*/
+void apilar_valor_elemento_vector(FILE *fpasm);
+
+/*
+   Comprueba en tiempo de ejecucion que el indice de un elemento
+   de un vector no sea negativo ni superior al tamanio del vector
+*/
+void comprobar_indice_vector(FILE *fpasm, const char *nombre, int es_direccion, int tam);
+
 /**
   Escribe la plantilla de comienzo de una función con nombre nombre_funcion 
   y un numero num_var_loc de variables locales
@@ -282,19 +286,14 @@ void escribirParametro(FILE *fpasm, int direccion, int pos_parametro, int num_to
 void escribirVariableLocal(FILE *fpasm, int direccion, int posicion_variable_local);
 
 /*
-Función para poder asignar a un destino que no es una variable “global” (tipo _x) por
-ejemplo parámetros o variables locales (ya que en ese caso su nombre real de alto nivel, no
-se tiene en cuenta pues es realmente un desplazamiento a partir de ebp: ebp+4 o ebp-8 por
-ejemplo).
-Se debe asumir que en la pila estará
-Primero (en la cima) lo que hay que asignar
-Debajo (se ha introducido en la pila antes) la dirección donde hay que asignar
-es_variable
-Es 1 si la expresión que se va a asignar es algo asimilable a una variable
-(identificador, o elemento de vector)
-Es 0 en caso contrario (constante u otro tipo de expresión)
+   Asigna el valor a un parametro en la pila
 */
-void asignarDestinoEnPila(FILE* fpasm, int es_variable);
+void asignarParametro(FILE* fpasm, int es_variable, int pos_param, int num_params);
+
+/*
+   Asigna el valor a una variable local en la pila
+*/
+void asignarVariableLocal(FILE* fpasm, int es_variable, int pos_var_loc);
 
 /*
 Como habrás visto en el material, nuestro convenio de llamadas a las funciones asume que

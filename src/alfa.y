@@ -32,6 +32,7 @@
 
     int yyerror(char *s)
     {
+        NO_USO(s);
         /* Si imprime un error morfologico, no debe imprimir uno sintactico */
         if (alfa_utils_T.error == ERR_MORFOLOGICO)
             return 0;
@@ -55,7 +56,7 @@
     static int pos_parametro_actual = UNDEFINED;
     static int num_parametros_actual = 0;
     static int num_variables_locales_actual = 0;
-	static int pos_variable_local_actual = 1;
+	static int pos_variable_local_actual = 0;
     static Tipo tipo_retorno_actual = UNDEFINED;
 
     /* 
@@ -133,6 +134,7 @@ programa : TOK_MAIN '{' iniciar declaraciones dec_vars funciones wrt_main senten
 
 iniciar :  {
                 sym_t_create();
+                escribir_cabecera_presentacion(alfa_utils_T.fasm, alfa_utils_T.fin_name);
                 escribir_subseccion_data(alfa_utils_T.fasm);
                 escribir_cabecera_bss(alfa_utils_T.fasm);
             }
@@ -223,7 +225,7 @@ fn_name : TOK_FUNCTION tipo identificador_use {
             
             /* Inicializar variables globales */
             num_variables_locales_actual = 0;
-            pos_variable_local_actual = 1;
+            pos_variable_local_actual = 0;
             num_parametros_actual = 0;
             pos_parametro_actual = 0;
             tipo_retorno_actual = tipo_actual;
@@ -299,8 +301,13 @@ asignacion  : identificador_use '=' exp {
                 /* Asignar */
                 if (sym->is_var_loc == UNDEFINED) { /*comprueba si es variable local */
                     asignar(alfa_utils_T.fasm, $1.lexema, $3.es_direccion);
-                } else { /*en caso contrario asigna destino en pila al ser local*/
-                    asignarDestinoEnPila(alfa_utils_T.fasm, $3.es_direccion);
+
+                } else if (sym->elem == PARAMETRO) {
+                    printf("POS_PARAM: %d NUM_PARAMS: %d\n", sym->pos_param, num_parametros_actual);
+                    asignarParametro(alfa_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
+                } else {
+                    printf("POS_VARLOC_ACTUAL: %d\n", sym->pos_var_loc);
+                    asignarVariableLocal(alfa_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
                 }
             }
             | elemento_vector '=' exp {
@@ -322,7 +329,6 @@ elemento_vector : identificador_use '[' exp ']' {
                     CHECK_ERROR(info->catg == VECTOR, "No se puede asignar una variable que no es de tipo vector");
                     CHECK_ERROR($3.tipo == INT, "Los indices en vectores deben ser enteros");
 
-                    
                     comprobar_indice_vector(alfa_utils_T.fasm, $1.lexema, $3.es_direccion, info->size);
 
                     $$.tipo = info->tipo;
@@ -368,26 +374,24 @@ bucle_tok : TOK_WHILE {
 
 lectura : TOK_SCANF identificador_use {
             char err_msg[TAM_ERRMSG] = "";
-            sym_info* info = sym_t_check($2.lexema);
             P_RULE(54,"<lectura> ::= scanf identificador"); 
 
-            /* Buscar si el identificador existe */
             sprintf(err_msg, "Identificador [%s] no existe", $2.lexema);
+            sym_info* info = sym_t_check($2.lexema);
             CHECK_ERROR(info, err_msg);
-
-            /* Si el identificador existe */
             CHECK_ERROR((info->elem != FUNCION), "scanf no admite funciones como entrada");
             CHECK_ERROR((info->catg != VECTOR), "scanf no admite vectores como entrada");
 
-            /* NASM: Apilar direccion de identificador */
-            if (info->elem == PARAMETRO) {
+            if (info->is_var_loc == UNDEFINED) {
+                leer(alfa_utils_T.fasm, info->lexema, info->tipo, 1);
+            }
+            else if (info->elem == PARAMETRO) {
                 escribirParametro(alfa_utils_T.fasm, 1, info->pos_param, num_parametros_actual);
+                leer(alfa_utils_T.fasm, info->lexema, info->tipo, 0);
             } else if (info->elem == VARIABLE && info->is_var_loc == 1) {
                 escribirVariableLocal(alfa_utils_T.fasm, 1, info->pos_var_loc);
+                leer(alfa_utils_T.fasm, info->lexema, info->tipo, 0);
             }
-
-            /* Llamar a scanf */
-            leer(alfa_utils_T.fasm, info->lexema, info->tipo);
         };
 
 escritura : TOK_PRINTF exp {
@@ -403,7 +407,6 @@ retorno_funcion : TOK_RETURN exp {
                     
                     retornarFuncion(alfa_utils_T.fasm, $2.es_direccion);
                     hay_return++;
-                    tipo_retorno_actual = UNDEFINED;
                 };
 
 exp : exp '+' exp {
@@ -504,7 +507,7 @@ exp : exp '+' exp {
             escribirParametro(alfa_utils_T.fasm, 0, sym->pos_param, num_parametros_actual);
         /* Variable local */
         } else if (sym->elem == VARIABLE && sym->is_var_loc != UNDEFINED) {
-            escribirVariableLocal(alfa_utils_T.fasm, 0, pos_variable_local_actual);
+            escribirVariableLocal(alfa_utils_T.fasm, 0, sym->pos_var_loc);
         }
     }
     | constante {
@@ -532,10 +535,11 @@ exp : exp '+' exp {
     | elemento_vector {
             P_RULE(85,"<exp> ::= <elemento_vector>");
 
-            $$.tipo = $1.tipo;
-            $$.es_direccion = $1.es_direccion;
+            apilar_valor_elemento_vector(alfa_utils_T.fasm);
 
-            /*escribir_elemento_vector(alfa_utils_T.fasm, char *nombre_vector, int tam_max, int exp_es_direccion)*/
+            $$.tipo = $1.tipo;
+            $$.es_direccion = 0;
+
     }
     | idf_llamada_funcion '(' lista_expresiones ')' {
             sym_info* sym = NULL;
@@ -683,6 +687,7 @@ identificador_new : TOK_IDENTIFICADOR {
         sym_t_add_symb(sym);
         if(sym->is_var_loc){
             pos_variable_local_actual++;
+            sym->pos_var_loc = pos_variable_local_actual;
             num_variables_locales_actual++;
         }
         tamanio_vector_actual = 0;

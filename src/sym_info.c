@@ -34,7 +34,7 @@ sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categori
             sym->num_vars_loc = e2;
         } else if (elem == PARAMETRO)
             sym->pos_param = e2;
-        if (catg == ESCALAR) { /*funct and escalar??*/
+        if (catg == ESCALAR) {
             sym->valor = e1;
             sym->size = 1;
         } else if (catg == VECTOR) {
