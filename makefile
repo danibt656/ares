@@ -1,8 +1,8 @@
 .DEFAULT_GOAL = all
-.PHONY: all test debug clean help graph nasm astyle
+.PHONY: all clean help nasm astyle
 .SUFFIXES:
 
-## Definiciones de carpetas
+## Directorios
 BDIR := .
 SDIR := src
 IDIR := include
@@ -10,7 +10,6 @@ ODIR := obj
 EDIR := src
 NDIR := .
 
-## Configuracion de las herramientas
 CC       ?= gcc
 LEX      ?= flex
 BISON    ?= bison
@@ -63,15 +62,11 @@ NASM_BIN := $(patsubst %.nasm, %, $(NASM_SOURCES))
 
 $(FLEX_OBJ): CFLAGS += -Wno-sign-compare -D_XOPEN_SOURCE=700
 
-all: CFLAGS += -O3 -DNDEBUG -g
-test: CFLAGS += -g
-debug: CFLAGS += -g
+all: CFLAGS += -g
 
 all: $(EBIN)
 
 nasm: $(NASM_BIN)
-
-debug: $(EBIN)
 
 $(SOBJ):$(ODIR)/%.o: $(SDIR)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
@@ -107,7 +102,8 @@ clean:
 
 help:
 	@echo "Flags de Makefile:"
-	@echo "    debug               - compila todo usando con simbolos de depuracion"
+	@echo "    all                 - compila todo y genera el ejecutable alfa"
+	@echo "                             -> Genera un fichero debug con las trazas de flex y bison"
 	@echo "    clean               - borra todos los ficheros generados"
 	@echo "    compile_file        - compila un fichero de prueba en ALFA y lo ejecuta"
 	@echo "                             -> Uso: make compile_file src=<FICHERO_ALFA>"
@@ -124,6 +120,5 @@ compile_file:
 valgrind:
 	valgrind --leak-check=full --show-leak-kinds=all ./alfa $(src) exe.asm
 
-## Deteccion de dependencias automatica, v2
 CFLAGS += -MMD
 -include $(DEPEND_FILES)
