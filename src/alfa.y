@@ -689,7 +689,6 @@ identificador_new : TOK_IDENTIFICADOR {
             num_variables_locales_actual++;
         }
         tamanio_vector_actual = 0;
-
     };
 
 %%
