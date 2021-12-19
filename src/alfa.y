@@ -12,8 +12,7 @@
     #define CHECK_ERROR(cond, err_msg) \
         F_BLOCK( \
             if(!(cond)){ \
-            fprintf(alfa_utils_T.ferr, "[%s]: linea %d[%d] ERROR: %s\n", \
-                    (alfa_utils_T.fin_name), \
+            fprintf(alfa_utils_T.ferr, "****Error semantico en lin %d[%d]: %s\n", \
                     (alfa_utils_T.line), \
                     (alfa_utils_T.col), \
                     (err_msg)); \
@@ -186,8 +185,9 @@ tipo : TOK_INT {
 clase_vector : TOK_ARRAY tipo '[' TOK_CONSTANTE_ENTERA ']' {
         P_RULE(15,"<clase_vector> ::= array <tipo> [ constante_entera ]");
         tamanio_vector_actual = $4.valor_entero;
-        CHECK_ERROR(tamanio_vector_actual >= 1, "Tamanyo de vector invalido");
-        CHECK_ERROR(tamanio_vector_actual <= MAX_LONG_VECTOR, "Tamanyo de vector invalido");
+        CHECK_ERROR(tamanio_vector_actual >= 1, "El tamanyo del vector excede los limites permitidos (1,64)");
+        CHECK_ERROR(tamanio_vector_actual <= MAX_LONG_VECTOR, "El tamanyo del vector excede los limites permitidos (1,64)");
+        CHECK_ERROR(dentro_de_fun == 0, "Variable local de tipo no escalar");
     };
 
 identificadores : identificador_new {P_RULE(18,"<identificadores> ::= <identificador>");}
@@ -204,7 +204,7 @@ funcion : fn_declaration sentencias '}' {
             dentro_de_fun = 0;
 
             /* Comprobar si hay al menos un retorno */
-            CHECK_ERROR(hay_return != 0, "Funcion no void sin retorno");
+            CHECK_ERROR(hay_return != 0, "Funcion sin sentencia de retorno");
         };
 
 fn_declaration : fn_name '(' parametros_funcion ')' '{' declaraciones_funcion {
@@ -249,7 +249,7 @@ idpf : identificador_use {
 parametro_funcion : tipo idpf {
             P_RULE(27,"<parametro_funcion> ::= <tipo> <identificador>");
             
-            sym_info *sym = sym_t_get_symb($2.lexema);
+            sym_info *sym = sym_t_check($2.lexema);
             CHECK_ERROR(sym == NULL, "Parametro declarado previamente");
 
             sym = sym_info_create($2.lexema, PARAMETRO, tipo_actual, clase_actual, 0, pos_parametro_actual);
@@ -303,10 +303,8 @@ asignacion  : identificador_use '=' exp {
                     asignar(alfa_utils_T.fasm, $1.lexema, $3.es_direccion);
 
                 } else if (sym->elem == PARAMETRO) {
-                    printf("POS_PARAM: %d NUM_PARAMS: %d\n", sym->pos_param, num_parametros_actual);
                     asignarParametro(alfa_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
                 } else {
-                    printf("POS_VARLOC_ACTUAL: %d\n", sym->pos_var_loc);
                     asignarVariableLocal(alfa_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
                 }
             }
@@ -326,8 +324,8 @@ elemento_vector : identificador_use '[' exp ']' {
                     sprintf(err_msg, "Identificador [%s] inexistente", $1.lexema);
                     info = sym_t_get_symb($1.lexema);
                     CHECK_ERROR(info != NULL, err_msg); 
-                    CHECK_ERROR(info->catg == VECTOR, "No se puede asignar una variable que no es de tipo vector");
-                    CHECK_ERROR($3.tipo == INT, "Los indices en vectores deben ser enteros");
+                    CHECK_ERROR(info->catg == VECTOR, "Intento de indexacion de una variable que no es de tipo vector");
+                    CHECK_ERROR($3.tipo == INT, "El indice en una operacion de indexacion tiene que ser de tipo entero");
 
                     comprobar_indice_vector(alfa_utils_T.fasm, $1.lexema, $3.es_direccion, info->size);
 
@@ -402,7 +400,7 @@ escritura : TOK_PRINTF exp {
 retorno_funcion : TOK_RETURN exp {
                     P_RULE(61,"<retorno_funcion> ::= return <exp>");
                     
-                    CHECK_ERROR(dentro_de_fun == 1, "Retorno no esta en cuerpo de funcion");
+                    CHECK_ERROR(dentro_de_fun == 1, "Sentencia de retorno fuera del cuerpo de una funcion");
                     CHECK_ERROR($2.tipo == tipo_retorno_actual, "Retorno de funcion de tipo incompatible");
                     
                     retornarFuncion(alfa_utils_T.fasm, $2.es_direccion);
@@ -488,8 +486,8 @@ exp : exp '+' exp {
 
         P_RULE(80,"<exp> ::= identificador");
 
+        sym = sym_t_get_symb($1.lexema);
         sprintf(err_msg, "Identificador [%s] no declarado", $1.lexema);
-        sym = sym_t_check($1.lexema);
         CHECK_ERROR(sym != NULL, err_msg);
         /* Comprueba que no sea ni FUNCION ni VECTOR */
         sprintf(err_msg, "Identificador [%s] no es variable", $1.lexema);
@@ -691,6 +689,7 @@ identificador_new : TOK_IDENTIFICADOR {
             num_variables_locales_actual++;
         }
         tamanio_vector_actual = 0;
+
     };
 
 %%

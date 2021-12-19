@@ -107,7 +107,6 @@ sym_info* sym_t_get_symb(char *id)
     }
     if(tabla->tabla_local){
         if((valor=hash_get(tabla->tabla_local, id))!=NULL){
-            valor->is_var_loc = 1;
             return valor;
         }
     }

@@ -1,0 +1,11 @@
+main
+{
+    int x;
+    function int f(int x){
+        array int[2] z;
+        z[0] = 1;
+        return z[0];
+    }
+
+    printf f(1);
+}
