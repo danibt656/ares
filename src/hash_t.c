@@ -30,9 +30,11 @@ void hash_free(hash_t *hashtable)
         for (int i = 0; i < hashtable->size; i++) { /*por cada pos de la yabla*/
 			entry_t* entrada= hashtable->table[i];
 			if(entrada!=NULL){
-				sym_info_free(entrada->value);
-				free(entrada->key);
-            	free(entrada);
+				if(entrada->value->elem!=FUNCION){
+					sym_info_free(entrada->value);
+					free(entrada->key);
+            		free(entrada);
+				}
 			}
         }
     }

@@ -147,6 +147,7 @@ help:
 	@echo "    	debug    			- compila todo usando con simbolos de depuracion"
 	@echo "    	clean    			- borra todos los ficheros generados"
 	@echo "    	compile_file		- compila un fichero de prueba en ALFA y lo ejecuta"
+	@echo "		valdrind			- ejecuta valgrind en el compilador sobre un fichero dado"
 	@echo "	   							- USO: make compile_file src=<FICHERO_ALFA>"
 
 compile_file:
@@ -154,6 +155,9 @@ compile_file:
 	nasm -f elf32 exe.asm
 	gcc -m32 -o exe exe.o obj/alfalib.o 
 	./exe
+
+valgrind:
+	valgrind --leak-check=full --show-leak-kinds=all ./alfa $(src) exe.asm
 
 ## Deteccion de dependencias automatica, v2
 CFLAGS += -MMD

@@ -273,13 +273,13 @@ void retornarFuncion(FILE *fpasm, int es_variable);
  * Almacena en la pila la dirección del parámetro correspondiente. 
  * El primer parámetro está en la posición 0
  */
-void escribirParametro(FILE *fpasm, int pos_parametro, int num_total_parametros);
+void escribirParametro(FILE *fpasm, int direccion, int pos_parametro, int num_total_parametros);
 
 /*
  * Almacena en la pila la dirección de la variable local correspondiente.
  * La primera variable local está en la posición 1
  */
-void escribirVariableLocal(FILE *fpasm, int posicion_variable_local);
+void escribirVariableLocal(FILE *fpasm, int direccion, int posicion_variable_local);
 
 /*
 Función para poder asignar a un destino que no es una variable “global” (tipo _x) por

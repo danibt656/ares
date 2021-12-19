@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     /* Comprobar extension de fichero de entrada */
     const char *dot = strrchr(argv[1], '.');
     if(strcmp(dot, INPUT_EXTENSION) != 0) {
-        printf("Los ficheros de entrada deben acabar en [%s]", INPUT_EXTENSION);
+        printf("** Los ficheros de entrada deben acabar en [%s]", INPUT_EXTENSION);
         return EXIT_FAILURE;
     }
 

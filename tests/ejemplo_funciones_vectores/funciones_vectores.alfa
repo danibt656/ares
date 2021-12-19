@@ -15,7 +15,7 @@ main
 	vector[2] = false;
 	
 	resultado = or (vector[0], vector [1], vector [2]);
-	printf resultado;	
+	printf resultado;
 	
 }
 

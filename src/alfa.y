@@ -52,12 +52,20 @@
     static int etiqueta = 1;
 
     /* Funciones */
-    static int pos_parametro_actual = -1;
+    static int pos_parametro_actual = UNDEFINED;
     static int num_parametros_actual = 0;
     static int num_variables_locales_actual = 0;
 	static int pos_variable_local_actual = 1;
-	static int fn_return = 0;
-	static int en_explist = 0;
+    static Tipo tipo_retorno_actual = UNDEFINED;
+
+    /* 
+    Para ver que toda funcion tiene al menos un return
+    Y que un return solo puede estar en el cuerpo de una funcion
+    */
+	static int hay_return = 0;
+    static int dentro_de_fun = 0;
+
+	static int en_lista_expr = 0;
 %}
 
 %union {
@@ -100,8 +108,7 @@
 %type <atributos> constante
 %type <atributos> constante_entera
 %type <atributos> constante_logica
-%type <atributos> identificador_new identificador_use idpf funcion
-/*%type <atributos> idpf fn_name fn_declaration*/
+%type <atributos> identificador_new identificador_use idpf funcion fn_name fn_declaration
 %type <atributos> idf_llamada_funcion
 %type <atributos> lista_expresiones resto_lista_expresiones
 
@@ -187,8 +194,44 @@ identificadores : identificador_new {P_RULE(18,"<identificadores> ::= <identific
 funciones : funcion funciones {P_RULE(20,"<funciones> ::= <funcion> <funciones>");}
           | /* lambda */ {P_RULE(21,"<funciones> ::=");};
 
-funcion : TOK_FUNCTION tipo identificador_use '(' parametros_funcion ')' '{' declaraciones_funcion sentencias '}'
-        {P_RULE(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }");};
+funcion : fn_declaration sentencias '}' {
+            P_RULE(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }");
+
+            /* Cerrar ambito actual */
+            close_scope();
+            dentro_de_fun = 0;
+
+            /* Comprobar si hay al menos un retorno */
+            CHECK_ERROR(hay_return != 0, "Funcion no void sin retorno");
+        };
+
+fn_declaration : fn_name '(' parametros_funcion ')' '{' declaraciones_funcion {
+                    sym_info *sym = sym_t_get_symb($1.lexema);
+                    
+                    sym->num_params = num_parametros_actual;
+                    sym->num_vars_loc = num_variables_locales_actual;
+                    $$ = $1;
+                    declararFuncion(alfa_utils_T.fasm, $1.lexema, num_variables_locales_actual);
+                };
+
+fn_name : TOK_FUNCTION tipo identificador_use {
+            sym_info *sym = sym_t_get_symb($3.lexema);
+            CHECK_ERROR(sym == NULL, "Funcion declarada previamente");
+
+            /* Abrimos un nuevo ambito */
+            open_scope($3.lexema, UNDEFINED, tipo_actual);
+            
+            /* Inicializar variables globales */
+            num_variables_locales_actual = 0;
+            pos_variable_local_actual = 1;
+            num_parametros_actual = 0;
+            pos_parametro_actual = 0;
+            tipo_retorno_actual = tipo_actual;
+
+            $$ = $3;
+            dentro_de_fun = 1;
+            hay_return = 0;
+        };
 
 parametros_funcion : parametro_funcion resto_parametros_funcion {P_RULE(23,"<parametros_funcion> ::= <parametro_funcion> <resto_parametros_funcion>");}
                    | /* lambda */ {P_RULE(24,"<parametros_funcion> ::=");};
@@ -201,7 +244,20 @@ idpf : identificador_use {
         clase_actual = ESCALAR;
      };
 
-parametro_funcion : tipo idpf {P_RULE(27,"<parametro_funcion> ::= <tipo> <identificador>");};
+parametro_funcion : tipo idpf {
+            P_RULE(27,"<parametro_funcion> ::= <tipo> <identificador>");
+            
+            sym_info *sym = sym_t_get_symb($2.lexema);
+            CHECK_ERROR(sym == NULL, "Parametro declarado previamente");
+
+            sym = sym_info_create($2.lexema, PARAMETRO, tipo_actual, clase_actual, 0, pos_parametro_actual);
+            CHECK_ERROR(sym, "Sin memoria");
+            
+            sym_t_add_symb(sym);
+
+            pos_parametro_actual++;
+            num_parametros_actual++;
+        };
 
 declaraciones_funcion : declaraciones {P_RULE(28,"<declaraciones_funcion> ::= <declaraciones>");}
                       | /* lambda */ {P_RULE(29,"<declaraciones_funcion> ::=");};
@@ -249,7 +305,7 @@ asignacion  : identificador_use '=' exp {
             }
             | elemento_vector '=' exp {
                 sym_info* sym = NULL;
-                P_RULE(44,"<parametros_funcion> ::= <elemento_vector> = <exp>");
+                P_RULE(44,"<asignacion> ::= <elemento_vector> = <exp>");
                 sym = sym_t_get_symb($1.lexema);
                 CHECK_ERROR(sym != NULL, "Identificador inexistente");
                 escribir_elemento_vector(alfa_utils_T.fasm, $3.lexema, sym->size, sym->elem);
@@ -262,14 +318,15 @@ elemento_vector : identificador_use '[' exp ']' {
                     
                     sprintf(err_msg, "Identificador [%s] inexistente", $1.lexema);
                     info = sym_t_get_symb($1.lexema);
-                    CHECK_ERROR(info != NULL, err_msg);
+                    CHECK_ERROR(info != NULL, err_msg); 
                     CHECK_ERROR(info->catg == VECTOR, "No se puede asignar una variable que no es de tipo vector");
                     CHECK_ERROR($3.tipo == INT, "Los indices en vectores deben ser enteros");
 
+                    
                     comprobar_indice_vector(alfa_utils_T.fasm, $1.lexema, $3.es_direccion, info->size);
 
                     $$.tipo = info->tipo;
-                    $$.es_direccion = 0;
+                    $$.es_direccion = 1;
                 };
 
 condicional : if_sentencias {
@@ -324,9 +381,9 @@ lectura : TOK_SCANF identificador_use {
 
             /* NASM: Apilar direccion de identificador */
             if (info->elem == PARAMETRO) {
-                escribirParametro(alfa_utils_T.fasm, pos_parametro_actual, info->num_params);
+                escribirParametro(alfa_utils_T.fasm, 1, info->pos_param, num_parametros_actual);
             } else if (info->elem == VARIABLE && info->is_var_loc == 1) {
-                escribirVariableLocal(alfa_utils_T.fasm, pos_variable_local_actual);
+                escribirVariableLocal(alfa_utils_T.fasm, 1, info->pos_var_loc);
             }
 
             /* Llamar a scanf */
@@ -338,7 +395,16 @@ escritura : TOK_PRINTF exp {
                 escribir(alfa_utils_T.fasm, $2.es_direccion, $2.tipo);
           };
 
-retorno_funcion : TOK_RETURN exp {P_RULE(61,"<retorno_funcion> ::= return <exp>");};
+retorno_funcion : TOK_RETURN exp {
+                    P_RULE(61,"<retorno_funcion> ::= return <exp>");
+                    
+                    CHECK_ERROR(dentro_de_fun == 1, "Retorno no esta en cuerpo de funcion");
+                    CHECK_ERROR($2.tipo == tipo_retorno_actual, "Retorno de funcion de tipo incompatible");
+                    
+                    retornarFuncion(alfa_utils_T.fasm, $2.es_direccion);
+                    hay_return++;
+                    tipo_retorno_actual = UNDEFINED;
+                };
 
 exp : exp '+' exp {
         P_RULE(72,"<exp> ::= <exp> + <exp>");
@@ -433,14 +499,14 @@ exp : exp '+' exp {
         /* Variable global */
         if (sym->elem == VARIABLE && sym->is_var_loc == UNDEFINED) {
             escribir_operando(alfa_utils_T.fasm, $1.lexema, 1);
-        /* Variable local */
-        } else if (sym->elem == VARIABLE && sym->is_var_loc != -1) {
-            escribirVariableLocal(alfa_utils_T.fasm, pos_variable_local_actual);
         /* Parametro */
         } else if (sym->elem == PARAMETRO) {
-            escribirParametro(alfa_utils_T.fasm, pos_parametro_actual, sym->num_params);
+            escribirParametro(alfa_utils_T.fasm, 0, sym->pos_param, num_parametros_actual);
+        /* Variable local */
+        } else if (sym->elem == VARIABLE && sym->is_var_loc != UNDEFINED) {
+            escribirVariableLocal(alfa_utils_T.fasm, 0, pos_variable_local_actual);
         }
-      }
+    }
     | constante {
             P_RULE(81,"<exp> ::= <constante>");
 
@@ -450,19 +516,19 @@ exp : exp '+' exp {
             char valor[INT_TO_CHAR];
             sprintf(valor, "%d", $1.valor_entero);
             escribir_operando(alfa_utils_T.fasm, valor, 0);
-        }
+    }
     | '(' exp ')' {
             P_RULE(82,"<exp> ::= ( <exp> )");
 
             $$.tipo = $2.tipo;
             $$.es_direccion = $2.es_direccion;
-        }
+    }
     | '(' comparacion ')' {
             P_RULE(83,"<exp> ::= ( <comparacion> )");
 
             $$.tipo = $2.tipo;
             $$.es_direccion = $2.es_direccion;
-        }
+    }
     | elemento_vector {
             P_RULE(85,"<exp> ::= <elemento_vector>");
 
@@ -470,7 +536,7 @@ exp : exp '+' exp {
             $$.es_direccion = $1.es_direccion;
 
             /*escribir_elemento_vector(alfa_utils_T.fasm, char *nombre_vector, int tam_max, int exp_es_direccion)*/
-        }
+    }
     | idf_llamada_funcion '(' lista_expresiones ')' {
             sym_info* sym = NULL;
 
@@ -483,14 +549,14 @@ exp : exp '+' exp {
             
             llamarFuncion(alfa_utils_T.fasm, $1.lexema, $3.num_parametros_llamada_actual);
             
-            en_explist = 0;
+            en_lista_expr = 0;
 
             $$.tipo = sym->tipo;
             $$.es_direccion = 0;
-        };
+    };
 
 idf_llamada_funcion: identificador_use {
-                        en_explist = 1;
+                        en_lista_expr = 1;
                     };
 
 lista_expresiones : exp resto_lista_expresiones {
@@ -606,16 +672,20 @@ identificador_use: TOK_IDENTIFICADOR
 identificador_new : TOK_IDENTIFICADOR {
         char err_msg[TAM_ERRMSG] = "";
         sym_info* sym = NULL;
+        
         P_RULE(108,"<identificador> ::= TOK_IDENTIFICADOR");
         sprintf(err_msg, "Identificador [%s] duplicado", $1.lexema);
         CHECK_ERROR(sym_t_check($1.lexema) == NULL, err_msg);
         
-        /*si llega a aqui el check error lo permite*/
-        sym=sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, -1, -1);
+        sym = sym_info_create($1.lexema, VARIABLE, tipo_actual, clase_actual, tamanio_vector_actual, pos_variable_local_actual);
         CHECK_ERROR(sym, "Sin memoria");
         
-        sym_t_add_symb(sym); /*insertas el simbolo donde toque (global o local, de eso se encarga la tabla)*/
-        pos_variable_local_actual++;
+        sym_t_add_symb(sym);
+        if(sym->is_var_loc){
+            pos_variable_local_actual++;
+            num_variables_locales_actual++;
+        }
+        tamanio_vector_actual = 0;
     };
 
 %%

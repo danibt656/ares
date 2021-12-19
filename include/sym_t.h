@@ -47,7 +47,7 @@ void sym_t_free();
  * @param key string identificador de ámbito local
  * @param value valor de ámbito local
  */
-void open_scope(char* key, int value);
+void open_scope(char* key, int value, Tipo tipo);
 
 /**
  * Cierra la tabla local de la tabla de simbolos

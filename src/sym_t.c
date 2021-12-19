@@ -74,8 +74,8 @@ int sym_t_add_symb(sym_info *sym)
         hash_set(tabla->tabla_local, sym->lexema, sym);
         if(tabla->symbolsLocal!=NULL){
             tabla->symbolsLocal[tabla->tamL]=key;
-            tabla->tamL++;
             sym->pos_param=tabla->tamL;
+            tabla->tamL++;
         }
         return 0;
     }
@@ -133,21 +133,19 @@ sym_info* sym_t_check(char *id)
     }
 }
 
-void open_scope(char* key, int value){
+void open_scope(char* key, int value, Tipo tipo){
     if(!tabla){
         return;
     }
     if((tabla->symbolsLocal = (char**)calloc(SIZE_T_LOCAL, sizeof(char*)))==NULL){
         return;
     }
-    sym_info *info1 = sym_info_create(key, FUNCION, INT, ESCALAR, -1, -1); //int y escalar está x poner
+    sym_info *info1 = sym_info_create(key, FUNCION, tipo, ESCALAR, -1, -1); //int y escalar está x poner
     info1->valor=value;
     tabla->tabla_local = hash_create(SIZE_T_LOCAL);
     //insertamos simbolo tanto en tabla local como global
     hash_set(tabla->tabla_global, info1->lexema, info1);
-    sym_info *info2 = sym_info_create(key, FUNCION, INT, ESCALAR, -1, -1); //int y escalar está x poner
-    info2->valor=value;
-    hash_set(tabla->tabla_local, info2->lexema, info2);
+    hash_set(tabla->tabla_local, info1->lexema, info1);
 
 }
 

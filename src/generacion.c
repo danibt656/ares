@@ -577,9 +577,6 @@ void escribir(FILE *fpasm, int es_variable, int tipo)
         }
         else if(tipo == BOOLEAN){
                 fprintf(fpasm, "call print_boolean\n");
-        }else{
-                fprintf(fpasm, "call print_endofline\n");
-                return;
         }
         fprintf(fpasm, "call print_endofline\n");
         fprintf(fpasm, "add esp, 4\n");
@@ -694,14 +691,8 @@ void escribir_elemento_vector(FILE *fpasm, char *nombre_vector, int tam_max, int
         fprintf(fpasm, "mov dword eax, [eax]\n");
     }
 
-    // Error de ejecución si el índice está fuera del rango
-    fprintf(fpasm, "mov ebx, %d\n", tam_max);
-    fprintf(fpasm, "cmp eax, ebx\n");
-    fprintf(fpasm, "jge fin_indice_fuera_rango\n");
-
-    fprintf(fpasm, "mov dword edx, _%s\n", nombre_vector);  // Direccion vector
-    fprintf(fpasm, "lea eax, [edx + eax*4]\n");             // Dirección del elemento indexado en eax
-    fprintf(fpasm, "push dword eax\n");                     // Almacenamos la dirección al elemento
+    fprintf(fpasm, "pop dword ebx\n");
+    fprintf(fpasm, "mov dword [ebx], eax\n");
 }
 
 void comprobar_indice_vector(FILE *fpasm, const char *nombre, int es_direccion, int tam)
@@ -722,7 +713,7 @@ void comprobar_indice_vector(FILE *fpasm, const char *nombre, int es_direccion, 
         fprintf(fpasm, "cmp eax, %d\n", tam);
         fprintf(fpasm, "jge fin_indice_fuera_rango\n");
 
-        fprintf(fpasm, "lea eax, [_%s + eax*4]\n", nombre); // Dirección del elemento indexado en eax
+        fprintf(fpasm, "lea eax, [4*eax + _%s]\n", nombre); // Dirección del elemento indexado en eax
         fprintf(fpasm, "push dword eax\n");         // Almacenamos la dirección al elemento 
 }
 
@@ -752,25 +743,34 @@ void retornarFuncion(FILE *fpasm, int es_variable)
         fprintf(fpasm, "ret\n");
 }
 
-void escribirParametro(FILE *fpasm, int pos_parametro, int num_total_parametros)
+void escribirParametro(FILE *fpasm, int direccion, int pos_parametro, int num_total_parametros)
 {
+        int d_ebp = 4 + 4*(num_total_parametros - pos_parametro);
         if (!fpasm) {
                 printf("Error fallo en compilador, fichero fpasm nulo");
                 return;
         }
-        int d_ebp = 4 * (1 + (num_total_parametros - pos_parametro));
-        fprintf(fpasm, "lea eax, [ebp + %d]\n", d_ebp);
+        if (direccion == 1) {
+                fprintf(fpasm, "lea eax, [ebp + %d]\n", d_ebp);
+        } else {
+                fprintf(fpasm, "mov eax, dword [ebp + %d]\n", d_ebp);
+        }
         fprintf(fpasm, "push dword eax\n");
 }
 
-void escribirVariableLocal(FILE *fpasm, int posicion_variable_local)
+void escribirVariableLocal(FILE *fpasm, int direccion, int posicion_variable_local)
 {
         if (!fpasm) {
                 printf("Error fallo en compilador, fichero fpasm nulo");
                 return;
         }
         int d_ebp = 4 * posicion_variable_local;
-        fprintf(fpasm, "lea eax, [ebp - %d]\n", d_ebp);
+
+        if (direccion == 1) {
+                fprintf(fpasm, "lea eax, [ebp - %d]\n", d_ebp);
+        } else {
+                fprintf(fpasm, "mov eax, dword [ebp - %d]\n", d_ebp);
+        }
         fprintf(fpasm, "push dword eax\n");
 }
 
