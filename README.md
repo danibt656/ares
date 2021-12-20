@@ -10,7 +10,8 @@
 
 ## Makefile
 
-Se incluye un fichero Makefile con las siguientes reglas:
+Se incluye un fichero Makefile con las siguientes reglas (para verlas por terminal se puede ejecutar el comando `make help`):
+
 + all: compila todo y genera el ejecutable `alfa`. Genera un fichero debug con las trazas de flex y bison llamado `debug`
 + clean: borra todos los ficheros generados
 + compile_file: compila un fichero de prueba en ALFA y lo ejecuta. Uso: make compile_file src=<FICHERO_ALFA>

@@ -297,8 +297,7 @@ asignacion  : identificador_use '=' exp {
                 CHECK_ERROR(sym->elem != FUNCION, err_msg);
 
                 /* Comprueba que el tipo sea el mismo */
-                sprintf(err_msg, "Asignacion incompatible");
-                CHECK_ERROR($3.tipo == sym->tipo, err_msg);
+                CHECK_ERROR($3.tipo == sym->tipo, "Asignacion incompatible");
 
                 /* Asignar */
                 if (sym->is_var_loc == UNDEFINED) { /*comprueba si es variable local */
@@ -313,8 +312,12 @@ asignacion  : identificador_use '=' exp {
             | elemento_vector '=' exp {
                 sym_info* sym = NULL;
                 P_RULE(44,"<asignacion> ::= <elemento_vector> = <exp>");
+
                 sym = sym_t_get_symb($1.lexema);
                 CHECK_ERROR(sym != NULL, "Identificador inexistente");
+                /* Comprueba que el tipo sea el mismo */
+                CHECK_ERROR($3.tipo == sym->tipo, "Asignacion incompatible");
+
                 escribir_elemento_vector(alfa_utils_T.fasm, $3.lexema, sym->size, sym->elem);
             };
 

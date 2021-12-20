@@ -1,12 +1,8 @@
 main
 {
-    int a;
+    array boolean[2] a;
 
-    function int f(int x) {
-        array int[2] a;
-        a = x;
-        return a;
-    }
+    a[1] = 1;
 
-    printf f(6);
+    printf a[1];
 }

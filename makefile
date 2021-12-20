@@ -10,6 +10,7 @@ DINC := include
 DOBJ := obj
 DEXE := src
 
+# Flags
 CC       ?= gcc
 LEX      ?= flex
 BISON    ?= bison
@@ -25,12 +26,11 @@ CCNASMFLAGS := -m32
 ALFALIB     := $(DOBJ)/alfalib.o
 
 EXES := alfa.c
-
 EXES := $(patsubst %,$(DEXE)/%,$(EXES))
 EOBJ := $(patsubst $(DEXE)/%.c,$(DOBJ)/%.o,$(EXES))
 EBIN := $(patsubst $(DEXE)/%.c,$(DBIN)/%,$(EXES))
 
-DEPEND_FILES := $(wildcard $(DOBJ)/*.d)
+DEPENDENCIAS := $(wildcard $(DOBJ)/*.d)
 
 FLEX_SOURCES := $(wildcard $(DSRC)/*.l)
 FLEX_GENERATED_FILES := $(FLEX_SOURCES:.l=.yy.c)
@@ -44,10 +44,8 @@ BISON_HEADERS := $(patsubst $(DSRC)/%,$(DINC)/%, $(BISON_HEADERS_ORIG))
 BISON_OUTPUT_ORIG := $(patsubst %.tab.c,%.output, $(BISON_GENERATED_FILES))
 BISON_OUTPUT := $(patsubst $(DSRC)/%,$(MDIR)/%, $(BISON_OUTPUT_ORIG))
 
-
 SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES), $(wildcard $(DSRC)/*.c))
 SOBJ := $(patsubst $(DSRC)/%.c,$(DOBJ)/%.o,$(SRCS) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES))
-
 
 NASM_SOURCES := $(wildcard $(DNASM)/*.nasm)
 NASM_OBJ := $(patsubst $(DNASM)/%.nasm, $(DOBJ)/%.o, $(NASM_SOURCES))
@@ -82,13 +80,15 @@ $(NASM_OBJ):$(DOBJ)/%.o: $(DNASM)/%.nasm
 $(NASM_BIN): $(DBIN)/%: $(DOBJ)/%.o $(ALFALIB)
 	$(CC) $(CCNASMFLAGS) -o $@ $^ $(CFLAGS)
 
+# Borrar ficheros generados con make all
 clean:
 	@$(RM) alfa exe
-	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(DEPEND_FILES)
+	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(DEPENDENCIAS)
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
 	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
 	@$(RM) $(NASM_OBJ) $(NASM_BIN) debug *.asm *.o
 
+# Ayuda
 help:
 	@echo "Flags de Makefile:"
 	@echo "    all                 - compila todo y genera el ejecutable alfa"
@@ -110,4 +110,4 @@ valgrind:
 	valgrind --leak-check=full --show-leak-kinds=all ./alfa $(src) exe.asm
 
 CFLAGS += -MMD
--include $(DEPEND_FILES)
+-include $(DEPENDENCIAS)
