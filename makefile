@@ -24,7 +24,6 @@ CCNASMFLAGS := -m32
 
 ALFALIB     := $(ODIR)/alfalib.o
 
-## Mains objetivos de make all
 EXES := alfa.c
 
 EXES := $(patsubst %,$(EDIR)/%,$(EXES))
@@ -33,12 +32,10 @@ EBIN := $(patsubst $(EDIR)/%.c,$(BDIR)/%,$(EXES))
 
 DEPEND_FILES := $(wildcard $(ODIR)/*.d)
 
-## Definiciones de objetivos
 FLEX_SOURCES := $(wildcard $(SDIR)/*.l)
 FLEX_GENERATED_FILES := $(FLEX_SOURCES:.l=.yy.c)
 FLEX_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(FLEX_GENERATED_FILES))
 
-## Definiciones de objetivos
 BISON_SOURCES := $(wildcard $(SDIR)/*.y)
 BISON_GENERATED_FILES := $(BISON_SOURCES:.y=.tab.c)
 BISON_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(BISON_GENERATED_FILES))
@@ -98,7 +95,7 @@ clean:
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
 	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
 	@$(RM) $(BISON_GRAPH_ORIG) $(BISON_GRAPH)
-	@$(RM) $(NASM_OBJ) $(NASM_BIN) debug *.asm
+	@$(RM) $(NASM_OBJ) $(NASM_BIN) debug *.asm *.o
 
 help:
 	@echo "Flags de Makefile:"
@@ -107,7 +104,7 @@ help:
 	@echo "    clean               - borra todos los ficheros generados"
 	@echo "    compile_file        - compila un fichero de prueba en ALFA y lo ejecuta"
 	@echo "                             -> Uso: make compile_file src=<FICHERO_ALFA>"
-	@echo "    valdrind            - ejecuta valgrind en el compilador sobre un fichero dado"
+	@echo "    valgrind            - ejecuta valgrind en el compilador sobre un fichero dado"
 
 compile_file:
 	@echo "-------------------------------"
