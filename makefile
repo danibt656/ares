@@ -16,7 +16,7 @@ BISON    ?= bison
 CFLAGS   := -std=c99 -Iinclude -pedantic -Wall -Wextra
 LDFLAGS  :=
 LFLAGS   :=
-BFLAGS   := -d -y -v -g
+BFLAGS   := -dyv
 RM       := rm -fv
 NASM     := nasm
 NFLAGS   := -f elf32
@@ -44,10 +44,6 @@ BISON_HEADERS := $(patsubst $(SDIR)/%,$(IDIR)/%, $(BISON_HEADERS_ORIG))
 BISON_OUTPUT_ORIG := $(patsubst %.tab.c,%.output, $(BISON_GENERATED_FILES))
 BISON_OUTPUT := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_OUTPUT_ORIG))
 
-BISON_GRAPH_ORIG := $(patsubst %.tab.c,%.dot, $(BISON_GENERATED_FILES))
-BISON_GRAPH := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_GRAPH_ORIG))
-DOT := dot
-DOTFLAGS := -O -Tpdf
 
 SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
 SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES))
@@ -73,9 +69,6 @@ $(SDIR)/%.yy.c: $(SDIR)/%.l $(BISON_GENERATED_FILES)
 
 $(SDIR)/%.tab.c: $(SDIR)/%.y
 	$(BISON) $(BFLAGS) -o $@ $<
-	# mv $(BISON_HEADERS_ORIG) $(IDIR)
-	# mv $(BISON_OUTPUT_ORIG) $(MDIR)
-	# mv $(BISON_GRAPH_ORIG) $(MDIR)
 
 $(EOBJ):$(ODIR)/%.o: $(EDIR)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $< 
@@ -94,7 +87,6 @@ clean:
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(DEPEND_FILES)
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
 	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
-	@$(RM) $(BISON_GRAPH_ORIG) $(BISON_GRAPH)
 	@$(RM) $(NASM_OBJ) $(NASM_BIN) debug *.asm *.o
 
 help:

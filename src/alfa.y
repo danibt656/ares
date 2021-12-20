@@ -65,7 +65,10 @@
 	static int hay_return = 0;
     static int dentro_de_fun = 0;
 
-	static int en_lista_expr = 0;
+    /*
+    Para evitar llamadas a funciones como parametros
+    */
+	static int en_explist = 0;
 %}
 
 %union {
@@ -109,15 +112,12 @@
 %type <atributos> constante_entera
 %type <atributos> constante_logica
 %type <atributos> identificador_new identificador_use idpf funcion fn_name fn_declaration
-%type <atributos> idf_llamada_funcion
+%type <atributos> llamada_funcion
 %type <atributos> lista_expresiones resto_lista_expresiones
 
 %type <atributos> if_exp if_sentencias
 %type <atributos> bucle
 %type <atributos> bucle_exp bucle_tok
-
-/* %type <atributos> compare_with compare_less compare_equal compare_greater */
-/* %type <atributos> inicializacion_vector lista_inicializaciones */
 
 %left '+' '-' TOK_OR
 %left '*' '/' TOK_AND 
@@ -197,14 +197,16 @@ funciones : funcion funciones {P_RULE(20,"<funciones> ::= <funcion> <funciones>"
           | /* lambda */ {P_RULE(21,"<funciones> ::=");};
 
 funcion : fn_declaration sentencias '}' {
+            char err_msg[TAM_ERRMSG] = "";
             P_RULE(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }");
 
             /* Cerrar ambito actual */
             close_scope();
             dentro_de_fun = 0;
 
+            sprintf(err_msg, "Funcion [%s] sin sentencia de retorno", $1.lexema);
             /* Comprobar si hay al menos un retorno */
-            CHECK_ERROR(hay_return != 0, "Funcion sin sentencia de retorno");
+            CHECK_ERROR(hay_return != 0, err_msg);
         };
 
 fn_declaration : fn_name '(' parametros_funcion ')' '{' declaraciones_funcion {
@@ -295,7 +297,7 @@ asignacion  : identificador_use '=' exp {
                 CHECK_ERROR(sym->elem != FUNCION, err_msg);
 
                 /* Comprueba que el tipo sea el mismo */
-                sprintf(err_msg, "Asignacion entre tipos distintos");
+                sprintf(err_msg, "Asignacion incompatible");
                 CHECK_ERROR($3.tipo == sym->tipo, err_msg);
 
                 /* Asignar */
@@ -350,7 +352,7 @@ if_sentencias : if_exp sentencias '}' {
                 }
 
 if_exp  :   TOK_IF '(' exp ')' '{' {
-                CHECK_ERROR($3.tipo == BOOLEAN, "Expresion no booleana en condicion");
+                CHECK_ERROR($3.tipo == BOOLEAN, "Condicional con condicion de tipo int");
                 $$.etiqueta = etiqueta++;
                 ifthen_inicio(alfa_utils_T.fasm, $3.es_direccion, $$.etiqueta);
             }
@@ -361,7 +363,7 @@ bucle : bucle_exp sentencias '}' {
         };
 
 bucle_exp : bucle_tok '(' exp ')' '{' {
-            CHECK_ERROR($3.tipo == BOOLEAN, "Condicion de bucle no booleana");
+            CHECK_ERROR($3.tipo == BOOLEAN, "Bucle con condicion de tipo int");
             while_exp_pila(alfa_utils_T.fasm, $3.es_direccion, $$.etiqueta);
           }
 
@@ -410,7 +412,7 @@ retorno_funcion : TOK_RETURN exp {
 exp : exp '+' exp {
         P_RULE(72,"<exp> ::= <exp> + <exp>");
         
-        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Tipos de operacion no permitidos");
+        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
         sumar(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = INT;
@@ -419,7 +421,7 @@ exp : exp '+' exp {
     | exp '-' exp {
         P_RULE(73,"<exp> ::= <exp> - <exp>");
 
-        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Tipos de operacion no permitidos");
+        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
         restar(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = INT;
@@ -428,7 +430,7 @@ exp : exp '+' exp {
     | exp '/' exp {
         P_RULE(74,"<exp> ::= <exp> / <exp>");
         
-        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Tipos de operacion no permitidos");
+        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
         dividir(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = INT;
@@ -437,7 +439,7 @@ exp : exp '+' exp {
     | exp '*' exp {
         P_RULE(75,"<exp> ::= <exp> * <exp>");
         
-        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Tipos de operacion no permitidos");
+        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
         multiplicar(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = INT;
@@ -446,7 +448,7 @@ exp : exp '+' exp {
     | '-' %prec NEG exp {
         P_RULE(76,"<exp> ::= - <exp>");
 
-        CHECK_ERROR($2.tipo == INT, "Tipo de operacion no permitido");
+        CHECK_ERROR($2.tipo == INT, "Operacion aritmetica con operando boolean");
         /*check*/
         cambiar_signo(alfa_utils_T.fasm, $2.es_direccion);
 
@@ -456,7 +458,7 @@ exp : exp '+' exp {
     | exp TOK_AND exp {
         P_RULE(77,"<exp> ::= <exp> && <exp>");
 
-        CHECK_ERROR($1.tipo == BOOLEAN && $3.tipo == BOOLEAN, "Tipos de operacion no permitidos");
+        CHECK_ERROR($1.tipo == BOOLEAN && $3.tipo == BOOLEAN, "Operacion logica con operandos int");
         y(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = BOOLEAN;
@@ -465,7 +467,7 @@ exp : exp '+' exp {
     | exp TOK_OR exp {
         P_RULE(78,"<exp> ::= <exp> || <exp>");
         
-        CHECK_ERROR($1.tipo == BOOLEAN && $3.tipo == BOOLEAN, "Tipos de operacion no permitidos");
+        CHECK_ERROR($1.tipo == BOOLEAN && $3.tipo == BOOLEAN, "Operacion logica con operandos int");
         o(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = BOOLEAN;
@@ -474,7 +476,7 @@ exp : exp '+' exp {
     | '!' exp {
         P_RULE(79,"<exp> ::= ! <exp>");
         
-        CHECK_ERROR($2.tipo == BOOLEAN, "Tipo de operacion no permitido");
+        CHECK_ERROR($2.tipo == BOOLEAN, "Operacion logica con operando int");
         no(alfa_utils_T.fasm, $2.es_direccion, etiqueta++);
 
         $$.tipo = BOOLEAN;
@@ -487,7 +489,7 @@ exp : exp '+' exp {
         P_RULE(80,"<exp> ::= identificador");
 
         sym = sym_t_get_symb($1.lexema);
-        sprintf(err_msg, "Identificador [%s] no declarado", $1.lexema);
+        sprintf(err_msg, "Variable [%s] no declarada", $1.lexema);
         CHECK_ERROR(sym != NULL, err_msg);
         /* Comprueba que no sea ni FUNCION ni VECTOR */
         sprintf(err_msg, "Identificador [%s] no es variable", $1.lexema);
@@ -539,7 +541,7 @@ exp : exp '+' exp {
             $$.es_direccion = 0;
 
     }
-    | idf_llamada_funcion '(' lista_expresiones ')' {
+    | llamada_funcion '(' lista_expresiones ')' {
             sym_info* sym = NULL;
 
             P_RULE(88,"<identificador> ( <lista_expresiones> )");
@@ -551,14 +553,19 @@ exp : exp '+' exp {
             
             llamarFuncion(alfa_utils_T.fasm, $1.lexema, $3.num_parametros_llamada_actual);
             
-            en_lista_expr = 0;
+            en_explist = 0;
 
             $$.tipo = sym->tipo;
             $$.es_direccion = 0;
     };
 
-idf_llamada_funcion: identificador_use {
-                        en_lista_expr = 1;
+llamada_funcion: identificador_use {
+                        /* 
+                        Para contorlar que no se invoque a funciones en una
+                        lista de paramteros de otra invocacion
+                        */
+                        CHECK_ERROR(en_explist == 0, "No esta permitido el uso de llamadas a funciones como parametros de otras funciones");
+                        en_explist = 1;
                     };
 
 lista_expresiones : exp resto_lista_expresiones {
@@ -582,7 +589,7 @@ resto_lista_expresiones : ',' exp resto_lista_expresiones {
 comparacion : exp TOK_IGUAL exp {
                 P_RULE(93,"<comparacion> ::= <exp> == <exp>");
 
-                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion entre tipos no numericos");
+                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
                 igual(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
 
                 $$.tipo = BOOLEAN;
@@ -591,7 +598,7 @@ comparacion : exp TOK_IGUAL exp {
             | exp TOK_DISTINTO exp {
                 P_RULE(94,"<comparacion> ::= <exp> != <exp>");
                 
-                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion entre tipos no numericos");
+                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
                 distinto(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                 
                 $$.tipo = BOOLEAN;
@@ -600,7 +607,7 @@ comparacion : exp TOK_IGUAL exp {
             | exp TOK_MENORIGUAL exp {
                 P_RULE(95,"<comparacion> ::= <exp> <= <exp>");
                 
-                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion entre tipos no numericos");
+                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
                 menor_igual(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                 
                 $$.tipo = BOOLEAN;
@@ -609,7 +616,7 @@ comparacion : exp TOK_IGUAL exp {
             | exp TOK_MAYORIGUAL exp {
                 P_RULE(96,"<comparacion> ::= <exp> >= <exp>");
 
-                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion entre tipos no numericos");
+                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
                 mayor_igual(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
 
                 $$.tipo = BOOLEAN;
@@ -618,7 +625,7 @@ comparacion : exp TOK_IGUAL exp {
             | exp '<' exp {
                 P_RULE(97,"<comparacion> ::= <exp> < <exp>");
                 
-                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion entre tipos no numericos");
+                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
                 menor(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                 
                 $$.tipo = BOOLEAN;
@@ -627,7 +634,7 @@ comparacion : exp TOK_IGUAL exp {
             | exp '>' exp {
                 P_RULE(98,"<comparacion> ::= <exp> > <exp>");
 
-                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion entre tipos no numericos");
+                CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
                 mayor(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                 
                 $$.tipo = BOOLEAN;

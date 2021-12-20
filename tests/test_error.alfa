@@ -1,11 +1,12 @@
 main
 {
-    int x;
-    function int f(int x){
-        array int[2] z;
-        z[0] = 1;
-        return z[0];
+    int a;
+
+    function int f(int x) {
+        array int[2] a;
+        a = x;
+        return a;
     }
 
-    printf f(1);
+    printf f(6);
 }
