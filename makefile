@@ -3,12 +3,12 @@
 .SUFFIXES:
 
 ## Directorios
-BDIR := .
-SDIR := src
-IDIR := include
-ODIR := obj
-EDIR := src
-NDIR := .
+DBIN := .
+DNASM := .
+DSRC := src
+DINC := include
+DOBJ := obj
+DEXE := src
 
 CC       ?= gcc
 LEX      ?= flex
@@ -22,35 +22,35 @@ NASM     := nasm
 NFLAGS   := -f elf32
 CCNASMFLAGS := -m32
 
-ALFALIB     := $(ODIR)/alfalib.o
+ALFALIB     := $(DOBJ)/alfalib.o
 
 EXES := alfa.c
 
-EXES := $(patsubst %,$(EDIR)/%,$(EXES))
-EOBJ := $(patsubst $(EDIR)/%.c,$(ODIR)/%.o,$(EXES))
-EBIN := $(patsubst $(EDIR)/%.c,$(BDIR)/%,$(EXES))
+EXES := $(patsubst %,$(DEXE)/%,$(EXES))
+EOBJ := $(patsubst $(DEXE)/%.c,$(DOBJ)/%.o,$(EXES))
+EBIN := $(patsubst $(DEXE)/%.c,$(DBIN)/%,$(EXES))
 
-DEPEND_FILES := $(wildcard $(ODIR)/*.d)
+DEPEND_FILES := $(wildcard $(DOBJ)/*.d)
 
-FLEX_SOURCES := $(wildcard $(SDIR)/*.l)
+FLEX_SOURCES := $(wildcard $(DSRC)/*.l)
 FLEX_GENERATED_FILES := $(FLEX_SOURCES:.l=.yy.c)
-FLEX_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(FLEX_GENERATED_FILES))
+FLEX_OBJ := $(patsubst $(DSRC)/%.c, $(DOBJ)/%.o, $(FLEX_GENERATED_FILES))
 
-BISON_SOURCES := $(wildcard $(SDIR)/*.y)
+BISON_SOURCES := $(wildcard $(DSRC)/*.y)
 BISON_GENERATED_FILES := $(BISON_SOURCES:.y=.tab.c)
-BISON_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(BISON_GENERATED_FILES))
+BISON_OBJ := $(patsubst $(DSRC)/%.c, $(DOBJ)/%.o, $(BISON_GENERATED_FILES))
 BISON_HEADERS_ORIG := $(patsubst %.c,%.h, $(BISON_GENERATED_FILES))
-BISON_HEADERS := $(patsubst $(SDIR)/%,$(IDIR)/%, $(BISON_HEADERS_ORIG))
+BISON_HEADERS := $(patsubst $(DSRC)/%,$(DINC)/%, $(BISON_HEADERS_ORIG))
 BISON_OUTPUT_ORIG := $(patsubst %.tab.c,%.output, $(BISON_GENERATED_FILES))
-BISON_OUTPUT := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_OUTPUT_ORIG))
+BISON_OUTPUT := $(patsubst $(DSRC)/%,$(MDIR)/%, $(BISON_OUTPUT_ORIG))
 
 
-SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
-SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES))
+SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES), $(wildcard $(DSRC)/*.c))
+SOBJ := $(patsubst $(DSRC)/%.c,$(DOBJ)/%.o,$(SRCS) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES))
 
 
-NASM_SOURCES := $(wildcard $(NDIR)/*.nasm)
-NASM_OBJ := $(patsubst $(NDIR)/%.nasm, $(ODIR)/%.o, $(NASM_SOURCES))
+NASM_SOURCES := $(wildcard $(DNASM)/*.nasm)
+NASM_OBJ := $(patsubst $(DNASM)/%.nasm, $(DOBJ)/%.o, $(NASM_SOURCES))
 NASM_BIN := $(patsubst %.nasm, %, $(NASM_SOURCES))
 
 $(FLEX_OBJ): CFLAGS += -Wno-sign-compare -D_XOPEN_SOURCE=700
@@ -61,25 +61,25 @@ all: $(EBIN)
 
 nasm: $(NASM_BIN)
 
-$(SOBJ):$(ODIR)/%.o: $(SDIR)/%.c
+$(SOBJ):$(DOBJ)/%.o: $(DSRC)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-$(SDIR)/%.yy.c: $(SDIR)/%.l $(BISON_GENERATED_FILES)
+$(DSRC)/%.yy.c: $(DSRC)/%.l $(BISON_GENERATED_FILES)
 	$(LEX) $(LFLAGS) -o $@ $<
 
-$(SDIR)/%.tab.c: $(SDIR)/%.y
+$(DSRC)/%.tab.c: $(DSRC)/%.y
 	$(BISON) $(BFLAGS) -o $@ $<
 
-$(EOBJ):$(ODIR)/%.o: $(EDIR)/%.c
+$(EOBJ):$(DOBJ)/%.o: $(DEXE)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $< 
 
-$(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
+$(EBIN):$(DBIN)/%: $(DOBJ)/%.o $(SOBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(NASM_OBJ):$(ODIR)/%.o: $(NDIR)/%.nasm
+$(NASM_OBJ):$(DOBJ)/%.o: $(DNASM)/%.nasm
 	$(NASM) $(NFLAGS) -o $@ $<
 
-$(NASM_BIN): $(BDIR)/%: $(ODIR)/%.o $(ALFALIB)
+$(NASM_BIN): $(DBIN)/%: $(DOBJ)/%.o $(ALFALIB)
 	$(CC) $(CCNASMFLAGS) -o $@ $^ $(CFLAGS)
 
 clean:

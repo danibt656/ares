@@ -54,7 +54,14 @@ int main(int argc, char *argv[])
     int ret;
     
     if (argc != 3) {
-        fprintf(stderr, "USO: %s <entrada_source> <salida_asm>", argv[0]);
+        fprintf(stderr,
+        "Numero de parametros incorrectos\n\
+    USO: %s <entrada_alfa> <salida_asm>\n\
+        + entrada_alfa: Fichero con codigo fuente ALFA\n\
+        + salida_asm: Nombre fichero donde se generara codigo NASM\n\
+\n\nPara mas informacion, referirse al README.md\n\
+-----------------------------------------------------\n",
+        argv[0]);
         return EXIT_FAILURE;
     }
 
