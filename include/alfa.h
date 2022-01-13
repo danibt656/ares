@@ -52,6 +52,8 @@ typedef struct {
     int etiqueta;                   /* para generacion NASM */
 
     int num_parametros_llamada_actual; /* Para llamadas a funciones */
+
+    int tam_inicializacion_vector;  /* Para inicializar vectores */
 } tipo_atributos;
 
 

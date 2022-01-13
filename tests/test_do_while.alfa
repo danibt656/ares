@@ -1,0 +1,11 @@
+// Test de un do_while simple
+main
+{
+    int x;
+    x = 4;
+    do {
+        printf(x);
+        x = x + 1;
+    }
+    while ((x <= 6));
+}

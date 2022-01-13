@@ -20,6 +20,7 @@ LETRA [a-zA-Z]
     /* Define la creacion de tokens */
 
 ("//".*)    {  }    /* Comentarios */
+("@".*)    {  }    /* Comentarios */
 [ ]         {  }    /* Espacio */
 [\t]        {  }    /* Tabulador */
 [\n]        { alfa_utils_T.line++; alfa_utils_T.col = 1; }    /* Saltos de linea */
@@ -33,13 +34,20 @@ function    { SHIFT(); return TOK_FUNCTION; }
 if          { SHIFT(); return TOK_IF; }
 else        { SHIFT(); return TOK_ELSE; }
 while       { SHIFT(); return TOK_WHILE; }
+do          { SHIFT(); return TOK_DO; }
 scanf       { SHIFT(); return TOK_SCANF; }
 printf      { SHIFT(); return TOK_PRINTF; }
 return      { SHIFT(); return TOK_RETURN; }
+init        { SHIFT(); return TOK_INIT; }
+compare     { SHIFT(); return TOK_COMPARE; }
+with        { SHIFT(); return TOK_WITH; }
+less        { SHIFT(); return TOK_LESS; }
+equal       { SHIFT(); return TOK_EQUAL; }
+greater     { SHIFT(); return TOK_GREATER; }
 
     /* Simbolos */ 
-;       { SHIFT(); return yytext[0]; }
-,       { SHIFT(); return yytext[0]; }
+";"     { SHIFT(); return yytext[0]; }
+","     { SHIFT(); return yytext[0]; }
 "("     { SHIFT(); return yytext[0]; }
 ")"     { SHIFT(); return yytext[0]; }
 "["     { SHIFT(); return yytext[0]; }
@@ -51,6 +59,9 @@ return      { SHIFT(); return TOK_RETURN; }
 "-"     { SHIFT(); return yytext[0]; }
 "/"     { SHIFT(); return yytext[0]; }
 "*"     { SHIFT(); return yytext[0]; }
+"^"     { SHIFT(); return yytext[0]; }
+"%"     { SHIFT(); return yytext[0]; }
+"~"     { SHIFT(); return yytext[0]; }
 "&&"    { SHIFT(); return TOK_AND; }
 "||"    { SHIFT(); return TOK_OR; }
 "!"     { SHIFT(); return yytext[0]; }
@@ -58,6 +69,8 @@ return      { SHIFT(); return TOK_RETURN; }
 "!="    { SHIFT(); return TOK_DISTINTO; }
 "<="    { SHIFT(); return TOK_MENORIGUAL; }
 ">="    { SHIFT(); return TOK_MAYORIGUAL; }
+"+="    { SHIFT(); return TOK_INCREMENTO; }
+".%"    { SHIFT(); return TOK_MODULO_VECTOR; }
 "<"     { SHIFT(); return yytext[0]; }
 ">"     { SHIFT(); return yytext[0]; }
 

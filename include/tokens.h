@@ -18,6 +18,13 @@ Descripcion: Definicion de tokens para el lenguaje ALFA
 #define TOK_SCANF               108
 #define TOK_PRINTF              109
 #define TOK_RETURN              110
+#define TOK_INIT                111
+#define TOK_COMPARE             112
+#define TOK_WITH                113
+#define TOK_LESS                114
+#define TOK_EQUAL               115
+#define TOK_GREATER             116
+#define TOK_DO                  117
 
 
 /* Simbolos */
@@ -43,6 +50,8 @@ Descripcion: Definicion de tokens para el lenguaje ALFA
 #define TOK_MAYORIGUAL          219
 #define TOK_MENOR               220
 #define TOK_MAYOR               221
+#define TOK_INCREMENTO          222
+#define TOK_MODULO_VECTOR       223
 
 
 /* Identificadores  */

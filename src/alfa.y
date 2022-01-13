@@ -86,7 +86,14 @@
 %token TOK_WHILE              
 %token TOK_SCANF              
 %token TOK_PRINTF             
-%token TOK_RETURN             
+%token TOK_RETURN
+%token TOK_INIT
+%token TOK_COMPARE
+%token TOK_WITH
+%token TOK_LESS
+%token TOK_EQUAL
+%token TOK_GREATER    
+%token TOK_DO      
 
           
 %token TOK_AND                
@@ -94,7 +101,9 @@
 %token TOK_IGUAL              
 %token TOK_DISTINTO           
 %token TOK_MENORIGUAL         
-%token TOK_MAYORIGUAL            
+%token TOK_MAYORIGUAL
+%token TOK_INCREMENTO
+%token TOK_MODULO_VECTOR
 
 %token <atributos> TOK_IDENTIFICADOR
 %token <atributos> TOK_CONSTANTE_ENTERA   
@@ -114,13 +123,17 @@
 %type <atributos> identificador_new identificador_use idpf funcion fn_name fn_declaration
 %type <atributos> llamada_funcion
 %type <atributos> lista_expresiones resto_lista_expresiones
+%type <atributos> lista_init_v
+%type <atributos> compare_with compare_less compare_equal compare_greater
+%type <atributos> do_tok
 
 %type <atributos> if_exp if_sentencias
 %type <atributos> bucle
 %type <atributos> bucle_exp bucle_tok
 
 %left '+' '-' TOK_OR
-%left '*' '/' TOK_AND 
+%left '*' '/' TOK_AND '%'
+%right '^'
 %right NEG '!'
 
 %start programa
@@ -273,9 +286,13 @@ sentencia : sentencia_simple ';' {P_RULE(32,"<sentencia> ::= <sentencia_simple> 
           | bloque {P_RULE(33,"<sentencia> ::= <bloque>");};
 
 sentencia_simple : asignacion {P_RULE(34,"<sentencia_simple> ::= <asignacion>");}
+                 | incremento {P_RULE(0,"<sentencia_simple> ::= <incremento>");}
+                 | modulo_vector {P_RULE(0,"<sentencia_simple> ::= <modulo_vector>");}
                  | lectura {P_RULE(35,"<sentencia_simple> ::= <lectura>");}
                  | escritura {P_RULE(36,"<sentencia_simple> ::= <escritura>");}
-                 | retorno_funcion {P_RULE(38,"<sentencia_simple> ::= <retorno_funcion>");};
+                 | retorno_funcion {P_RULE(38,"<sentencia_simple> ::= <retorno_funcion>");}
+                 | init_vector {P_RULE(38,"<sentencia_simple> ::= <init_vector>");}
+                 ;
 
 bloque : condicional {P_RULE(40,"<bloque> ::= <condicional>");}
        | bucle {P_RULE(41,"<bloque> ::= <bucle>");};
@@ -321,6 +338,44 @@ asignacion  : identificador_use '=' exp {
                 escribir_elemento_vector(alfa_utils_T.fasm, $3.lexema, sym->size, sym->elem);
             };
 
+incremento : identificador_use TOK_INCREMENTO exp {
+                char err_msg[TAM_ERRMSG] = "";
+                sym_info* sym = NULL;
+                P_RULE(0,"<incremento> ::= <identificador_use> += <exp>");
+
+                sym = sym_t_get_symb($1.lexema);
+                sprintf(err_msg, "Incremento a variable no declarada (%s)", $1.lexema);
+                CHECK_ERROR(sym != NULL, err_msg);
+                CHECK_ERROR(sym->elem != FUNCION, "Asignacion incompatible");
+                CHECK_ERROR(sym->tipo == INT, "Operacion de incremento necesita expresion de tipo entero");
+                CHECK_ERROR($3.tipo == INT, "Operacion de incremento necesita expresion de tipo entero");
+                
+                if (sym->catg == VECTOR) {
+                    incremento_vector(alfa_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
+                } else if (sym->is_var_loc == UNDEFINED) {
+                    incremento_variable_global(alfa_utils_T.fasm, $1.lexema, $3.es_direccion);
+                } else if (sym->elem == PARAMETRO) {
+                    incremento_parametro(alfa_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
+                } else {
+                    incremento_variable_local(alfa_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
+                }
+            };
+
+modulo_vector : identificador_use TOK_MODULO_VECTOR exp {
+                char err_msg[TAM_ERRMSG] = "";
+                sym_info* sym = NULL;
+                P_RULE(0,"<modulo_vector> ::= <identificador_use> % <exp>");
+
+                sym = sym_t_get_symb($1.lexema);
+                sprintf(err_msg, "Acceso a variable no declarada (%s)", $1.lexema);
+                CHECK_ERROR(sym != NULL, err_msg);
+                CHECK_ERROR(sym->catg == VECTOR, "Asignacion incompatible");
+                CHECK_ERROR(sym->tipo == INT, "Modulo vectorial necesita vector de tipo entero");
+                CHECK_ERROR($3.tipo == INT, "Modulo vectorial necesita expresion de tipo entero");
+
+                modulo_vector(alfa_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
+            };
+
 elemento_vector : identificador_use '[' exp ']' {
                     sym_info* info = NULL;
                     char err_msg[TAM_ERRMSG] = "";
@@ -338,6 +393,29 @@ elemento_vector : identificador_use '[' exp ']' {
                     $$.es_direccion = 1;
                 };
 
+init_vector : TOK_INIT identificador_use '{' lista_init_v '}' {
+                sym_info* info = NULL;
+                char err_msg[TAM_ERRMSG] = "";
+                P_RULE(48,"<init_vector> ::= init <identificador_use> { <lista_init_v> }");
+
+                sprintf(err_msg, "Acceso a variable no declarada (%s)", $2.lexema);
+                info = sym_t_get_symb($2.lexema);
+                CHECK_ERROR(info != NULL, err_msg);
+                CHECK_ERROR(info->catg == VECTOR, "Intento de inicializacion de una variable que no es de tipo vector");
+                CHECK_ERROR($4.tam_inicializacion_vector <= info->size, "Lista de inicializacion de longitud incorrecta");
+                init_vector(alfa_utils_T.fasm, $2.lexema, $4.tam_inicializacion_vector, info->size);
+            };
+
+lista_init_v : exp ';' lista_init_v {
+                CHECK_ERROR($1.tipo == $3.tipo, "Lista de inicializacion con expresion de tipo incorrecto");
+                $$.tipo = $1.tipo;
+                $$.tam_inicializacion_vector = $3.tam_inicializacion_vector + 1;
+            }
+            | exp {
+                $$.tipo = $1.tipo;
+                $$.tam_inicializacion_vector = 1;
+            };
+
 condicional : if_sentencias {
                 /* IF THEN, ELSE VACIO */
                 P_RULE(50,"<condicional> ::= if ( <exp> ) { <sentencias> }");
@@ -347,7 +425,32 @@ condicional : if_sentencias {
                 /* IF THEN, ELSE CON COSAS */
                 P_RULE(51,"<condicional> ::= if ( <exp> ) { <sentencias> } else { <sentencias> }");
                 ifthenelse_fin(alfa_utils_T.fasm, $1.etiqueta);
+            }
+            | compare_greater {
+                fin_compare(alfa_utils_T.fasm, $1.etiqueta);
             };
+
+compare_with : TOK_COMPARE exp TOK_WITH exp '{' TOK_LESS {
+                $$.etiqueta = etiqueta++;
+                CHECK_ERROR($2.tipo==INT && $4.tipo==INT, "se esperaba una expresion de tipo entero");
+                compare_with(alfa_utils_T.fasm, $2.es_direccion, $4.es_direccion, $$.etiqueta);
+                salto_less(alfa_utils_T.fasm, $$.etiqueta);
+            };
+
+compare_less : compare_with sentencias TOK_EQUAL {
+                $$.etiqueta = $1.etiqueta;
+                salto_equal(alfa_utils_T.fasm, $$.etiqueta);
+            };
+
+compare_equal : compare_less sentencias TOK_GREATER {
+                $$.etiqueta = $1.etiqueta;
+                salto_greater(alfa_utils_T.fasm, $$.etiqueta);
+            };
+
+compare_greater : compare_equal sentencias '}' {
+                    $$.etiqueta = $1.etiqueta;
+                };
+
 
 if_sentencias : if_exp sentencias '}' {
                     $$.etiqueta = $1.etiqueta;
@@ -363,7 +466,20 @@ if_exp  :   TOK_IF '(' exp ')' '{' {
 bucle : bucle_exp sentencias '}' {
             P_RULE(52,"<bucle> ::= while ( <exp> ) { <sentencias> }");
             while_fin(alfa_utils_T.fasm, $1.etiqueta);
+        }
+        | do_tok '{' sentencias '}' TOK_WHILE '(' exp ')' ';'{
+            P_RULE(0,"<bucle> ::=  do { <sentencias> } while ( <exp> );");
+
+            /* Comprobamos que la expresion sea de tipo boolean */
+            CHECK_ERROR($7.tipo == BOOLEAN, "se esperaba una expresion de tipo boolean");
+            do_while_fin(alfa_utils_T.fasm, $7.es_direccion, $1.etiqueta);
         };
+
+do_tok : TOK_DO {
+                /* La etiqueta permite el anidamiento */
+                $$.etiqueta = etiqueta++;
+                do_while_inicio(alfa_utils_T.fasm, $$.etiqueta);
+            };
 
 bucle_exp : bucle_tok '(' exp ')' '{' {
             CHECK_ERROR($3.tipo == BOOLEAN, "Bucle con condicion de tipo int");
@@ -448,6 +564,24 @@ exp : exp '+' exp {
         $$.tipo = INT;
         $$.es_direccion = 0;
     }
+    | exp '^' exp {
+        P_RULE(0,"<exp> ::= <exp> ^ <exp>");
+
+        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
+        exponente(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+
+        $$.tipo = INT;
+        $$.es_direccion = 0;
+    }
+    | exp '%' exp {
+        P_RULE(0,"<exp> ::= <exp> % <exp>");
+        
+        CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
+        modulo(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
+
+        $$.tipo = INT;
+        $$.es_direccion = 0;
+    }
     | '-' %prec NEG exp {
         P_RULE(76,"<exp> ::= - <exp>");
 
@@ -483,6 +617,22 @@ exp : exp '+' exp {
         no(alfa_utils_T.fasm, $2.es_direccion, etiqueta++);
 
         $$.tipo = BOOLEAN;
+        $$.es_direccion = 0;  
+    }
+    | '~' identificador_use {
+        char err_msg[TAM_ERRMSG] = "";
+        sym_info* sym = NULL;
+
+        P_RULE(79,"<exp> ::= ! <exp>");
+        
+        sym = sym_t_get_symb($2.lexema);
+        sprintf(err_msg, "Asignacion a variable no declarada (%s)", $2.lexema);
+        CHECK_ERROR(sym != NULL, err_msg);
+        CHECK_ERROR(sym->catg == VECTOR, "Operador de longitud no aplicable a escalares");
+
+        longitud(alfa_utils_T.fasm, sym->size);
+
+        $$.tipo = INT;
         $$.es_direccion = 0;  
     }
     | identificador_use {

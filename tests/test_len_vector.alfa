@@ -1,0 +1,13 @@
+main {
+    // Declarar vector
+    array int[4] v;
+    int a;
+
+    // Inicializar vector
+    init v {1;2;3};
+
+    a = ~v;
+
+    @ debe imprimir 4 (len del vector)
+    printf a;
+}

@@ -107,6 +107,9 @@ void sumar(FILE* fpasm, int es_variable_1, int es_variable_2);
 void restar(FILE* fpasm, int es_variable_1, int es_variable_2);
 void multiplicar(FILE* fpasm, int es_variable_1, int es_variable_2);
 void dividir(FILE* fpasm, int es_variable_1, int es_variable_2);
+void exponente(FILE *fpasm, int es_variable_1, int es_variable_2, int etiqueta);
+void modulo(FILE *fpasm, int es_variable_1, int es_variable_2);
+void longitud(FILE *fpasm, int tam_vector);
 void o(FILE* fpasm, int es_variable_1, int es_variable_2);
 void y(FILE* fpasm, int es_variable_1, int es_variable_2);
 
@@ -238,6 +241,9 @@ puesto que se ha liberado la última de ellas.
 */
 void while_fin( FILE * fpasm, int etiqueta);
 
+void do_while_inicio(FILE *fpasm, int etiqueta);
+void do_while_fin(FILE *fpasm, int exp_es_variable, int etiqueta);
+
 /* FUNCIONES DE VECTORES Y FUNCIONES */
 /*
 Generación de código para indexar un vector
@@ -321,5 +327,31 @@ pila
 */
 void limpiarPila(FILE * fd_asm, int num_argumentos);
 
+/*
+Inicializa un vector
+*/
+void init_vector(FILE *fpasm, char *nombre, int tam_inicializacion, int tam_vector);
+
+/*
+Para condicionales compare-with
+*/
+void fin_compare(FILE *fpasm, int etiqueta);
+void compare_with(FILE *fpasm, int es_dir_1, int es_dir2, int etiqueta);
+void salto_less(FILE *fpasm, int etiqueta);
+void salto_equal(FILE *fpasm, int etiqueta);
+void salto_greater(FILE *fpasm, int etiqueta);
+
+/*
+Para operador de incremento
+*/
+void incremento_variable_global(FILE *fpasm, char *nombre, int es_direccion);
+void incremento_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
+void incremento_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
+void incremento_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
+
+/*
+Modulo sobre vectores
+*/
+void modulo_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
 
 #endif

@@ -1,0 +1,19 @@
+// Test que mezcla un do-while con una llamada a funcion
+main
+{
+    int x, y;
+
+    function int bucle() {
+        do {
+            printf(x);
+            x = x + 1;
+            y = 0;
+        }
+        while ((x <= 6));
+        return x;
+    }
+
+    x = 4;
+    y = bucle();
+    printf y;
+}

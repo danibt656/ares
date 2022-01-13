@@ -60,17 +60,26 @@ extern int yydebug;
     TOK_SCANF = 266,
     TOK_PRINTF = 267,
     TOK_RETURN = 268,
-    TOK_AND = 269,
-    TOK_OR = 270,
-    TOK_IGUAL = 271,
-    TOK_DISTINTO = 272,
-    TOK_MENORIGUAL = 273,
-    TOK_MAYORIGUAL = 274,
-    TOK_IDENTIFICADOR = 275,
-    TOK_CONSTANTE_ENTERA = 276,
-    TOK_TRUE = 277,
-    TOK_FALSE = 278,
-    TOK_ERROR = 279
+    TOK_INIT = 269,
+    TOK_COMPARE = 270,
+    TOK_WITH = 271,
+    TOK_LESS = 272,
+    TOK_EQUAL = 273,
+    TOK_GREATER = 274,
+    TOK_DO = 275,
+    TOK_AND = 276,
+    TOK_OR = 277,
+    TOK_IGUAL = 278,
+    TOK_DISTINTO = 279,
+    TOK_MENORIGUAL = 280,
+    TOK_MAYORIGUAL = 281,
+    TOK_INCREMENTO = 282,
+    TOK_MODULO_VECTOR = 283,
+    TOK_IDENTIFICADOR = 284,
+    TOK_CONSTANTE_ENTERA = 285,
+    TOK_TRUE = 286,
+    TOK_FALSE = 287,
+    TOK_ERROR = 288,
   };
 #endif
 /* Tokens.  */
@@ -85,17 +94,26 @@ extern int yydebug;
 #define TOK_SCANF 266
 #define TOK_PRINTF 267
 #define TOK_RETURN 268
-#define TOK_AND 269
-#define TOK_OR 270
-#define TOK_IGUAL 271
-#define TOK_DISTINTO 272
-#define TOK_MENORIGUAL 273
-#define TOK_MAYORIGUAL 274
-#define TOK_IDENTIFICADOR 275
-#define TOK_CONSTANTE_ENTERA 276
-#define TOK_TRUE 277
-#define TOK_FALSE 278
-#define TOK_ERROR 279
+#define TOK_INIT 269
+#define TOK_COMPARE 270
+#define TOK_WITH 271
+#define TOK_LESS 272
+#define TOK_EQUAL 273
+#define TOK_GREATER 274
+#define TOK_DO 275
+#define TOK_AND 276
+#define TOK_OR 277
+#define TOK_IGUAL 278
+#define TOK_DISTINTO 279
+#define TOK_MENORIGUAL 280
+#define TOK_MAYORIGUAL 281
+#define TOK_INCREMENTO 282
+#define TOK_MODULO_VECTOR 283
+#define TOK_IDENTIFICADOR 284
+#define TOK_CONSTANTE_ENTERA 285
+#define TOK_TRUE 286
+#define TOK_FALSE 287
+#define TOK_ERROR 288
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
