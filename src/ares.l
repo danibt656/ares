@@ -1,14 +1,14 @@
 %{
-    #include "alfa.h"
+    #include "ares.h"
     #include "y.tab.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
     /* Imprime token en un fichero de debug */
-    #define SHIFT() fprintf(alfa_utils_T.fdbg, ";D:\t%s\n", yytext)
+    #define SHIFT() fprintf(ares_utils_T.fdbg, ";D:\t%s\n", yytext)
 
     /* Antes de cada regla, avanzamos el contador de columna */
-    #define YY_USER_ACTION { alfa_utils_T.col += yyleng; }
+    #define YY_USER_ACTION { ares_utils_T.col += yyleng; }
 %}
 
 /* SECCION DE DEFINICIONES */
@@ -23,7 +23,7 @@ LETRA [a-zA-Z]
 ("@".*)    {  }    /* Comentarios */
 [ ]         {  }    /* Espacio */
 [\t]        {  }    /* Tabulador */
-[\n]        { alfa_utils_T.line++; alfa_utils_T.col = 1; }    /* Saltos de linea */
+[\n]        { ares_utils_T.line++; ares_utils_T.col = 1; }    /* Saltos de linea */
 
     /* Palabras reservadas */ 
 main        { SHIFT(); return TOK_MAIN; }
@@ -78,8 +78,8 @@ greater     { SHIFT(); return TOK_GREATER; }
 true        { SHIFT(); return TOK_TRUE; }
 false       { SHIFT(); return TOK_FALSE; }
 {DIGITO}+   { 
-                #include "alfa.h"
-                SHIFT(); yylval.atributos.valor_entero = atoi(yytext); 
+                #include "ares.h"
+                SHIFT(); yylval.attributes.valor_entero = atoi(yytext); 
                 return TOK_CONSTANTE_ENTERA; 
             }   
 
@@ -88,16 +88,16 @@ false       { SHIFT(); return TOK_FALSE; }
                                 SHIFT();
                                 /* Error de longitud */
                                 if (yyleng > MAX_LONG_ID) {
-                                    alfa_utils_T.col -= yyleng;
-                                    alfa_utils_T.error = ERR_MORFOLOGICO;
+                                    ares_utils_T.col -= yyleng;
+                                    ares_utils_T.error = ERR_MORFOLOGICO;
                                     manage_error("identificador con longitud superior a 100", NULL);
                                     return TOK_ERROR;
                                 }
-                                strcpy(yylval.atributos.lexema, yytext);
+                                strcpy(yylval.attributes.lexema, yytext);
                                 return TOK_IDENTIFICADOR; 
                             }
 
     /* Error de simbolos no permitidos */
-.         { alfa_utils_T.col -= 1; alfa_utils_T.error = ERR_MORFOLOGICO; manage_error("simbolo no permitido", yytext); return TOK_ERROR; }
+.         { ares_utils_T.col -= 1; ares_utils_T.error = ERR_MORFOLOGICO; manage_error("simbolo no permitido", yytext); return TOK_ERROR; }
 
 %%

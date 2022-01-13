@@ -1,1 +1,6 @@
+# Directories
 .vscode/
+obj/
+
+# File extensions
+*.o

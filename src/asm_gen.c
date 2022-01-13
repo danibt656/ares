@@ -1,14 +1,5 @@
-/**
- *      Funciones de generacion de codigo
- *      OBSERVACIÓN GENERAL A TODAS LAS FUNCIONES:
- *      Todas ellas escriben el código NASM a un FILE* proporcionado como primer argumento.
- *
- *      @author Carlos Anivarro Batiste
- *      @author Daniel Barahona Martin
- *      @author David Garitagoitia Romero
-*/
-#include "generacion.h"
-#include "alfa.h"
+#include "asm_gen.h"
+#include "ares.h"
 
 
 void escribir_cabecera_presentacion(FILE *fpasm, char *input_filename)
@@ -19,9 +10,7 @@ void escribir_cabecera_presentacion(FILE *fpasm, char *input_filename)
         }
         fprintf(fpasm, ";-------------------------------\n");
         fprintf(fpasm, "; %s\n", input_filename);
-        fprintf(fpasm, ";   Autor: Carlos Anivarro\n");
-        fprintf(fpasm, ";   Autor: Daniel Barahona\n");
-        fprintf(fpasm, ";   Autor: David Garitagoitia\n");
+        fprintf(fpasm, ";   Author: Daniel Barahona\n");
         fprintf(fpasm, ";-------------------------------\n");
 }
 

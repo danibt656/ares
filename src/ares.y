@@ -1,9 +1,9 @@
 %{
-    #include "alfa.h"
+    #include "ares.h"
     #include "y.tab.h"
     #include "sym_t.h"
     #include "sym_info.h"
-    #include "generacion.h"
+    #include "asm_gen.h"
 
     #include <stdio.h>
     #include <stdlib.h>
@@ -12,9 +12,9 @@
     #define CHECK_ERROR(cond, err_msg) \
         F_BLOCK( \
             if(!(cond)){ \
-            fprintf(alfa_utils_T.ferr, "****Error semantico en lin %d[%d]: %s\n", \
-                    (alfa_utils_T.line), \
-                    (alfa_utils_T.col), \
+            fprintf(ares_utils_T.ferr, "****Error semantico en lin %d[%d]: %s\n", \
+                    (ares_utils_T.line), \
+                    (ares_utils_T.col), \
                     (err_msg)); \
              YYABORT; \
             } \
@@ -26,17 +26,17 @@
     /* Imprime regla gramatical en un fichero de debug */
     #define P_RULE(n, msg) \
         F_BLOCK( \
-            fprintf(alfa_utils_T.fdbg, ";R%d:\t%s\n", (n), (msg)); \
+            fprintf(ares_utils_T.fdbg, ";R%d:\t%s\n", (n), (msg)); \
         )
 
     int yyerror(char *s)
     {
         NO_USO(s);
         /* Si imprime un error morfologico, no debe imprimir uno sintactico */
-        if (alfa_utils_T.error == ERR_MORFOLOGICO)
+        if (ares_utils_T.error == ERR_MORFOLOGICO)
             return 0;
 
-        alfa_utils_T.error = ERR_SINTACTICO;
+        ares_utils_T.error = ERR_SINTACTICO;
         manage_error(NULL, NULL);
         return 1;
     }
@@ -72,7 +72,7 @@
 %}
 
 %union {
-    tipo_atributos atributos;
+    attribute_type attributes;
 }
 
 /* Palabras reservadas */ 
@@ -105,31 +105,29 @@
 %token TOK_INCREMENTO
 %token TOK_MODULO_VECTOR
 
-%token <atributos> TOK_IDENTIFICADOR
-%token <atributos> TOK_CONSTANTE_ENTERA   
+%token <attributes> TOK_IDENTIFICADOR
+%token <attributes> TOK_CONSTANTE_ENTERA   
 %token TOK_TRUE               
-%token TOK_FALSE             
-
-%token TOK_ERROR
+%token TOK_FALSE
 
 
-%type <atributos> condicional
-%type <atributos> comparacion
-%type <atributos> elemento_vector
-%type <atributos> exp
-%type <atributos> constante
-%type <atributos> constante_entera
-%type <atributos> constante_logica
-%type <atributos> identificador_new identificador_use idpf funcion fn_name fn_declaration
-%type <atributos> llamada_funcion
-%type <atributos> lista_expresiones resto_lista_expresiones
-%type <atributos> lista_init_v
-%type <atributos> compare_with compare_less compare_equal compare_greater
-%type <atributos> do_tok
+%type <attributes> condicional
+%type <attributes> comparacion
+%type <attributes> elemento_vector
+%type <attributes> exp
+%type <attributes> constante
+%type <attributes> constante_entera
+%type <attributes> constante_logica
+%type <attributes> identificador_new identificador_use idpf funcion fn_name fn_declaration
+%type <attributes> llamada_funcion
+%type <attributes> lista_expresiones resto_lista_expresiones
+%type <attributes> lista_init_v
+%type <attributes> compare_with compare_less compare_equal compare_greater
+%type <attributes> do_tok
 
-%type <atributos> if_exp if_sentencias
-%type <atributos> bucle
-%type <atributos> bucle_exp bucle_tok
+%type <attributes> if_exp if_sentencias
+%type <attributes> bucle
+%type <attributes> bucle_exp bucle_tok
 
 %left '+' '-' TOK_OR
 %left '*' '/' TOK_AND '%'
@@ -146,14 +144,14 @@ programa : TOK_MAIN '{' iniciar declaraciones dec_vars funciones wrt_main senten
 
 iniciar :  {
                 sym_t_create();
-                escribir_cabecera_presentacion(alfa_utils_T.fasm, alfa_utils_T.fin_name);
-                escribir_subseccion_data(alfa_utils_T.fasm);
-                escribir_cabecera_bss(alfa_utils_T.fasm);
+                escribir_cabecera_presentacion(ares_utils_T.fasm, ares_utils_T.fin_name);
+                escribir_subseccion_data(ares_utils_T.fasm);
+                escribir_cabecera_bss(ares_utils_T.fasm);
             }
 
 final :    {
                 sym_t_free();
-                escribir_fin(alfa_utils_T.fasm);
+                escribir_fin(ares_utils_T.fasm);
             }
 
 dec_vars:   {
@@ -163,12 +161,12 @@ dec_vars:   {
                 for (i = 0; simbolos[i] != NULL; i++) {
                     sym = sym_t_get_symb(simbolos[i]);
                     if (sym && VARIABLE == sym->elem)
-                        declarar_variable(alfa_utils_T.fasm, sym->lexema, sym->tipo, sym->size);
+                        declarar_variable(ares_utils_T.fasm, sym->lexema, sym->tipo, sym->size);
                 }
-                escribir_segmento_codigo(alfa_utils_T.fasm);
+                escribir_segmento_codigo(ares_utils_T.fasm);
             }
 
-wrt_main:   {   escribir_inicio_main(alfa_utils_T.fasm);}
+wrt_main:   {   escribir_inicio_main(ares_utils_T.fasm);}
 
 declaraciones : declaracion {P_RULE(2,"<declaraciones> ::= <declaracion>");}
               |   declaracion declaraciones {P_RULE(3,"<declaraciones> ::= <declaracion> <declaraciones>");};
@@ -228,7 +226,7 @@ fn_declaration : fn_name '(' parametros_funcion ')' '{' declaraciones_funcion {
                     sym->num_params = num_parametros_actual;
                     sym->num_vars_loc = num_variables_locales_actual;
                     $$ = $1;
-                    declararFuncion(alfa_utils_T.fasm, $1.lexema, num_variables_locales_actual);
+                    declararFuncion(ares_utils_T.fasm, $1.lexema, num_variables_locales_actual);
                 };
 
 fn_name : TOK_FUNCTION tipo identificador_use {
@@ -318,12 +316,12 @@ asignacion  : identificador_use '=' exp {
 
                 /* Asignar */
                 if (sym->is_var_loc == UNDEFINED) { /*comprueba si es variable local */
-                    asignar(alfa_utils_T.fasm, $1.lexema, $3.es_direccion);
+                    asignar(ares_utils_T.fasm, $1.lexema, $3.es_direccion);
 
                 } else if (sym->elem == PARAMETRO) {
-                    asignarParametro(alfa_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
+                    asignarParametro(ares_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
                 } else {
-                    asignarVariableLocal(alfa_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
+                    asignarVariableLocal(ares_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
                 }
             }
             | elemento_vector '=' exp {
@@ -335,7 +333,7 @@ asignacion  : identificador_use '=' exp {
                 /* Comprueba que el tipo sea el mismo */
                 CHECK_ERROR($3.tipo == sym->tipo, "Asignacion incompatible");
 
-                escribir_elemento_vector(alfa_utils_T.fasm, $3.lexema, sym->size, sym->elem);
+                escribir_elemento_vector(ares_utils_T.fasm, $3.lexema, sym->size, sym->elem);
             };
 
 incremento : identificador_use TOK_INCREMENTO exp {
@@ -351,13 +349,13 @@ incremento : identificador_use TOK_INCREMENTO exp {
                 CHECK_ERROR($3.tipo == INT, "Operacion de incremento necesita expresion de tipo entero");
                 
                 if (sym->catg == VECTOR) {
-                    incremento_vector(alfa_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
+                    incremento_vector(ares_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
                 } else if (sym->is_var_loc == UNDEFINED) {
-                    incremento_variable_global(alfa_utils_T.fasm, $1.lexema, $3.es_direccion);
+                    incremento_variable_global(ares_utils_T.fasm, $1.lexema, $3.es_direccion);
                 } else if (sym->elem == PARAMETRO) {
-                    incremento_parametro(alfa_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
+                    incremento_parametro(ares_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
                 } else {
-                    incremento_variable_local(alfa_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
+                    incremento_variable_local(ares_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
                 }
             };
 
@@ -373,7 +371,7 @@ modulo_vector : identificador_use TOK_MODULO_VECTOR exp {
                 CHECK_ERROR(sym->tipo == INT, "Modulo vectorial necesita vector de tipo entero");
                 CHECK_ERROR($3.tipo == INT, "Modulo vectorial necesita expresion de tipo entero");
 
-                modulo_vector(alfa_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
+                modulo_vector(ares_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
             };
 
 elemento_vector : identificador_use '[' exp ']' {
@@ -387,7 +385,7 @@ elemento_vector : identificador_use '[' exp ']' {
                     CHECK_ERROR(info->catg == VECTOR, "Intento de indexacion de una variable que no es de tipo vector");
                     CHECK_ERROR($3.tipo == INT, "El indice en una operacion de indexacion tiene que ser de tipo entero");
 
-                    comprobar_indice_vector(alfa_utils_T.fasm, $1.lexema, $3.es_direccion, info->size);
+                    comprobar_indice_vector(ares_utils_T.fasm, $1.lexema, $3.es_direccion, info->size);
 
                     $$.tipo = info->tipo;
                     $$.es_direccion = 1;
@@ -403,7 +401,7 @@ init_vector : TOK_INIT identificador_use '{' lista_init_v '}' {
                 CHECK_ERROR(info != NULL, err_msg);
                 CHECK_ERROR(info->catg == VECTOR, "Intento de inicializacion de una variable que no es de tipo vector");
                 CHECK_ERROR($4.tam_inicializacion_vector <= info->size, "Lista de inicializacion de longitud incorrecta");
-                init_vector(alfa_utils_T.fasm, $2.lexema, $4.tam_inicializacion_vector, info->size);
+                init_vector(ares_utils_T.fasm, $2.lexema, $4.tam_inicializacion_vector, info->size);
             };
 
 lista_init_v : exp ';' lista_init_v {
@@ -419,32 +417,32 @@ lista_init_v : exp ';' lista_init_v {
 condicional : if_sentencias {
                 /* IF THEN, ELSE VACIO */
                 P_RULE(50,"<condicional> ::= if ( <exp> ) { <sentencias> }");
-                ifthenelse_fin(alfa_utils_T.fasm, $1.etiqueta);
+                ifthenelse_fin(ares_utils_T.fasm, $1.etiqueta);
             }
             | if_sentencias TOK_ELSE '{' sentencias '}'{
                 /* IF THEN, ELSE CON COSAS */
                 P_RULE(51,"<condicional> ::= if ( <exp> ) { <sentencias> } else { <sentencias> }");
-                ifthenelse_fin(alfa_utils_T.fasm, $1.etiqueta);
+                ifthenelse_fin(ares_utils_T.fasm, $1.etiqueta);
             }
             | compare_greater {
-                fin_compare(alfa_utils_T.fasm, $1.etiqueta);
+                fin_compare(ares_utils_T.fasm, $1.etiqueta);
             };
 
 compare_with : TOK_COMPARE exp TOK_WITH exp '{' TOK_LESS {
                 $$.etiqueta = etiqueta++;
                 CHECK_ERROR($2.tipo==INT && $4.tipo==INT, "se esperaba una expresion de tipo entero");
-                compare_with(alfa_utils_T.fasm, $2.es_direccion, $4.es_direccion, $$.etiqueta);
-                salto_less(alfa_utils_T.fasm, $$.etiqueta);
+                compare_with(ares_utils_T.fasm, $2.es_direccion, $4.es_direccion, $$.etiqueta);
+                salto_less(ares_utils_T.fasm, $$.etiqueta);
             };
 
 compare_less : compare_with sentencias TOK_EQUAL {
                 $$.etiqueta = $1.etiqueta;
-                salto_equal(alfa_utils_T.fasm, $$.etiqueta);
+                salto_equal(ares_utils_T.fasm, $$.etiqueta);
             };
 
 compare_equal : compare_less sentencias TOK_GREATER {
                 $$.etiqueta = $1.etiqueta;
-                salto_greater(alfa_utils_T.fasm, $$.etiqueta);
+                salto_greater(ares_utils_T.fasm, $$.etiqueta);
             };
 
 compare_greater : compare_equal sentencias '}' {
@@ -454,41 +452,41 @@ compare_greater : compare_equal sentencias '}' {
 
 if_sentencias : if_exp sentencias '}' {
                     $$.etiqueta = $1.etiqueta;
-                    ifthenelse_fin_then(alfa_utils_T.fasm, $$.etiqueta);
+                    ifthenelse_fin_then(ares_utils_T.fasm, $$.etiqueta);
                 }
 
 if_exp  :   TOK_IF '(' exp ')' '{' {
                 CHECK_ERROR($3.tipo == BOOLEAN, "Condicional con condicion de tipo int");
                 $$.etiqueta = etiqueta++;
-                ifthen_inicio(alfa_utils_T.fasm, $3.es_direccion, $$.etiqueta);
+                ifthen_inicio(ares_utils_T.fasm, $3.es_direccion, $$.etiqueta);
             }
 
 bucle : bucle_exp sentencias '}' {
             P_RULE(52,"<bucle> ::= while ( <exp> ) { <sentencias> }");
-            while_fin(alfa_utils_T.fasm, $1.etiqueta);
+            while_fin(ares_utils_T.fasm, $1.etiqueta);
         }
         | do_tok '{' sentencias '}' TOK_WHILE '(' exp ')' ';'{
             P_RULE(0,"<bucle> ::=  do { <sentencias> } while ( <exp> );");
 
             /* Comprobamos que la expresion sea de tipo boolean */
             CHECK_ERROR($7.tipo == BOOLEAN, "se esperaba una expresion de tipo boolean");
-            do_while_fin(alfa_utils_T.fasm, $7.es_direccion, $1.etiqueta);
+            do_while_fin(ares_utils_T.fasm, $7.es_direccion, $1.etiqueta);
         };
 
 do_tok : TOK_DO {
                 /* La etiqueta permite el anidamiento */
                 $$.etiqueta = etiqueta++;
-                do_while_inicio(alfa_utils_T.fasm, $$.etiqueta);
+                do_while_inicio(ares_utils_T.fasm, $$.etiqueta);
             };
 
 bucle_exp : bucle_tok '(' exp ')' '{' {
             CHECK_ERROR($3.tipo == BOOLEAN, "Bucle con condicion de tipo int");
-            while_exp_pila(alfa_utils_T.fasm, $3.es_direccion, $$.etiqueta);
+            while_exp_pila(ares_utils_T.fasm, $3.es_direccion, $$.etiqueta);
           }
 
 bucle_tok : TOK_WHILE {
             $$.etiqueta = etiqueta++;
-            while_inicio(alfa_utils_T.fasm, $$.etiqueta);
+            while_inicio(ares_utils_T.fasm, $$.etiqueta);
           }
 
 lectura : TOK_SCANF identificador_use {
@@ -502,20 +500,20 @@ lectura : TOK_SCANF identificador_use {
             CHECK_ERROR((info->catg != VECTOR), "scanf no admite vectores como entrada");
 
             if (info->is_var_loc == UNDEFINED) {
-                leer(alfa_utils_T.fasm, info->lexema, info->tipo, 1);
+                leer(ares_utils_T.fasm, info->lexema, info->tipo, 1);
             }
             else if (info->elem == PARAMETRO) {
-                escribirParametro(alfa_utils_T.fasm, 1, info->pos_param, num_parametros_actual);
-                leer(alfa_utils_T.fasm, info->lexema, info->tipo, 0);
+                escribirParametro(ares_utils_T.fasm, 1, info->pos_param, num_parametros_actual);
+                leer(ares_utils_T.fasm, info->lexema, info->tipo, 0);
             } else if (info->elem == VARIABLE && info->is_var_loc == 1) {
-                escribirVariableLocal(alfa_utils_T.fasm, 1, info->pos_var_loc);
-                leer(alfa_utils_T.fasm, info->lexema, info->tipo, 0);
+                escribirVariableLocal(ares_utils_T.fasm, 1, info->pos_var_loc);
+                leer(ares_utils_T.fasm, info->lexema, info->tipo, 0);
             }
         };
 
 escritura : TOK_PRINTF exp {
                 P_RULE(56,"<escritura> ::= printf <exp>");
-                escribir(alfa_utils_T.fasm, $2.es_direccion, $2.tipo);
+                escribir(ares_utils_T.fasm, $2.es_direccion, $2.tipo);
           };
 
 retorno_funcion : TOK_RETURN exp {
@@ -524,7 +522,7 @@ retorno_funcion : TOK_RETURN exp {
                     CHECK_ERROR(dentro_de_fun == 1, "Sentencia de retorno fuera del cuerpo de una funcion");
                     CHECK_ERROR($2.tipo == tipo_retorno_actual, "Retorno de funcion de tipo incompatible");
                     
-                    retornarFuncion(alfa_utils_T.fasm, $2.es_direccion);
+                    retornarFuncion(ares_utils_T.fasm, $2.es_direccion);
                     hay_return++;
                 };
 
@@ -532,7 +530,7 @@ exp : exp '+' exp {
         P_RULE(72,"<exp> ::= <exp> + <exp>");
         
         CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
-        sumar(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
+        sumar(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = INT;
         $$.es_direccion = 0;
@@ -541,7 +539,7 @@ exp : exp '+' exp {
         P_RULE(73,"<exp> ::= <exp> - <exp>");
 
         CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
-        restar(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
+        restar(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = INT;
         $$.es_direccion = 0;
@@ -550,7 +548,7 @@ exp : exp '+' exp {
         P_RULE(74,"<exp> ::= <exp> / <exp>");
         
         CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
-        dividir(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
+        dividir(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = INT;
         $$.es_direccion = 0;
@@ -559,7 +557,7 @@ exp : exp '+' exp {
         P_RULE(75,"<exp> ::= <exp> * <exp>");
         
         CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
-        multiplicar(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
+        multiplicar(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = INT;
         $$.es_direccion = 0;
@@ -568,7 +566,7 @@ exp : exp '+' exp {
         P_RULE(0,"<exp> ::= <exp> ^ <exp>");
 
         CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
-        exponente(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+        exponente(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
 
         $$.tipo = INT;
         $$.es_direccion = 0;
@@ -577,7 +575,7 @@ exp : exp '+' exp {
         P_RULE(0,"<exp> ::= <exp> % <exp>");
         
         CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Operacion aritmetica con operandos boolean");
-        modulo(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
+        modulo(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = INT;
         $$.es_direccion = 0;
@@ -587,7 +585,7 @@ exp : exp '+' exp {
 
         CHECK_ERROR($2.tipo == INT, "Operacion aritmetica con operando boolean");
         /*check*/
-        cambiar_signo(alfa_utils_T.fasm, $2.es_direccion);
+        cambiar_signo(ares_utils_T.fasm, $2.es_direccion);
 
         $$.tipo = INT;
         $$.es_direccion = 0;    
@@ -596,7 +594,7 @@ exp : exp '+' exp {
         P_RULE(77,"<exp> ::= <exp> && <exp>");
 
         CHECK_ERROR($1.tipo == BOOLEAN && $3.tipo == BOOLEAN, "Operacion logica con operandos int");
-        y(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
+        y(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = BOOLEAN;
         $$.es_direccion = 0; 
@@ -605,7 +603,7 @@ exp : exp '+' exp {
         P_RULE(78,"<exp> ::= <exp> || <exp>");
         
         CHECK_ERROR($1.tipo == BOOLEAN && $3.tipo == BOOLEAN, "Operacion logica con operandos int");
-        o(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion);
+        o(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion);
 
         $$.tipo = BOOLEAN;
         $$.es_direccion = 0;
@@ -614,7 +612,7 @@ exp : exp '+' exp {
         P_RULE(79,"<exp> ::= ! <exp>");
         
         CHECK_ERROR($2.tipo == BOOLEAN, "Operacion logica con operando int");
-        no(alfa_utils_T.fasm, $2.es_direccion, etiqueta++);
+        no(ares_utils_T.fasm, $2.es_direccion, etiqueta++);
 
         $$.tipo = BOOLEAN;
         $$.es_direccion = 0;  
@@ -630,7 +628,7 @@ exp : exp '+' exp {
         CHECK_ERROR(sym != NULL, err_msg);
         CHECK_ERROR(sym->catg == VECTOR, "Operador de longitud no aplicable a escalares");
 
-        longitud(alfa_utils_T.fasm, sym->size);
+        longitud(ares_utils_T.fasm, sym->size);
 
         $$.tipo = INT;
         $$.es_direccion = 0;  
@@ -654,13 +652,13 @@ exp : exp '+' exp {
 
         /* Variable global */
         if (sym->elem == VARIABLE && sym->is_var_loc == UNDEFINED) {
-            escribir_operando(alfa_utils_T.fasm, $1.lexema, 1);
+            escribir_operando(ares_utils_T.fasm, $1.lexema, 1);
         /* Parametro */
         } else if (sym->elem == PARAMETRO) {
-            escribirParametro(alfa_utils_T.fasm, 0, sym->pos_param, num_parametros_actual);
+            escribirParametro(ares_utils_T.fasm, 0, sym->pos_param, num_parametros_actual);
         /* Variable local */
         } else if (sym->elem == VARIABLE && sym->is_var_loc != UNDEFINED) {
-            escribirVariableLocal(alfa_utils_T.fasm, 0, sym->pos_var_loc);
+            escribirVariableLocal(ares_utils_T.fasm, 0, sym->pos_var_loc);
         }
     }
     | constante {
@@ -671,7 +669,7 @@ exp : exp '+' exp {
             
             char valor[INT_TO_CHAR];
             sprintf(valor, "%d", $1.valor_entero);
-            escribir_operando(alfa_utils_T.fasm, valor, 0);
+            escribir_operando(ares_utils_T.fasm, valor, 0);
     }
     | '(' exp ')' {
             P_RULE(82,"<exp> ::= ( <exp> )");
@@ -688,7 +686,7 @@ exp : exp '+' exp {
     | elemento_vector {
             P_RULE(85,"<exp> ::= <elemento_vector>");
 
-            apilar_valor_elemento_vector(alfa_utils_T.fasm);
+            apilar_valor_elemento_vector(ares_utils_T.fasm);
 
             $$.tipo = $1.tipo;
             $$.es_direccion = 0;
@@ -704,7 +702,7 @@ exp : exp '+' exp {
             CHECK_ERROR(sym->elem == FUNCION, "No es una funcion");
             CHECK_ERROR($3.num_parametros_llamada_actual == sym->num_params, "Numero incorrecto de parametros en llamada a funcion");
             
-            llamarFuncion(alfa_utils_T.fasm, $1.lexema, $3.num_parametros_llamada_actual);
+            llamarFuncion(ares_utils_T.fasm, $1.lexema, $3.num_parametros_llamada_actual);
             
             en_explist = 0;
 
@@ -743,7 +741,7 @@ comparacion : exp TOK_IGUAL exp {
                 P_RULE(93,"<comparacion> ::= <exp> == <exp>");
 
                 CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
-                igual(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+                igual(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
 
                 $$.tipo = BOOLEAN;
                 $$.es_direccion = 0;
@@ -752,7 +750,7 @@ comparacion : exp TOK_IGUAL exp {
                 P_RULE(94,"<comparacion> ::= <exp> != <exp>");
                 
                 CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
-                distinto(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+                distinto(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                 
                 $$.tipo = BOOLEAN;
                 $$.es_direccion = 0;
@@ -761,7 +759,7 @@ comparacion : exp TOK_IGUAL exp {
                 P_RULE(95,"<comparacion> ::= <exp> <= <exp>");
                 
                 CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
-                menor_igual(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+                menor_igual(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                 
                 $$.tipo = BOOLEAN;
                 $$.es_direccion = 0;
@@ -770,7 +768,7 @@ comparacion : exp TOK_IGUAL exp {
                 P_RULE(96,"<comparacion> ::= <exp> >= <exp>");
 
                 CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
-                mayor_igual(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+                mayor_igual(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
 
                 $$.tipo = BOOLEAN;
                 $$.es_direccion = 0;
@@ -779,7 +777,7 @@ comparacion : exp TOK_IGUAL exp {
                 P_RULE(97,"<comparacion> ::= <exp> < <exp>");
                 
                 CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
-                menor(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+                menor(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                 
                 $$.tipo = BOOLEAN;
                 $$.es_direccion = 0;
@@ -788,7 +786,7 @@ comparacion : exp TOK_IGUAL exp {
                 P_RULE(98,"<comparacion> ::= <exp> > <exp>");
 
                 CHECK_ERROR($1.tipo == INT && $3.tipo == INT, "Comparacion con operandos boolean");
-                mayor(alfa_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+                mayor(ares_utils_T.fasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                 
                 $$.tipo = BOOLEAN;
                 $$.es_direccion = 0;

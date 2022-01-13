@@ -1,13 +1,3 @@
-/**
- *      Prototipos de funciones de generacion de codigo
- *      OBSERVACIÓN GENERAL A TODAS LAS FUNCIONES:
- *      Todas ellas escriben el código NASM a un FILE* proporcionado como primer argumento.
- *
- *      @author Carlos Anivarro Batiste
- *      @author Daniel Barahona Martin
- *      @author David Garitagoitia Romero
-*/
-
 #ifndef GENERACION_H
 #define GENERACION_H 1
 

@@ -119,9 +119,9 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 57 "alfa.y"
+#line 57 "ares.y"
 
-    tipo_atributos atributos;
+    attribute_type attributes;
 
 #line 109 "y.tab.h"
 

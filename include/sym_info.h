@@ -1,6 +1,6 @@
 #ifndef SYM_INFO_H
 #define SYM_INFO_H 1
-#include "alfa.h"
+#include "ares.h"
 
 #define UNDEFINED -1    /* enteros no inicializados */
 

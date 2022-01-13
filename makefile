@@ -23,9 +23,9 @@ NASM     := nasm
 NFLAGS   := -f elf32
 CCNASMFLAGS := -m32
 
-ALFALIB     := $(DOBJ)/alfalib.o
+ALFALIB     := $(DOBJ)/areslib.o
 
-EXES := alfa.c
+EXES := ares.c
 EXES := $(patsubst %,$(DEXE)/%,$(EXES))
 EOBJ := $(patsubst $(DEXE)/%.c,$(DOBJ)/%.o,$(EXES))
 EBIN := $(patsubst $(DEXE)/%.c,$(DBIN)/%,$(EXES))
@@ -82,7 +82,7 @@ $(NASM_BIN): $(DBIN)/%: $(DOBJ)/%.o $(ALFALIB)
 
 # Borrar ficheros generados con make all
 clean:
-	@$(RM) alfa exe
+	@$(RM) ares exe
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(DEPENDENCIAS)
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
 	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
@@ -91,7 +91,7 @@ clean:
 # Ayuda
 help:
 	@echo "Flags de Makefile:"
-	@echo "    all                 - compila todo y genera el ejecutable alfa"
+	@echo "    all                 - compila todo y genera el ejecutable ares"
 	@echo "                             -> Genera un fichero debug con las trazas de flex y bison"
 	@echo "    clean               - borra todos los ficheros generados"
 	@echo "    compile_file        - compila un fichero de prueba en ALFA y lo ejecuta"
@@ -100,14 +100,14 @@ help:
 
 compile_file:
 	@echo "-------------------------------"
-	./alfa $(src) exe.asm
+	./ares $(src) exe.asm
 	nasm -f elf32 exe.asm
-	gcc -m32 -o exe exe.o obj/alfalib.o
+	gcc -m32 -o exe exe.o obj/areslib.o
 	@echo "-------------------------------"
 	./exe
 
 valgrind:
-	valgrind --leak-check=full --show-leak-kinds=all ./alfa $(src) exe.asm
+	valgrind --leak-check=full --show-leak-kinds=all ./ares $(src) exe.asm
 
 CFLAGS += -MMD
 -include $(DEPENDENCIAS)

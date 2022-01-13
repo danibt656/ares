@@ -11,7 +11,7 @@
 #define MAX_LONG_VECTOR 64
 
 /* Extension de los ficheros en lenguaje ALFA */
-#define INPUT_EXTENSION ".alfa"
+#define INPUT_EXTENSION ".ares"
 
 /* Codigos de errores */
 typedef enum ErrorCode
@@ -40,7 +40,7 @@ extern struct ALFA_UTILS
     ErrorCode error;    /* Codigo de error */
 
     unsigned int line, col;/* Numeros de linea y columna */
-} alfa_utils_T;
+} ares_utils_T;
 
 typedef struct {
     char lexema[MAX_LONG_ID+1];    /* lexema de Identificador */
@@ -49,14 +49,15 @@ typedef struct {
 
     Tipo tipo;                      /* boolean o entero */
 
-    int etiqueta;                   /* para generacion NASM */
+    int etiqueta;                   /* para anidacion */
 
     int num_parametros_llamada_actual; /* Para llamadas a funciones */
 
     int tam_inicializacion_vector;  /* Para inicializar vectores */
-} tipo_atributos;
+} attribute_type;
 
-
+/* Ejecutar comandos */
+void exec_sh(const char *cmd);
 
 /* Funcion para manejar errores */
 void manage_error(char *msg, char *s);
