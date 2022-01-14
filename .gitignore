@@ -2,5 +2,6 @@
 .vscode/
 
 # File extensions
-*.o
+*.d
 *.asm
+out
