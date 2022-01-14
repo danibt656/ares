@@ -32,17 +32,13 @@ LETRA [a-zA-Z]
 [\n]        { ares_utils_T.line++; ares_utils_T.col = 1; }    /* Saltos de linea */
 
     /* Palabras reservadas */ 
-main        { SHIFT(); return TOK_MAIN; }
-int         { SHIFT(); return TOK_INT; }
-boolean     { SHIFT(); return TOK_BOOLEAN; }
+begin       { SHIFT(); return TOK_MAIN; }
 array       { SHIFT(); return TOK_ARRAY; }
-function    { SHIFT(); return TOK_FUNCTION; }
+fn          { SHIFT(); return TOK_FUNCTION; }
 if          { SHIFT(); return TOK_IF; }
 else        { SHIFT(); return TOK_ELSE; }
 while       { SHIFT(); return TOK_WHILE; }
 do          { SHIFT(); return TOK_DO; }
-scanf       { SHIFT(); return TOK_SCANF; }
-printf      { SHIFT(); return TOK_PRINTF; }
 return      { SHIFT(); return TOK_RETURN; }
 init        { SHIFT(); return TOK_INIT; }
 compare     { SHIFT(); return TOK_COMPARE; }
@@ -50,40 +46,51 @@ with        { SHIFT(); return TOK_WITH; }
 less        { SHIFT(); return TOK_LESS; }
 equal       { SHIFT(); return TOK_EQUAL; }
 greater     { SHIFT(); return TOK_GREATER; }
+loop        { SHIFT(); return TOK_LOOP; }
+in          { SHIFT(); return TOK_IN; }
+to          { SHIFT(); return TOK_TO; }
+    
+    /* Tipos de datos */
+i32         { SHIFT(); return TOK_INT; }
+bool        { SHIFT(); return TOK_BOOLEAN; }
+
+    /* Funciones del sistema */
+"output("   { SHIFT(); return TOK_PRINTF; }
+"input("    { SHIFT(); return TOK_SCANF; }
+"len("      { SHIFT(); return TOK_LEN; }
 
     /* Simbolos */ 
-";"     { SHIFT(); return yytext[0]; }
-","     { SHIFT(); return yytext[0]; }
-"("     { SHIFT(); return yytext[0]; }
-")"     { SHIFT(); return yytext[0]; }
-"["     { SHIFT(); return yytext[0]; }
-"]"     { SHIFT(); return yytext[0]; }
-"{"     { SHIFT(); return yytext[0]; } 
-"}"     { SHIFT(); return yytext[0]; }
-"="     { SHIFT(); return yytext[0]; }
-"+"     { SHIFT(); return yytext[0]; }
-"-"     { SHIFT(); return yytext[0]; }
-"/"     { SHIFT(); return yytext[0]; }
-"*"     { SHIFT(); return yytext[0]; }
-"^"     { SHIFT(); return yytext[0]; }
-"%"     { SHIFT(); return yytext[0]; }
-"~"     { SHIFT(); return yytext[0]; }
-"&&"    { SHIFT(); return TOK_AND; }
-"||"    { SHIFT(); return TOK_OR; }
-"!"     { SHIFT(); return yytext[0]; }
-"=="    { SHIFT(); return TOK_IGUAL; }
-"!="    { SHIFT(); return TOK_DISTINTO; }
-"<="    { SHIFT(); return TOK_MENORIGUAL; }
-">="    { SHIFT(); return TOK_MAYORIGUAL; }
-".%"    { SHIFT(); return TOK_MODULO_VECTOR; }
-"<"     { SHIFT(); return yytext[0]; }
-">"     { SHIFT(); return yytext[0]; }
-"++"    { SHIFT(); return TOK_INCREMENTO; }
-"--"    { SHIFT(); return TOK_DECREMENTO; }
-"+="    { SHIFT(); return TOK_AUTOSUMA; }
-"-="    { SHIFT(); return TOK_AUTORESTA; }
-"*="    { SHIFT(); return TOK_AUTOMULT; }
-"/="    { SHIFT(); return TOK_AUTODIV; }
+";"         { SHIFT(); return yytext[0]; }
+","         { SHIFT(); return yytext[0]; }
+"("         { SHIFT(); return yytext[0]; }
+")"         { SHIFT(); return yytext[0]; }
+"["         { SHIFT(); return yytext[0]; }
+"]"         { SHIFT(); return yytext[0]; }
+"{"         { SHIFT(); return yytext[0]; } 
+"}"         { SHIFT(); return yytext[0]; }
+"="         { SHIFT(); return yytext[0]; }
+"+"         { SHIFT(); return yytext[0]; }
+"-"         { SHIFT(); return yytext[0]; }
+"/"         { SHIFT(); return yytext[0]; }
+"*"         { SHIFT(); return yytext[0]; }
+"^"         { SHIFT(); return yytext[0]; }
+"%"         { SHIFT(); return yytext[0]; }
+"&&"        { SHIFT(); return TOK_AND; }
+"||"        { SHIFT(); return TOK_OR; }
+"!"         { SHIFT(); return yytext[0]; }
+"=="        { SHIFT(); return TOK_IGUAL; }
+"!="        { SHIFT(); return TOK_DISTINTO; }
+"<="        { SHIFT(); return TOK_MENORIGUAL; }
+">="        { SHIFT(); return TOK_MAYORIGUAL; }
+".%"        { SHIFT(); return TOK_MODULO_VECTOR; }
+"<"         { SHIFT(); return yytext[0]; }
+">"         { SHIFT(); return yytext[0]; }
+"++"        { SHIFT(); return TOK_INCREMENTO; }
+"--"        { SHIFT(); return TOK_DECREMENTO; }
+"+="        { SHIFT(); return TOK_AUTOSUMA; }
+"-="        { SHIFT(); return TOK_AUTORESTA; }
+"*="        { SHIFT(); return TOK_AUTOMULT; }
+"/="        { SHIFT(); return TOK_AUTODIV; }
 
     /* Constantes */
 true        { SHIFT(); return TOK_TRUE; }

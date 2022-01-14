@@ -11,7 +11,7 @@
 /*
    Escribe una cabecera con nombres de autores y del fichero de entrada
 */
-void escribir_cabecera_presentacion(FILE *fpasm, char *input_filename);
+void escribir_cabecera_presentacion(FILE* fpasm, char* input_filename);
 
 /*
    Código para el principio de la sección .bss.
@@ -31,14 +31,14 @@ void escribir_subseccion_data(FILE* fpasm);
     • tipo puede ser ENTERO o BOOLEANO (observa la declaración de las constantes del principio del fichero).
     • Esta misma función se invocará cuando en el compilador se declaren vectores, por eso se adjunta un argumento final (tamano) que para esta primera práctica siempre recibirá el valor 1.
 */
-void declarar_variable(FILE* fpasm, char * nombre,  int tipo,  int tamano);
+void declarar_variable(FILE* fpasm, char* nombre,  int tipo,  int tamano);
 
 /*
    Para escribir el comienzo del segmento .text, básicamente se indica que se exporta la etiqueta main y que se usarán las funciones declaradas en la librería olib.o
 */
 void escribir_segmento_codigo(FILE* fpasm);
 
-/* 
+/*
    En este punto se debe escribir, al menos, la etiqueta main y la sentencia que guarda el puntero de pila en su variable (se recomienda usar __esp).
 */
 void escribir_inicio_main(FILE* fpasm);
@@ -97,9 +97,9 @@ void sumar(FILE* fpasm, int es_variable_1, int es_variable_2);
 void restar(FILE* fpasm, int es_variable_1, int es_variable_2);
 void multiplicar(FILE* fpasm, int es_variable_1, int es_variable_2);
 void dividir(FILE* fpasm, int es_variable_1, int es_variable_2);
-void exponente(FILE *fpasm, int es_variable_1, int es_variable_2, int etiqueta);
-void modulo(FILE *fpasm, int es_variable_1, int es_variable_2);
-void longitud(FILE *fpasm, int tam_vector);
+void exponente(FILE* fpasm, int es_variable_1, int es_variable_2, int etiqueta);
+void modulo(FILE* fpasm, int es_variable_1, int es_variable_2);
+void longitud(FILE* fpasm, int tam_vector);
 void o(FILE* fpasm, int es_variable_1, int es_variable_2);
 void y(FILE* fpasm, int es_variable_1, int es_variable_2);
 
@@ -156,7 +156,7 @@ Es 1 si la expresión de la condición es algo asimilable a una variable (identi
 elemento de vector)
 Es 0 en caso contrario (constante u otro tipo de expresión)
 */
-void ifthenelse_inicio(FILE * fpasm, int exp_es_variable, int etiqueta);
+void ifthenelse_inicio(FILE* fpasm, int exp_es_variable, int etiqueta);
 
 /*
 Generación de código para el inicio de una estructura if-then
@@ -167,7 +167,7 @@ Es 1 si la expresión de la condición es algo asimilable a una variable (identi
 elemento de vector)
 Es 0 en caso contrario (constante u otro tipo de expresión)
 */
-void ifthen_inicio(FILE * fpasm, int exp_es_variable, int etiqueta);
+void ifthen_inicio(FILE* fpasm, int exp_es_variable, int etiqueta);
 
 /*
 Generación de código para el fin de una estructura if-then
@@ -177,7 +177,7 @@ según se ha explicado
 Y tras ser invocada debe realizar el proceso para ajustar la información de las etiquetas
 puesto que se ha liberado la última de ellas.
 */
-void ifthen_fin(FILE * fpasm, int etiqueta);
+void ifthen_fin(FILE* fpasm, int etiqueta);
 
 /*
 Generación de código para el fin de la rama then de una estructura if-then-else
@@ -185,7 +185,7 @@ Sólo necesita usar la etiqueta adecuada, aunque es el final de una rama, luego 
 otra (la rama else) antes de que se termine la estructura y se tenga que ajustar las etiquetas
 por lo que sólo se necesita que se utilice la etiqueta que corresponde al momento actual.
 */
-void ifthenelse_fin_then( FILE * fpasm, int etiqueta);
+void ifthenelse_fin_then(FILE* fpasm, int etiqueta);
 
 /*
 Generación de código para el fin de una estructura if-then-else
@@ -195,7 +195,7 @@ según se ha explicado
 Y tras ser invocada debe realizar el proceso para ajustar la información de las etiquetas
 puesto que se ha liberado la última de ellas.
 */
-void ifthenelse_fin( FILE * fpasm, int etiqueta);
+void ifthenelse_fin(FILE* fpasm, int etiqueta);
 
 /* FUNCIONES DE BUCLES */
 /*
@@ -207,7 +207,7 @@ Es 1 si la expresión de la condición es algo asimilable a una variable (identi
 elemento de vector)
 Es 0 en caso contrario (constante u otro tipo de expresión)
 */
-void while_inicio(FILE * fpasm, int etiqueta);
+void while_inicio(FILE* fpasm, int etiqueta);
 
 /*
 Generación de código para el momento en el que se ha generado el código de la expresión
@@ -219,7 +219,7 @@ Es 1 si la expresión de la condición es algo asimilable a una variable (identi
 o elemento de vector)
 Es 0 en caso contrario (constante u otro tipo de expresión)
 */
-void while_exp_pila (FILE * fpasm, int exp_es_variable, int etiqueta);
+void while_exp_pila(FILE* fpasm, int exp_es_variable, int etiqueta);
 
 /*
 Generación de código para el final de una estructura while
@@ -229,10 +229,13 @@ según se ha explicado
 Y tras ser invocada debe realizar el proceso para ajustar la información de las etiquetas
 puesto que se ha liberado la última de ellas.
 */
-void while_fin( FILE * fpasm, int etiqueta);
+void while_fin(FILE* fpasm, int etiqueta);
 
-void do_while_inicio(FILE *fpasm, int etiqueta);
-void do_while_fin(FILE *fpasm, int exp_es_variable, int etiqueta);
+void do_while_inicio(FILE* fpasm, int etiqueta);
+void do_while_fin(FILE* fpasm, int exp_es_variable, int etiqueta);
+
+void loop_in_inicio(FILE* fpasm, char *nombre, int inicio_contador, int etiqueta);
+void loop_in_fin(FILE* fpasm, char *nombre, int fin_contador, int etiqueta);
 
 /* FUNCIONES DE VECTORES Y FUNCIONES */
 /*
@@ -245,41 +248,41 @@ Puede ser un valor concreto (en ese caso exp_es_direccion vale 0)
 Según se especifica en el material, es suficiente con utilizar dos registros para realizar esta
 tarea.
 */
-void escribir_elemento_vector(FILE * fpasm,char * nombre_vector, int tam_max, int exp_es_direccion);
+void escribir_elemento_vector(FILE* fpasm,char* nombre_vector, int tam_max, int exp_es_direccion);
 
 /*
    Apila el valor contenido en el elemento de un vector
 */
-void apilar_valor_elemento_vector(FILE *fpasm);
+void apilar_valor_elemento_vector(FILE* fpasm);
 
 /*
    Comprueba en tiempo de ejecucion que el indice de un elemento
    de un vector no sea negativo ni superior al tamanio del vector
 */
-void comprobar_indice_vector(FILE *fpasm, const char *nombre, int es_direccion, int tam);
+void comprobar_indice_vector(FILE* fpasm, const char* nombre, int es_direccion, int tam);
 
 /**
-  Escribe la plantilla de comienzo de una función con nombre nombre_funcion 
+  Escribe la plantilla de comienzo de una función con nombre nombre_funcion
   y un numero num_var_loc de variables locales
  */
-void declararFuncion(FILE *fpasm, char *nombre_function, int num_var_loc);
+void declararFuncion(FILE* fpasm, char* nombre_function, int num_var_loc);
 
 /*
   Escribe el final de la funcion correspondiente
  */
-void retornarFuncion(FILE *fpasm, int es_variable);
+void retornarFuncion(FILE* fpasm, int es_variable);
 
 /*
- * Almacena en la pila la dirección del parámetro correspondiente. 
+ * Almacena en la pila la dirección del parámetro correspondiente.
  * El primer parámetro está en la posición 0
  */
-void escribirParametro(FILE *fpasm, int direccion, int pos_parametro, int num_total_parametros);
+void escribirParametro(FILE* fpasm, int direccion, int pos_parametro, int num_total_parametros);
 
 /*
  * Almacena en la pila la dirección de la variable local correspondiente.
  * La primera variable local está en la posición 1
  */
-void escribirVariableLocal(FILE *fpasm, int direccion, int posicion_variable_local);
+void escribirVariableLocal(FILE* fpasm, int direccion, int posicion_variable_local);
 
 /*
    Asigna el valor a un parametro en la pila
@@ -298,7 +301,7 @@ no “variables”
 Esta función realiza la tarea de dado un operando escrito en la pila y sabiendo si es variable
 o no (es_variable) se deja en la pila el valor correspondiente
 */
-void operandoEnPilaAArgumento(FILE *fpasm, int es_variable);
+void operandoEnPilaAArgumento(FILE* fpasm, int es_variable);
 
 /*
 Esta función genera código para llamar a la función nombre_funcion asumiendo que los
@@ -307,7 +310,7 @@ Debe dejar en la cima de la pila el retorno de la función tras haberla limpiado
 argumentos
 Para limpiar la pila puede utilizar la función de nombre limpiarPila
 */
-void llamarFuncion(FILE *fpasm, char *nombre_funcion, int num_argumentos);
+void llamarFuncion(FILE* fpasm, char* nombre_funcion, int num_argumentos);
 
 /*
 Genera código para limpiar la pila tras invocar una función
@@ -315,59 +318,59 @@ Esta función es necesaria para completar la llamada a métodos, su gestión dif
 conocimiento por parte de la función de llamada del número de argumentos que hay en la
 pila
 */
-void limpiarPila(FILE * fd_asm, int num_argumentos);
+void limpiarPila(FILE* fd_asm, int num_argumentos);
 
 /*
 Inicializa un vector
 */
-void init_vector(FILE *fpasm, char *nombre, int tam_inicializacion, int tam_vector);
+void init_vector(FILE* fpasm, char* nombre, int tam_inicializacion, int tam_vector);
 
 /*
 Para condicionales compare-with
 */
-void fin_compare(FILE *fpasm, int etiqueta);
-void compare_with(FILE *fpasm, int es_dir_1, int es_dir2, int etiqueta);
-void salto_less(FILE *fpasm, int etiqueta);
-void salto_equal(FILE *fpasm, int etiqueta);
-void salto_greater(FILE *fpasm, int etiqueta);
+void fin_compare(FILE* fpasm, int etiqueta);
+void compare_with(FILE* fpasm, int es_dir_1, int es_dir2, int etiqueta);
+void salto_less(FILE* fpasm, int etiqueta);
+void salto_equal(FILE* fpasm, int etiqueta);
+void salto_greater(FILE* fpasm, int etiqueta);
 
 /*
 Para auto-operadores
 */
 /* Operador de incremento: ++ */
-void incremento_variable_global(FILE *fpasm, char *nombre);
-void incremento_parametro(FILE *fpasm, int pos_param, int num_params);
-void incremento_vector(FILE *fpasm, char *nombre, int tam_vector);
-void incremento_variable_local(FILE *fpasm, int pos_var_loc);
+void incremento_variable_global(FILE* fpasm, char* nombre);
+void incremento_parametro(FILE* fpasm, int pos_param, int num_params);
+void incremento_vector(FILE* fpasm, char* nombre, int tam_vector);
+void incremento_variable_local(FILE* fpasm, int pos_var_loc);
 /* Operador de decremento: -- */
-void decremento_variable_global(FILE *fpasm, char *nombre);
-void decremento_parametro(FILE *fpasm, int pos_param, int num_params);
-void decremento_vector(FILE *fpasm, char *nombre, int tam_vector);
-void decremento_variable_local(FILE *fpasm, int pos_var_loc);
+void decremento_variable_global(FILE* fpasm, char* nombre);
+void decremento_parametro(FILE* fpasm, int pos_param, int num_params);
+void decremento_vector(FILE* fpasm, char* nombre, int tam_vector);
+void decremento_variable_local(FILE* fpasm, int pos_var_loc);
 /* Operador de autosuma: += */
-void autosuma_variable_global(FILE *fpasm, char *nombre, int es_direccion);
-void autosuma_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
-void autosuma_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
-void autosuma_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
+void autosuma_variable_global(FILE* fpasm, char* nombre, int es_direccion);
+void autosuma_parametro(FILE* fpasm, int es_direccion, int pos_param, int num_params);
+void autosuma_vector(FILE* fpasm, char* nombre, int es_direccion, int tam_vector);
+void autosuma_variable_local(FILE* fpasm, int es_direccion, int pos_var_loc);
 /* Operador de autoresta: -= */
-void autoresta_variable_global(FILE *fpasm, char *nombre, int es_direccion);
-void autoresta_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
-void autoresta_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
-void autoresta_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
+void autoresta_variable_global(FILE* fpasm, char* nombre, int es_direccion);
+void autoresta_parametro(FILE* fpasm, int es_direccion, int pos_param, int num_params);
+void autoresta_vector(FILE* fpasm, char* nombre, int es_direccion, int tam_vector);
+void autoresta_variable_local(FILE* fpasm, int es_direccion, int pos_var_loc);
 /* Operador de automultiplicacion: *= */
-void automult_variable_global(FILE *fpasm, char *nombre, int es_direccion);
-void automult_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
-void automult_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
-void automult_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
+void automult_variable_global(FILE* fpasm, char* nombre, int es_direccion);
+void automult_parametro(FILE* fpasm, int es_direccion, int pos_param, int num_params);
+void automult_vector(FILE* fpasm, char* nombre, int es_direccion, int tam_vector);
+void automult_variable_local(FILE* fpasm, int es_direccion, int pos_var_loc);
 /* Operador de autodivision: /= */
-void autodiv_variable_global(FILE *fpasm, char *nombre, int es_direccion);
-void autodiv_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
-void autodiv_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
-void autodiv_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
+void autodiv_variable_global(FILE* fpasm, char* nombre, int es_direccion);
+void autodiv_parametro(FILE* fpasm, int es_direccion, int pos_param, int num_params);
+void autodiv_vector(FILE* fpasm, char* nombre, int es_direccion, int tam_vector);
+void autodiv_variable_local(FILE* fpasm, int es_direccion, int pos_var_loc);
 
 /*
 Modulo sobre vectores
 */
-void modulo_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
+void modulo_vector(FILE* fpasm, char* nombre, int es_direccion, int tam_vector);
 
 #endif

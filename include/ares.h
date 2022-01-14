@@ -14,28 +14,25 @@
 #define INPUT_EXTENSION ".ares"
 
 /* Codigos de errores */
-typedef enum ErrorCode
-{
+typedef enum ErrorCode {
     NO_ERR,
     ERR_MORFOLOGICO,
     ERR_SINTACTICO
 } ErrorCode;
 
 /* Tipos de variables*/
-typedef enum
-{
+typedef enum {
     BOOLEAN,
     INT
 } Tipo;
 
 /* Estructura para ficheros de entrada y salida */
-extern struct ARES_UTILS
-{
-    FILE *fin;          /* Fichero de entrada */
-    char *fin_name;     /* Nombre de fichero de entrada */
-    FILE *fasm;         /* Fichero de compilacion */
-    FILE *fdbg;         /* Fichero de debug (logs de flex/bison) */
-    FILE *ferr;         /* Fichero de salida de errores */
+extern struct ARES_UTILS {
+    FILE* fin;          /* Fichero de entrada */
+    char* fin_name;     /* Nombre de fichero de entrada */
+    FILE* fasm;         /* Fichero de compilacion */
+    FILE* fdbg;         /* Fichero de debug (logs de flex/bison) */
+    FILE* ferr;         /* Fichero de salida de errores */
 
     ErrorCode error;    /* Codigo de error */
 
@@ -56,17 +53,20 @@ typedef struct {
     int tam_inicializacion_vector;  /* Para inicializar vectores */
 } attribute_type;
 
-/* Ejecutar comandos */
-void exec_sh(const char *cmd);
+/* Ejecutar comandos de shell */
+void exec_sh(const char* cmd);
 
-/* Funcion para manejar errores */
-void manage_error(char *msg, char *s);
+/* Manejar errores */
+void manage_error(char* msg, char* s);
 
-/* Imprime ayuda */
-void print_help(const char *c);
+/* Muestra ayuda */
+void print_help(const char* c);
+
+/* Muestra numero de version */
+int print_version();
 
 /* Funcion Principal que llama al analizador */
-int main(int argc, char *argv[]);
+int main(int argc, char* argv[]);
 
 
 #endif /* ARES_H */

@@ -79,25 +79,34 @@
 }
 
 /* Palabras reservadas */ 
-%token TOK_MAIN               
-%token TOK_INT                
-%token TOK_BOOLEAN            
-%token TOK_ARRAY              
-%token TOK_FUNCTION           
-%token TOK_IF                 
-%token TOK_ELSE               
-%token TOK_WHILE              
-%token TOK_SCANF              
-%token TOK_PRINTF             
+%token TOK_MAIN
+%token TOK_ARRAY
+%token TOK_FUNCTION
+%token TOK_IF
+%token TOK_ELSE
+%token TOK_WHILE
 %token TOK_RETURN
 %token TOK_INIT
 %token TOK_COMPARE
 %token TOK_WITH
 %token TOK_LESS
 %token TOK_EQUAL
-%token TOK_GREATER    
-%token TOK_DO      
- 
+%token TOK_GREATER
+%token TOK_DO
+%token TOK_LOOP
+%token TOK_IN
+%token TOK_TO
+
+/* Tipos de datos */
+%token TOK_INT                
+%token TOK_BOOLEAN 
+
+/* Funciones del sistema */
+%token TOK_SCANF              
+%token TOK_PRINTF
+%token TOK_LEN    
+
+/* Simbolos */
 %token TOK_AND
 %token TOK_OR
 %token TOK_IGUAL
@@ -131,7 +140,7 @@
 %type <attributes> lista_expresiones resto_lista_expresiones
 %type <attributes> lista_init_v
 %type <attributes> compare_with compare_less compare_equal compare_greater
-%type <attributes> do_tok
+%type <attributes> do_tok loop_in_tok
 
 %type <attributes> if_exp if_sentencias
 %type <attributes> bucle
@@ -588,12 +597,39 @@ bucle : bucle_exp sentencias '}' {
             /* Comprobamos que la expresion sea de tipo boolean */
             CHECK_ERROR($7.tipo == BOOLEAN, "se esperaba una expresion de tipo boolean");
             do_while_fin(ares_utils_T.fasm, $7.es_direccion, $1.etiqueta);
+        }
+        | loop_in_tok TOK_TO exp ']' '{' sentencias '}' {
+            P_RULE(0,"<bucle> ::=  loop <identificador_use> in [<exp> to <exp>] { <sentencias> }");
+
+            CHECK_ERROR($3.tipo == INT, "limite del rango de loop-in deben ser de tipo entero");
+            CHECK_ERROR($3.valor_entero > $$.valor_entero, "limite superior del rango debe ser mayor al inferior");
+            printf("LEXEMA: %s\n\n", $1.lexema);
+            loop_in_fin(ares_utils_T.fasm, $$.lexema, $3.valor_entero, $$.etiqueta);
         };
 
 do_tok : TOK_DO {
                 /* La etiqueta permite el anidamiento */
                 $$.etiqueta = etiqueta++;
                 do_while_inicio(ares_utils_T.fasm, $$.etiqueta);
+            };
+
+loop_in_tok : TOK_LOOP identificador_use TOK_IN '[' exp {
+                char err_msg[TAM_ERRMSG] = "";
+                sprintf(err_msg, "Identificador [%s] no existe", $2.lexema);
+                sym_info *info = sym_t_check($2.lexema);
+
+                CHECK_ERROR(info, err_msg);
+                CHECK_ERROR(info->tipo == INT, "iterador de loop-in debe ser de tipo entero");
+                CHECK_ERROR(info->elem != FUNCION, "iterador de loop-in no puede ser una funcion");
+                CHECK_ERROR(info->catg != VECTOR, "iterador de loop-in no puede ser un vector");
+                CHECK_ERROR($5.tipo == INT, "limite del rango de loop-in deben ser de tipo entero");
+                //CHECK_ERROR($5.valor_entero < 0, "limite inferior del rango no puede ser negativo");
+
+                $$.etiqueta = etiqueta++;
+                $$.valor_entero = $5.valor_entero;
+                strcpy($$.lexema, info->lexema);
+
+                loop_in_inicio(ares_utils_T.fasm, info->lexema, $5.valor_entero, $$.etiqueta);
             };
 
 bucle_exp : bucle_tok '(' exp ')' '{' {
@@ -606,15 +642,15 @@ bucle_tok : TOK_WHILE {
             while_inicio(ares_utils_T.fasm, $$.etiqueta);
           }
 
-lectura : TOK_SCANF identificador_use {
+lectura : TOK_SCANF identificador_use ')' {
             char err_msg[TAM_ERRMSG] = "";
             P_RULE(54,"<lectura> ::= scanf identificador"); 
 
             sprintf(err_msg, "Identificador [%s] no existe", $2.lexema);
             sym_info* info = sym_t_check($2.lexema);
             CHECK_ERROR(info, err_msg);
-            CHECK_ERROR((info->elem != FUNCION), "scanf no admite funciones como entrada");
-            CHECK_ERROR((info->catg != VECTOR), "scanf no admite vectores como entrada");
+            CHECK_ERROR(info->elem != FUNCION, "scanf no admite funciones como entrada");
+            CHECK_ERROR(info->catg != VECTOR, "scanf no admite vectores como entrada");
 
             if (info->is_var_loc == UNDEFINED) {
                 leer(ares_utils_T.fasm, info->lexema, info->tipo, 1);
@@ -628,7 +664,7 @@ lectura : TOK_SCANF identificador_use {
             }
         };
 
-escritura : TOK_PRINTF exp {
+escritura : TOK_PRINTF exp ')' {
                 P_RULE(56,"<escritura> ::= printf <exp>");
                 escribir(ares_utils_T.fasm, $2.es_direccion, $2.tipo);
           };
@@ -734,7 +770,7 @@ exp : exp '+' exp {
         $$.tipo = BOOLEAN;
         $$.es_direccion = 0;  
     }
-    | '~' identificador_use {
+    | TOK_LEN identificador_use ')' {
         char err_msg[TAM_ERRMSG] = "";
         sym_info* sym = NULL;
 

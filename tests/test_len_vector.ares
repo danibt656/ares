@@ -1,13 +1,13 @@
 main {
     // Declarar vector
-    array int[4] v;
-    int a;
+    array u32[4] v;
+    u32 a;
 
     // Inicializar vector
     init v {1;2;3};
 
-    a = ~v;
+    a = len(v);
 
     @ debe imprimir 4 (len del vector)
-    printf a;
+    printf(a);
 }

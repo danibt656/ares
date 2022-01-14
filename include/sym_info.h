@@ -10,23 +10,20 @@
 #define MIN_FILAS_VECTOR 1
 #define MAX_FILAS_VECTOR 64
 
-typedef enum
-{
+typedef enum {
     VARIABLE,
     PARAMETRO,
     FUNCION
 } Elemento;
 
-typedef enum
-{
+typedef enum {
     ESCALAR,
     VECTOR
 } Categoria;
 
 /* Informacion de un simbolo en la tabla */
-typedef struct STRUCT_SYM_INFO
-{
-    char *lexema;       /* Identificador */
+typedef struct STRUCT_SYM_INFO {
+    char* lexema;       /* Identificador */
 
     Elemento elem;      /* Variable, Param o Funcion */
     Tipo tipo;          /* Boolean o Entero */
@@ -34,7 +31,7 @@ typedef struct STRUCT_SYM_INFO
 
     /* Escalares */
     int valor;
-    
+
     /* Para vectores */
     int size;           /* Num filas [1, 64] */
 
@@ -56,13 +53,13 @@ typedef struct STRUCT_SYM_INFO
  * @param tipo          INT o BOOLEAN
  * @param catg          Categoria del elemento (ESCALAR, VECTOR)
  * @param e1            Si ESCALAR -> Valor, VECTOR -> Longitud, FUNCION -> Num. parametros
- * @param e2            Si PARAMETRO -> Posicion en call, VARIABLE LOCAL -> Posicion en declaraciones 
- *                      de funcion, FUNCION -> Num. variables locales 
+ * @param e2            Si PARAMETRO -> Posicion en call, VARIABLE LOCAL -> Posicion en declaraciones
+ *                      de funcion, FUNCION -> Num. variables locales
  * @param is_var_loc    VARIABLE LOCAL -> 1, OTRO -> 0
- * 
- * @return Puntero a info de simbolo 
+ *
+ * @return Puntero a info de simbolo
  */
-sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categoria catg, int e1, int e2);
+sym_info* sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categoria catg, int e1, int e2);
 
 
 
@@ -71,6 +68,6 @@ sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categori
  *
  * @param sym Simbolo
  */
-void sym_info_free(sym_info *sym);
+void sym_info_free(sym_info* sym);
 
 #endif

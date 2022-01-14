@@ -29,10 +29,10 @@ typedef struct STRUCT_SYM_T {
 
 /**
  * Inicializa la tabla de simbolos
- * 
+ *
  * @return Puntero a tabla de simbolos
  */
-sym_t *sym_t_create();
+sym_t* sym_t_create();
 
 /**
  * Libera la memoria de la tabla de simbolos
@@ -51,18 +51,18 @@ void open_scope(char* key, int value, Tipo tipo);
 
 /**
  * Cierra la tabla local de la tabla de simbolos
- * 
+ *
  */
 void close_scope();
 
 /**
  * Anyade un simbolo al hash local, si existe. De lo contrario,
  * anyade al hash global.
- * 
+ *
  * @param sym   Simbolo
  * @return -1 si no hay tablas inicializadas
  */
-int sym_t_add_symb(sym_info *sym);
+int sym_t_add_symb(sym_info* sym);
 
 /**
  * Obtiene el simbolo en funcion de su ID.
@@ -70,17 +70,17 @@ int sym_t_add_symb(sym_info *sym);
  * @param id    String ID de lo leido
  * @return Puntero a simbolo de la tabla de simbolos
  */
-sym_info* sym_t_get_symb(char *id);
+sym_info* sym_t_get_symb(char* id);
 
 /**
  * Función para checkear si puede insertar un valor
  */
-sym_info* sym_t_check(char *id);
+sym_info* sym_t_check(char* id);
 
-char **sym_t_getLocalSymbols();
+char** sym_t_getLocalSymbols();
 
-char **sym_t_getGlobalSymbols();
+char** sym_t_getGlobalSymbols();
 
-sym_info* sym_t_get_symb_local(char *id);
+sym_info* sym_t_get_symb_local(char* id);
 
 #endif

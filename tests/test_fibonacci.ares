@@ -1,16 +1,16 @@
 // Tratamiento de funciones: recursividad
 
-main
+begin
 {
 // Declaraciones
 
-    int x, resultado;
+    i32 x, resultado;
 
 // Funciones
-    function int fibonacci (int num1)
+    fn i32 fibonacci (i32 num1)
     {
         // Declaraciones
-	    int res1, res2;
+	    i32 res1, res2;
 	
         if ((num1 == 0))
         {
@@ -27,9 +27,9 @@ main
 
 // Sentencias
 
-	scanf x;
+	input(x);
 
 	resultado = fibonacci (x);
 
-	printf resultado;
+	output(resultado);
 }

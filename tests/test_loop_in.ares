@@ -1,0 +1,9 @@
+@ Test del bucle loop-in
+begin
+{
+    i32 x;
+
+    loop x in [1 to 6] {
+        output(x);
+    }
+}

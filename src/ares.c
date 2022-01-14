@@ -24,17 +24,18 @@ struct ARES_UTILS ares_utils_T = {
     .col = 1,
 };
 
-void manage_error(char *msg, char *s)
+void manage_error(char* msg, char* s)
 {
-    char *tipo_error;
+    char* tipo_error;
 
     if (ares_utils_T.error == ERR_MORFOLOGICO)
         tipo_error = "Error morfologico";
-    else if (ares_utils_T.error == ERR_SINTACTICO) {
-        tipo_error = "Error sintactico";
-        ares_utils_T.col -= 1;
-    }
-    
+    else
+        if (ares_utils_T.error == ERR_SINTACTICO) {
+            tipo_error = "Error sintactico";
+            ares_utils_T.col -= 1;
+        }
+
     /* tipo de error y linea y columna*/
     fprintf(stderr, "***%s en [lin %d, col %d]", tipo_error, ares_utils_T.line, ares_utils_T.col);
     /* mensaje concreto de error (solo si lo hay) */
@@ -43,37 +44,38 @@ void manage_error(char *msg, char *s)
             fprintf(stderr, ": %s (%s)\n", msg, s);
         else
             fprintf(stderr, ": %s\n", msg);
-    } else
+    }
+    else
         fprintf(stderr, "\n");
 }
 
-void exec_sh(const char *cmd)
+void exec_sh(const char* cmd)
 {
-   char *output = (char*) calloc(1, sizeof(char));
-   output[0] = '\0';
+    char* output = (char*) calloc(1, sizeof(char));
+    output[0] = '\0';
 
-   FILE *fp;
-   char path[1035];
+    FILE* fp;
+    char path[1035];
 
-   fp = popen(cmd, "r");
-   if (!fp) {
-       printf("[Tac]: Failed to run command `%s`\n", cmd);
-       exit(1);
-   }
+    fp = popen(cmd, "r");
+    if (!fp) {
+        printf("[Tac]: Failed to run command `%s`\n", cmd);
+        exit(1);
+    }
 
-   while (fgets(path, sizeof(path), fp) != NULL) {
-       output = (char*)realloc(output, (strlen(output) + strlen(path) + 1) * sizeof(char));
-       strcat(output, path);
-   }
+    while (fgets(path, sizeof(path), fp) != NULL) {
+        output = (char*)realloc(output, (strlen(output) + strlen(path) + 1) * sizeof(char));
+        strcat(output, path);
+    }
 
-   pclose(fp);
-   free(output);
+    pclose(fp);
+    free(output);
 }
 
-void print_help(const char *c)
+void print_help(const char* c)
 {
     fprintf(stderr,
-"\nUSO: %s <entrada_ares> <salida>\n\
+            "\nUSO: %s <entrada_ares> <salida>\n\
     + entrada_ares: Fichero con codigo fuente ARES\n\
     + salida_asm: Nombre fichero ejecutable\n\
 \nOpciones\n\
@@ -84,47 +86,54 @@ void print_help(const char *c)
     -u: desinstala el compilador del Lenguaje ARES\n\n\
 \nPara mas informacion, referirse al README.md\n\
 -----------------------------------------------------\n",
-        c);
+            c);
 }
 
-extern FILE *yyout;
-extern FILE *yyin;
+int print_version()
+{
+    printf("Current version: ares v2.1\n");
+    return EXIT_SUCCESS;
+}
+
+extern FILE* yyout;
+extern FILE* yyin;
 
 extern int yyparse(void);
 
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     int ret = 1, opt;
     int file_in_exists=-1, file_out_exists=-1, dbg_enabled=-1;
     char cmd[128] = "", file_in[64] = "", file_out[64] = "";
 
-    
-    while((opt = getopt(argc, argv, "f:o:dh")) != -1) 
-    { 
-        switch(opt) 
-        { 
-            case 'f': 
+
+    while ((opt = getopt(argc, argv, "f:o:dhv")) != -1) {
+        switch (opt) {
+            case 'f':
                 sprintf(file_in, "%s", optarg);
                 file_in_exists = 1;
-                break; 
-            case 'o': 
+                break;
+            case 'o':
                 sprintf(file_out, "%s", optarg);
                 file_out_exists = 1;
-                break; 
+                break;
             case 'd':
                 dbg_enabled = 1;
                 break;
             case 'h':
                 print_help(argv[0]);
                 break;
-            case ':': 
-                printf("** la opcion necesita un valor\n"); 
-                break; 
-            case '?': 
+            case 'v':
+                printf("OPTIND %d", optind);
+                return print_version();
+            case ':':
+                printf("** la opcion necesita un valor\n");
+                break;
+            case '?':
                 printf("** opcion desconocida: %c\n", optopt);
-                break; 
-        } 
+                break;
+        }
     }
 
     if (file_in_exists == -1) {
@@ -138,8 +147,8 @@ int main(int argc, char *argv[])
     }
 
     /* Comprobar extension de fichero de entrada */
-    const char *dot = strrchr(file_in, '.');
-    if(strcmp(dot, INPUT_EXTENSION) != 0) {
+    const char* dot = strrchr(file_in, '.');
+    if (strcmp(dot, INPUT_EXTENSION) != 0) {
         printf("** Los ficheros de entrada deben acabar en [%s]\n", INPUT_EXTENSION);
         return EXIT_FAILURE;
     }

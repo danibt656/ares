@@ -1,8 +1,8 @@
-main
+begin
 {
-    array boolean[2] a;
+    array bool[2] a;
 
     a[1] = 1;
 
-    printf a[1];
+    output(a[1]);
 }

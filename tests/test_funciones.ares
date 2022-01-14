@@ -1,8 +1,8 @@
-main
+begin
 {
-    int x, y, resultado;
+    i32 x, y, resultado;
 
-	function int suma (int num1; int num2)
+	fn i32 suma (i32 num1; i32 num2)
 	{
 		return num1+num2;
 	}
@@ -11,16 +11,16 @@ main
 	y = 3;
 	
 	resultado = suma (x,y);
-	printf resultado;
+	output(resultado);
 	
 	resultado = suma (x,1);
-	printf resultado;
+	output(resultado);
 	
 	resultado = suma (10,y);
-	printf resultado;
+	output(resultado);
 
 	resultado = suma (3,5);
-	printf resultado;	
+	output(resultado);	
 	
 }
 

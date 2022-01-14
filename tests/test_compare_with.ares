@@ -1,20 +1,20 @@
-main
+begin
 {
-    int a,b;
+    i32 a,b;
 
-    scanf a;
-    scanf b;
+    input(a);
+    input(b);
 
     compare a with b
     {
         less
-            printf(a-b);
-            printf(-1);
+            output(a-b);
+            output(-1);
         equal
-            printf(a-b);
-            printf(0);
+            output(a-b);
+            output(0);
         greater
-            printf(a-b);
-            printf(1);
+            output(a-b);
+            output(1);
     }
 }

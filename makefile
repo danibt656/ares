@@ -1,5 +1,5 @@
-.DEFAULT_GOAL = install
-.PHONY: install clean help nasm astyle
+.DEFAULT_GOAL = all
+.PHONY: all clean help nasm astyle
 .SUFFIXES:
 
 ## Directorios
@@ -30,6 +30,8 @@ EXES := $(patsubst %,$(DEXE)/%,$(EXES))
 EOBJ := $(patsubst $(DEXE)/%.c,$(DOBJ)/%.o,$(EXES))
 EBIN := $(patsubst $(DEXE)/%.c,$(DBIN)/%,$(EXES))
 
+ARTISTIC_STYLE_OPTIONS ?= .astylerc
+
 DEPENDENCIAS := $(wildcard $(DOBJ)/*.d)
 
 FLEX_SOURCES := $(wildcard $(DSRC)/*.l)
@@ -53,9 +55,9 @@ NASM_BIN := $(patsubst %.nasm, %, $(NASM_SOURCES))
 
 $(FLEX_OBJ): CFLAGS += -Wno-sign-compare -D_XOPEN_SOURCE=700
 
-install: CFLAGS += -g
+all: CFLAGS += -g
 
-install: $(EBIN)
+all: $(EBIN)
 
 nasm: $(NASM_BIN)
 
@@ -80,7 +82,7 @@ $(NASM_OBJ):$(DOBJ)/%.o: $(DNASM)/%.nasm
 $(NASM_BIN): $(DBIN)/%: $(DOBJ)/%.o $(ARESLIB)
 	$(CC) $(CCNASMFLAGS) -o $@ $^ $(CFLAGS)
 
-# Borrar ficheros generados con make install
+# Borrar ficheros generados con make all
 clean:
 	@$(RM) ares exe
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(DEPENDENCIAS)
@@ -91,28 +93,32 @@ clean:
 # Borrar ficheros generados y volver a compilar
 reset:
 	make clean
-	make install
+	make all
 
 # Ayuda
 help:
 	@echo "Flags de Makefile:"
-	@echo "    install              - compila todo y genera el ejecutable ares"
+	@echo "    all              - compila todo y genera el ejecutable ares"
 	@echo "                             -> Genera un fichero debug con las trazas de flex y bison"
 	@echo "    clean               - borra todos los ficheros generados"
 	@echo "    runf                - compila un fichero de prueba en ARES y lo ejecuta"
 	@echo "                             -> Uso: make runf src=<FICHERO_ARES>"
 	@echo "                             -> El fichero ejecutable se llama 'exe' y se encuentra en el directorio /ares/build"
 	@echo "    valgrind            - ejecuta valgrind en el compilador sobre un fichero dado"
-	@echo "    reset               - ejecuta primero la regla 'make clean' y luego 'make install'"
+	@echo "    astyle              - estiliza el codigo acorde al fichero fichero $(ARTISTIC_STYLE_OPTIONS)"
+	@echo "    reset               - ejecuta primero la regla 'make clean' y luego 'make all'"
 
 runf:
 	@echo "-------------------------------"
-	./ares -f $(src) -o exe
+	./ares -f $(src) -o exe -d
 	@echo "-------------------------------"
 	./exe
 
 valgrind:
 	valgrind --leak-check=full --show-leak-kinds=all ./ares $(src) exe.asm
+
+style:
+	astyle --options=$(ARTISTIC_STYLE_OPTIONS) $(DINC)/*.h $(DSRC)/*.c
 
 CFLAGS += -MMD
 -include $(DEPENDENCIAS)

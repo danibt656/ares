@@ -1,11 +1,11 @@
-main {
-	int x, y;
-	scanf x;
+begin {
+	i32 x, y;
+	input(x);
 	y = 1;
 	while((x>1)) {
 		y = x*y;
 		x = x-1;
 	}
-	printf y;
+	output(y);
 
 }

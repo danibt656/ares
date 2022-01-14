@@ -1,12 +1,12 @@
 // Test que mezcla un do-while con una llamada a funcion
-main
+begin
 {
-    int x, y;
+    i32 x, y;
 
-    function int bucle() {
+    fn i32 bucle() {
         do {
-            printf(x);
-            x = x + 1;
+            output(x);
+            x++;
             y = 0;
         }
         while ((x <= 6));
@@ -15,5 +15,5 @@ main
 
     x = 4;
     y = bucle();
-    printf y;
+    output(y);
 }

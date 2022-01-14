@@ -1,18 +1,18 @@
 @ Test para los auto-operadores
-main {
-    int x;
+begin {
+    i32 x;
     x = 3;
-    printf x;   // 3
+    output(x);   // 3
     x += 3;
-    printf x;   // 6
+    output(x);   // 6
     x -= 1;
-    printf x;   // 5
+    output(x);   // 5
     x *= 2;
-    printf x;   // 10
+    output(x);   // 10
     x /= 2;
-    printf x;   // 5
+    output(x);   // 5
     x++;
-    printf x;   // 6
+    output(x);   // 6
     x--;
-    printf x;   // 5
+    output(x);   // 5
 }

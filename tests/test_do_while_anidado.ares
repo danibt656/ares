@@ -1,25 +1,25 @@
-// Test de un do while anidado
-// Al ejemplo del enunciado se ha añadido un tercer bucle anidado,
-// solo para mostrar que funciona
-main
+@ Test de un do while anidado
+@ Al ejemplo del enunciado se ha añadido un tercer bucle anidado,
+@ solo para mostrar que funciona
+begin
 {
-    int x, y;
+    i32 x, y;
     x = 4;
     do {
-        printf(x);
+        output(x);
         do {
             y = 0;
-            printf(true);
-            x = x + 1;
+            output(true);
+            x++;
             do {
-                printf y;
+                output(y);
                 y = y + 1;
             }
             while ((y < 3));
         }
         while ((x <= 5));
         
-        x = x + 1;
+        x++;
     }
     while ((x <= 6));
 }

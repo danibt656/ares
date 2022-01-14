@@ -4,15 +4,15 @@
 #include <string.h>
 
 /* SIMBOLOS */
-sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categoria catg, int e1, int e2)
+sym_info* sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categoria catg, int e1, int e2)
 {
     sym_info* sym = NULL;
-    
-    if ((sym = (sym_info*) malloc(sizeof(sym_info)))==NULL){
+
+    if ((sym = (sym_info*) malloc(sizeof(sym_info)))==NULL) {
         return NULL;
     }
-    else{
-        if(!(sym->lexema=(char*)malloc((strlen(lexema)+1)*sizeof(char)))){
+    else {
+        if (!(sym->lexema=(char*)malloc((strlen(lexema)+1)*sizeof(char)))) {
             free(sym);
             return NULL;
         }
@@ -32,19 +32,23 @@ sym_info *sym_info_create(const char* lexema, Elemento elem, Tipo tipo, Categori
         if (elem == FUNCION) {
             sym->num_params = e1;
             sym->num_vars_loc = e2;
-        } else if (elem == PARAMETRO)
-            sym->pos_param = e2;
+        }
+        else
+            if (elem == PARAMETRO)
+                sym->pos_param = e2;
         if (catg == ESCALAR) {
             sym->valor = e1;
             sym->size = 1;
-        } else if (catg == VECTOR) {
-            sym->size = e1;
         }
+        else
+            if (catg == VECTOR) {
+                sym->size = e1;
+            }
     }
     return sym;
 }
 
-void sym_info_free(sym_info *sym)
+void sym_info_free(sym_info* sym)
 {
     if (sym) {
         if (sym->lexema)

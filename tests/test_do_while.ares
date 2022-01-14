@@ -1,11 +1,11 @@
 // Test de un do_while simple
-main
+begin
 {
-    int x;
+    i32 x;
     x = 4;
     do {
-        printf(x);
-        x = x + 1;
+        output(x);
+        x++;
     }
     while ((x <= 6));
 }

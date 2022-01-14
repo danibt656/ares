@@ -2,7 +2,7 @@
 #define _TOKENS_H 1
 
 
-/* Palabras reservadas */ 
+/* Palabras reservadas */
 #define TOK_MAIN                100
 #define TOK_INT                 101
 #define TOK_BOOLEAN             102
@@ -21,7 +21,10 @@
 #define TOK_EQUAL               115
 #define TOK_GREATER             116
 #define TOK_DO                  117
-
+#define TOK_LEN                 118
+#define TOK_LOOP                119
+#define TOK_IN                  120
+#define TOK_TO                  121
 
 /* Simbolos */
 #define TOK_PUNTOYCOMA          200
@@ -58,7 +61,7 @@
 /* Identificadores  */
 #define TOK_IDENTIFICADOR       300
 
-/* Constantes */ 
+/* Constantes */
 
 #define TOK_CONSTANTE_ENTERA    400
 #define TOK_TRUE                401
