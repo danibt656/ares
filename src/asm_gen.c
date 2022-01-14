@@ -1025,14 +1025,155 @@ void fin_compare(FILE *fpasm, int etiqueta)
         fprintf(fpasm, "fin_cmpw%d:\n", etiqueta);
 }
 
-
-void incremento_variable_global(FILE *fpasm, char *nombre, int es_direccion)
+/* Operador de incremento: ++ */
+void incremento_variable_global(FILE *fpasm, char *nombre)
 {
         if (!fpasm) {
                 printf("Error fallo en compilador, fichero fpasm nulo");
                 return;
         }
         fprintf(fpasm, "; Inc variable global [%s]\n", nombre);
+        
+        fprintf(fpasm, "mov dword ebx, [_%s]\n", nombre);
+        fprintf(fpasm, "inc ebx\n");
+        fprintf(fpasm, "mov dword [_%s], ebx\n", nombre);
+}
+
+void incremento_parametro(FILE *fpasm, int pos_param, int num_params)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Inc parametro funcion\n");
+
+        fprintf(fpasm, "mov dword eax, 1\n");
+        
+        fprintf(fpasm, "lea ebx, [ebp + %d]\n", 4 + 4*(num_params - pos_param));
+        fprintf(fpasm, "add eax, [ebx]\n");
+        fprintf(fpasm, "mov dword [ebx], eax\n");
+}
+
+void incremento_vector(FILE *fpasm, char *nombre, int tam_vector)
+{
+        int i;
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Inc elementos vector [%s]\n", nombre);
+
+        fprintf(fpasm, "mov eax, 1\n");
+
+        fprintf(fpasm, "mov edx, eax\n");
+
+        fprintf(fpasm, "mov ebx, _%s\n", nombre);
+
+        for (i = 0; i < tam_vector; i++) {
+                if (i != 0)
+                        fprintf(fpasm, "mov eax, edx\n");
+
+                fprintf(fpasm, "add eax, [ebx]\n");
+                fprintf(fpasm, "mov [ebx], eax\n");
+
+                if (i != (tam_vector - 1))
+                        fprintf(fpasm, "add ebx, 4\n");
+        }
+}
+
+void incremento_variable_local(FILE *fpasm, int pos_var_loc)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Inc variable local\n");
+
+        fprintf(fpasm, "mov eax, 1\n");
+
+        fprintf(fpasm, "lea ebx, [ebp - %d]\n", 4 * pos_var_loc);
+        fprintf(fpasm, "add eax, [ebx]\n");
+        fprintf(fpasm, "mov dword [ebx], eax\n");        
+}
+
+/* Operador de decremento: -- */
+void decremento_variable_global(FILE *fpasm, char *nombre)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Dec variable global [%s]\n", nombre);
+        
+        fprintf(fpasm, "mov dword ebx, [_%s]\n", nombre);
+        fprintf(fpasm, "dec ebx\n");
+        fprintf(fpasm, "mov dword [_%s], ebx\n", nombre);
+}
+
+void decremento_parametro(FILE *fpasm, int pos_param, int num_params)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Dec parametro funcion\n");
+
+        fprintf(fpasm, "mov eax, -1\n");
+        
+        fprintf(fpasm, "lea ebx, [ebp + %d]\n", 4 + 4*(num_params - pos_param));
+        fprintf(fpasm, "add eax, [ebx]\n");
+        fprintf(fpasm, "mov dword [ebx], eax\n");
+}
+
+void decremento_vector(FILE *fpasm, char *nombre, int tam_vector)
+{
+        int i;
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Dec elementos vector [%s]\n", nombre);
+
+        fprintf(fpasm, "mov eax, -1\n");
+        fprintf(fpasm, "mov edx, eax\n");
+
+        fprintf(fpasm, "mov ebx, _%s\n", nombre);
+
+        for (i = 0; i < tam_vector; i++) {
+                if (i != 0)
+                        fprintf(fpasm, "mov eax, edx\n");
+
+                fprintf(fpasm, "add eax, [ebx]\n");
+                fprintf(fpasm, "mov [ebx], eax\n");
+
+                if (i != (tam_vector - 1))
+                        fprintf(fpasm, "add ebx, 4\n");
+        }
+}
+
+void decremento_variable_local(FILE *fpasm, int pos_var_loc)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Dec variable local\n");
+
+        fprintf(fpasm, "mov eax, -1\n");
+
+        fprintf(fpasm, "lea ebx, [ebp - %d]\n", 4 * pos_var_loc);
+        fprintf(fpasm, "add eax, [ebx]\n");
+        fprintf(fpasm, "mov dword [ebx], eax\n");        
+}
+
+/* Operador de autosuma: += */
+void autosuma_variable_global(FILE *fpasm, char *nombre, int es_direccion)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Autosuma variable global [%s]\n", nombre);
 
         fprintf(fpasm, "pop dword eax\n");
         if (es_direccion)
@@ -1043,13 +1184,13 @@ void incremento_variable_global(FILE *fpasm, char *nombre, int es_direccion)
         fprintf(fpasm, "mov dword [_%s], ebx\n", nombre);
 }
 
-void incremento_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params)
+void autosuma_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params)
 {
         if (!fpasm) {
                 printf("Error fallo en compilador, fichero fpasm nulo");
                 return;
         }
-        fprintf(fpasm, "; Inc parametro funcion\n");
+        fprintf(fpasm, "; Autosuma parametro funcion\n");
 
         fprintf(fpasm, "pop dword eax\n");
         if (es_direccion)
@@ -1060,14 +1201,14 @@ void incremento_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_
         fprintf(fpasm, "mov dword [ebx], eax\n");
 }
 
-void incremento_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector)
+void autosuma_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector)
 {
         int i;
         if (!fpasm) {
                 printf("Error fallo en compilador, fichero fpasm nulo");
                 return;
         }
-        fprintf(fpasm, "; Inc elementos vector [%s]\n", nombre);
+        fprintf(fpasm, "; Autosuma elementos vector [%s]\n", nombre);
 
         fprintf(fpasm, "pop dword eax\n");
         if (es_direccion)
@@ -1088,13 +1229,13 @@ void incremento_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vect
         }
 }
 
-void incremento_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc)
+void autosuma_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc)
 {
         if (!fpasm) {
                 printf("Error fallo en compilador, fichero fpasm nulo");
                 return;
         }
-        fprintf(fpasm, "; Inc variable local\n");
+        fprintf(fpasm, "; Autosuma variable local\n");
 
         fprintf(fpasm, "pop dword eax\n");
         if (es_direccion)
@@ -1104,6 +1245,257 @@ void incremento_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc)
         fprintf(fpasm, "add eax, [ebx]\n");
         fprintf(fpasm, "mov dword [ebx], eax\n");        
 }
+
+/* Operador de autoresta: -= */
+void autoresta_variable_global(FILE *fpasm, char *nombre, int es_direccion)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Autoresta variable global [%s]\n", nombre);
+
+        fprintf(fpasm, "pop dword eax\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov dword eax, [eax]\n");
+        
+        fprintf(fpasm, "mov dword ebx, [_%s]\n", nombre);
+        fprintf(fpasm, "sub ebx, eax\n");
+        fprintf(fpasm, "mov dword [_%s], ebx\n", nombre);
+}
+
+void autoresta_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Autoresta parametro funcion\n");
+
+        fprintf(fpasm, "pop dword eax\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov dword eax, [eax]\n");
+        
+        fprintf(fpasm, "lea ebx, [ebp + %d]\n", 4 + 4*(num_params - pos_param));
+        fprintf(fpasm, "mov ecx, dword [ebx]\n");
+        fprintf(fpasm, "sub ecx, eax\n");
+        fprintf(fpasm, "mov dword [ebx], ecx\n");
+}
+
+void autoresta_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector)
+{
+        int i;
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Autoresta elementos vector [%s]\n", nombre);
+
+        fprintf(fpasm, "pop dword eax\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov edx, dword [eax]\n");
+        fprintf(fpasm, "mov edx, eax\n");
+
+        fprintf(fpasm, "mov ebx, _%s\n", nombre);
+
+        for (i = 0; i < tam_vector; i++) {
+                if (i != 0)
+                        fprintf(fpasm, "mov eax, edx\n");
+
+                fprintf(fpasm, "sub [ebx], eax\n");
+
+                if (i != (tam_vector - 1))
+                        fprintf(fpasm, "add ebx, 4\n");
+        }
+}
+
+void autoresta_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Autoresta variable local\n");
+
+        fprintf(fpasm, "pop dword eax\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov dword eax, [eax]\n");
+
+        fprintf(fpasm, "lea ebx, [ebp - %d]\n", 4 * pos_var_loc);
+        fprintf(fpasm, "sub [ebx], eax\n");
+        fprintf(fpasm, "mov dword [ebx], eax\n");        
+}
+
+/* Operador de automultiplicacion: *= */
+void automult_variable_global(FILE *fpasm, char *nombre, int es_direccion)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Automult variable global [%s]\n", nombre);
+
+        fprintf(fpasm, "pop dword ebx\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov dword ebx, [ebx]\n");
+        
+        fprintf(fpasm, "mov dword eax, [_%s]\n", nombre);
+        fprintf(fpasm, "imul ebx\n");
+        fprintf(fpasm, "mov dword [_%s], eax\n", nombre);
+}
+
+void automult_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Automult parametro funcion\n");
+
+        fprintf(fpasm, "pop dword ecx\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov dword ecx, [ecx]\n");
+        
+        fprintf(fpasm, "lea ebx, [ebp + %d]\n", 4 + 4*(num_params - pos_param));
+        fprintf(fpasm, "mov dword eax, [ebx]\n");
+        fprintf(fpasm, "imul ecx\n");
+        fprintf(fpasm, "mov dword [ebx], eax\n");
+}
+
+void automult_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector)
+{
+        int i;
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Automult elementos vector [%s]\n", nombre);
+
+        fprintf(fpasm, "pop dword ecx\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov edx, dword [ecx]\n");
+        fprintf(fpasm, "mov edx, ecx\n");
+
+        fprintf(fpasm, "mov ebx, _%s\n", nombre);
+
+        for (i = 0; i < tam_vector; i++) {
+                if (i != 0)
+                        fprintf(fpasm, "mov ecx, edx\n");
+
+                fprintf(fpasm, "mov dword eax, [ebx]\n");
+                fprintf(fpasm, "imul ecx\n");
+                fprintf(fpasm, "mov [ebx], eax\n");
+
+                if (i != (tam_vector - 1))
+                        fprintf(fpasm, "add ebx, 4\n");
+        }
+}
+
+void automult_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Automult variable local\n");
+
+        fprintf(fpasm, "pop dword ecx\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov dword ecx, [ecx]\n");
+
+        fprintf(fpasm, "lea ebx, [ebp - %d]\n", 4 * pos_var_loc);
+        fprintf(fpasm, "mov dword eax, [ebx]\n");
+        fprintf(fpasm, "imul ecx\n");
+        fprintf(fpasm, "mov dword [ebx], eax\n");        
+}
+
+/* Operador de autodivision: /= */
+void autodiv_variable_global(FILE *fpasm, char *nombre, int es_direccion)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Autodiv variable global [%s]\n", nombre);
+
+        fprintf(fpasm, "pop dword ebx\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov dword ebx, [ebx]\n");
+        
+        fprintf(fpasm, "mov dword eax, [_%s]\n", nombre);
+        fprintf(fpasm, "cdq\n");
+        fprintf(fpasm, "idiv ebx\n");
+        fprintf(fpasm, "mov dword [_%s], eax\n", nombre);
+}
+
+void autodiv_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Autodiv parametro funcion\n");
+
+        fprintf(fpasm, "pop dword ecx\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov dword ecx, [ecx]\n");
+        
+        fprintf(fpasm, "lea ebx, [ebp + %d]\n", 4 + 4*(num_params - pos_param));
+        fprintf(fpasm, "mov dword eax, [ebx]\n");
+        fprintf(fpasm, "cdq\n");
+        fprintf(fpasm, "idiv ecx\n");
+        fprintf(fpasm, "mov dword [ebx], eax\n");
+}
+
+void autodiv_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector)
+{
+        int i;
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Autodiv elementos vector [%s]\n", nombre);
+
+        fprintf(fpasm, "pop dword ecx\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov edx, dword [ecx]\n");
+        fprintf(fpasm, "mov edx, ecx\n");
+
+        fprintf(fpasm, "mov ebx, _%s\n", nombre);
+
+        for (i = 0; i < tam_vector; i++) {
+                if (i != 0)
+                        fprintf(fpasm, "mov ecx, edx\n");
+
+                fprintf(fpasm, "mov dword eax, [ebx]\n");
+                fprintf(fpasm, "cdq\n");
+                fprintf(fpasm, "idiv ecx\n");
+                fprintf(fpasm, "mov [ebx], eax\n");
+
+                if (i != (tam_vector - 1))
+                        fprintf(fpasm, "add ebx, 4\n");
+        }
+}
+
+void autodiv_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc)
+{
+        if (!fpasm) {
+                printf("Error fallo en compilador, fichero fpasm nulo");
+                return;
+        }
+        fprintf(fpasm, "; Autodiv variable local\n");
+
+        fprintf(fpasm, "pop dword ecx\n");
+        if (es_direccion)
+                fprintf(fpasm, "mov dword ecx, [ecx]\n");
+
+        fprintf(fpasm, "lea ebx, [ebp - %d]\n", 4 * pos_var_loc);
+        fprintf(fpasm, "mov dword eax, [ebx]\n");
+        fprintf(fpasm, "cdq\n");
+        fprintf(fpasm, "idiv ecx\n");
+        fprintf(fpasm, "mov dword [ebx], eax\n");    
+}
+
 
 void modulo_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector)
 {

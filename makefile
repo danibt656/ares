@@ -1,5 +1,5 @@
-.DEFAULT_GOAL = all
-.PHONY: all clean help nasm astyle
+.DEFAULT_GOAL = install
+.PHONY: install clean help nasm astyle
 .SUFFIXES:
 
 ## Directorios
@@ -14,7 +14,7 @@ DEXE := src
 CC       ?= gcc
 LEX      ?= flex
 BISON    ?= bison
-CFLAGS   := -std=c99 -Iinclude -pedantic -Wall -Wextra
+CFLAGS   := -std=gnu99 -Iinclude -pedantic -Wall -Wextra
 LDFLAGS  :=
 LFLAGS   :=
 BFLAGS   := -dyv
@@ -23,7 +23,7 @@ NASM     := nasm
 NFLAGS   := -f elf32
 CCNASMFLAGS := -m32
 
-ALFALIB     := $(DOBJ)/areslib.o
+ARESLIB     := $(DOBJ)/areslib.o
 
 EXES := ares.c
 EXES := $(patsubst %,$(DEXE)/%,$(EXES))
@@ -53,9 +53,9 @@ NASM_BIN := $(patsubst %.nasm, %, $(NASM_SOURCES))
 
 $(FLEX_OBJ): CFLAGS += -Wno-sign-compare -D_XOPEN_SOURCE=700
 
-all: CFLAGS += -g
+install: CFLAGS += -g
 
-all: $(EBIN)
+install: $(EBIN)
 
 nasm: $(NASM_BIN)
 
@@ -77,10 +77,10 @@ $(EBIN):$(DBIN)/%: $(DOBJ)/%.o $(SOBJ)
 $(NASM_OBJ):$(DOBJ)/%.o: $(DNASM)/%.nasm
 	$(NASM) $(NFLAGS) -o $@ $<
 
-$(NASM_BIN): $(DBIN)/%: $(DOBJ)/%.o $(ALFALIB)
+$(NASM_BIN): $(DBIN)/%: $(DOBJ)/%.o $(ARESLIB)
 	$(CC) $(CCNASMFLAGS) -o $@ $^ $(CFLAGS)
 
-# Borrar ficheros generados con make all
+# Borrar ficheros generados con make install
 clean:
 	@$(RM) ares exe
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(DEPENDENCIAS)
@@ -88,21 +88,26 @@ clean:
 	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
 	@$(RM) $(NASM_OBJ) $(NASM_BIN) debug *.asm *.o
 
+# Borrar ficheros generados y volver a compilar
+reset:
+	make clean
+	make install
+
 # Ayuda
 help:
 	@echo "Flags de Makefile:"
-	@echo "    all                 - compila todo y genera el ejecutable ares"
+	@echo "    install              - compila todo y genera el ejecutable ares"
 	@echo "                             -> Genera un fichero debug con las trazas de flex y bison"
 	@echo "    clean               - borra todos los ficheros generados"
-	@echo "    compile_file        - compila un fichero de prueba en ALFA y lo ejecuta"
-	@echo "                             -> Uso: make compile_file src=<FICHERO_ALFA>"
+	@echo "    runf                - compila un fichero de prueba en ARES y lo ejecuta"
+	@echo "                             -> Uso: make runf src=<FICHERO_ARES>"
+	@echo "                             -> El fichero ejecutable se llama 'exe' y se encuentra en el directorio /ares/build"
 	@echo "    valgrind            - ejecuta valgrind en el compilador sobre un fichero dado"
+	@echo "    reset               - ejecuta primero la regla 'make clean' y luego 'make install'"
 
-compile_file:
+runf:
 	@echo "-------------------------------"
-	./ares $(src) exe.asm
-	nasm -f elf32 exe.asm
-	gcc -m32 -o exe exe.o obj/areslib.o
+	./ares -f $(src) -o exe
 	@echo "-------------------------------"
 	./exe
 

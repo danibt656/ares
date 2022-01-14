@@ -12,7 +12,13 @@
 %}
 
 /* SECCION DE DEFINICIONES */
-%option noyywrap 
+/* Suprimir la accion por defecto de imprimir los caracteres que no encajan */
+%option nodefault
+/* Como solo leemos un fichero, esto nos evita tener que definir esta funcion */
+%option noyywrap
+/* No genera estas funciones y evita avisos al compilar */
+%option nounput noinput
+
 DIGITO [0-9]
 LETRA [a-zA-Z]  
 %%
@@ -69,10 +75,15 @@ greater     { SHIFT(); return TOK_GREATER; }
 "!="    { SHIFT(); return TOK_DISTINTO; }
 "<="    { SHIFT(); return TOK_MENORIGUAL; }
 ">="    { SHIFT(); return TOK_MAYORIGUAL; }
-"+="    { SHIFT(); return TOK_INCREMENTO; }
 ".%"    { SHIFT(); return TOK_MODULO_VECTOR; }
 "<"     { SHIFT(); return yytext[0]; }
 ">"     { SHIFT(); return yytext[0]; }
+"++"    { SHIFT(); return TOK_INCREMENTO; }
+"--"    { SHIFT(); return TOK_DECREMENTO; }
+"+="    { SHIFT(); return TOK_AUTOSUMA; }
+"-="    { SHIFT(); return TOK_AUTORESTA; }
+"*="    { SHIFT(); return TOK_AUTOMULT; }
+"/="    { SHIFT(); return TOK_AUTODIV; }
 
     /* Constantes */
 true        { SHIFT(); return TOK_TRUE; }

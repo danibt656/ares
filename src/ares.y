@@ -41,6 +41,9 @@
         return 1;
     }
 
+    /* Prototipo para evitar warning */
+    int yylex(void);
+
     /* Para declaraciones */
     static Tipo tipo_actual;
     static Categoria clase_actual;
@@ -94,22 +97,27 @@
 %token TOK_EQUAL
 %token TOK_GREATER    
 %token TOK_DO      
-
-          
-%token TOK_AND                
-%token TOK_OR               
-%token TOK_IGUAL              
-%token TOK_DISTINTO           
-%token TOK_MENORIGUAL         
+ 
+%token TOK_AND
+%token TOK_OR
+%token TOK_IGUAL
+%token TOK_DISTINTO
+%token TOK_MENORIGUAL
 %token TOK_MAYORIGUAL
-%token TOK_INCREMENTO
 %token TOK_MODULO_VECTOR
+%token TOK_INCREMENTO
+%token TOK_DECREMENTO
+%token TOK_AUTOSUMA
+%token TOK_AUTORESTA
+%token TOK_AUTOMULT
+%token TOK_AUTODIV
 
 %token <attributes> TOK_IDENTIFICADOR
 %token <attributes> TOK_CONSTANTE_ENTERA   
 %token TOK_TRUE               
 %token TOK_FALSE
 
+%token TOK_ERROR
 
 %type <attributes> condicional
 %type <attributes> comparacion
@@ -284,7 +292,7 @@ sentencia : sentencia_simple ';' {P_RULE(32,"<sentencia> ::= <sentencia_simple> 
           | bloque {P_RULE(33,"<sentencia> ::= <bloque>");};
 
 sentencia_simple : asignacion {P_RULE(34,"<sentencia_simple> ::= <asignacion>");}
-                 | incremento {P_RULE(0,"<sentencia_simple> ::= <incremento>");}
+                 | auto_operador {P_RULE(0,"<sentencia_simple> ::= <incremento>");}
                  | modulo_vector {P_RULE(0,"<sentencia_simple> ::= <modulo_vector>");}
                  | lectura {P_RULE(35,"<sentencia_simple> ::= <lectura>");}
                  | escritura {P_RULE(36,"<sentencia_simple> ::= <escritura>");}
@@ -336,28 +344,137 @@ asignacion  : identificador_use '=' exp {
                 escribir_elemento_vector(ares_utils_T.fasm, $3.lexema, sym->size, sym->elem);
             };
 
-incremento : identificador_use TOK_INCREMENTO exp {
+auto_operador : identificador_use TOK_AUTOSUMA exp {
                 char err_msg[TAM_ERRMSG] = "";
                 sym_info* sym = NULL;
                 P_RULE(0,"<incremento> ::= <identificador_use> += <exp>");
 
                 sym = sym_t_get_symb($1.lexema);
-                sprintf(err_msg, "Incremento a variable no declarada (%s)", $1.lexema);
+                sprintf(err_msg, "Auto-operador a variable no declarada (%s)", $1.lexema);
                 CHECK_ERROR(sym != NULL, err_msg);
                 CHECK_ERROR(sym->elem != FUNCION, "Asignacion incompatible");
-                CHECK_ERROR(sym->tipo == INT, "Operacion de incremento necesita expresion de tipo entero");
-                CHECK_ERROR($3.tipo == INT, "Operacion de incremento necesita expresion de tipo entero");
+                CHECK_ERROR(sym->tipo == INT, "Operacion necesita expresion de tipo entero");
+                CHECK_ERROR($3.tipo == INT, "Operacion necesita expresion de tipo entero");
                 
                 if (sym->catg == VECTOR) {
-                    incremento_vector(ares_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
+                    autosuma_vector(ares_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
                 } else if (sym->is_var_loc == UNDEFINED) {
-                    incremento_variable_global(ares_utils_T.fasm, $1.lexema, $3.es_direccion);
+                    autosuma_variable_global(ares_utils_T.fasm, $1.lexema, $3.es_direccion);
                 } else if (sym->elem == PARAMETRO) {
-                    incremento_parametro(ares_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
+                    autosuma_parametro(ares_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
                 } else {
-                    incremento_variable_local(ares_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
+                    autosuma_variable_local(ares_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
                 }
-            };
+            }
+            | identificador_use TOK_AUTORESTA exp {
+                char err_msg[TAM_ERRMSG] = "";
+                sym_info* sym = NULL;
+                P_RULE(0,"<incremento> ::= <identificador_use> += <exp>");
+
+                sym = sym_t_get_symb($1.lexema);
+                sprintf(err_msg, "Auto-operador a variable no declarada (%s)", $1.lexema);
+                CHECK_ERROR(sym != NULL, err_msg);
+                CHECK_ERROR(sym->elem != FUNCION, "Asignacion incompatible");
+                CHECK_ERROR(sym->tipo == INT, "Operacion necesita expresion de tipo entero");
+                CHECK_ERROR($3.tipo == INT, "Operacion necesita expresion de tipo entero");
+                
+                if (sym->catg == VECTOR) {
+                    autoresta_vector(ares_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
+                } else if (sym->is_var_loc == UNDEFINED) {
+                    autoresta_variable_global(ares_utils_T.fasm, $1.lexema, $3.es_direccion);
+                } else if (sym->elem == PARAMETRO) {
+                    autoresta_parametro(ares_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
+                } else {
+                    autoresta_variable_local(ares_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
+                }
+            }
+            | identificador_use TOK_AUTOMULT exp {
+                char err_msg[TAM_ERRMSG] = "";
+                sym_info* sym = NULL;
+                P_RULE(0,"<incremento> ::= <identificador_use> += <exp>");
+
+                sym = sym_t_get_symb($1.lexema);
+                sprintf(err_msg, "Auto-operador a variable no declarada (%s)", $1.lexema);
+                CHECK_ERROR(sym != NULL, err_msg);
+                CHECK_ERROR(sym->elem != FUNCION, "Asignacion incompatible");
+                CHECK_ERROR(sym->tipo == INT, "Operacion necesita expresion de tipo entero");
+                CHECK_ERROR($3.tipo == INT, "Operacion necesita expresion de tipo entero");
+                
+                if (sym->catg == VECTOR) {
+                    automult_vector(ares_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
+                } else if (sym->is_var_loc == UNDEFINED) {
+                    automult_variable_global(ares_utils_T.fasm, $1.lexema, $3.es_direccion);
+                } else if (sym->elem == PARAMETRO) {
+                    automult_parametro(ares_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
+                } else {
+                    automult_variable_local(ares_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
+                }
+            }
+            | identificador_use TOK_AUTODIV exp {
+                char err_msg[TAM_ERRMSG] = "";
+                sym_info* sym = NULL;
+                P_RULE(0,"<incremento> ::= <identificador_use> += <exp>");
+
+                sym = sym_t_get_symb($1.lexema);
+                sprintf(err_msg, "Auto-operador a variable no declarada (%s)", $1.lexema);
+                CHECK_ERROR(sym != NULL, err_msg);
+                CHECK_ERROR(sym->elem != FUNCION, "Asignacion incompatible");
+                CHECK_ERROR(sym->tipo == INT, "Operacion necesita expresion de tipo entero");
+                CHECK_ERROR($3.tipo == INT, "Operacion necesita expresion de tipo entero");
+                
+                if (sym->catg == VECTOR) {
+                    autodiv_vector(ares_utils_T.fasm, $1.lexema, $3.es_direccion, sym->size);
+                } else if (sym->is_var_loc == UNDEFINED) {
+                    autodiv_variable_global(ares_utils_T.fasm, $1.lexema, $3.es_direccion);
+                } else if (sym->elem == PARAMETRO) {
+                    autodiv_parametro(ares_utils_T.fasm, $3.es_direccion, sym->pos_param, num_parametros_actual);
+                } else {
+                    autodiv_variable_local(ares_utils_T.fasm, $3.es_direccion, sym->pos_var_loc);
+                }
+            }
+            | identificador_use TOK_INCREMENTO {
+                char err_msg[TAM_ERRMSG] = "";
+                sym_info* sym = NULL;
+                P_RULE(0,"<incremento> ::= <identificador_use> += <exp>");
+
+                sym = sym_t_get_symb($1.lexema);
+                sprintf(err_msg, "Auto-operador a variable no declarada (%s)", $1.lexema);
+                CHECK_ERROR(sym != NULL, err_msg);
+                CHECK_ERROR(sym->elem != FUNCION, "Asignacion incompatible");
+                CHECK_ERROR(sym->tipo == INT, "Operacion necesita expresion de tipo entero");
+                
+                if (sym->catg == VECTOR) {
+                    incremento_vector(ares_utils_T.fasm, $1.lexema, sym->size);
+                } else if (sym->is_var_loc == UNDEFINED) {
+                    incremento_variable_global(ares_utils_T.fasm, $1.lexema);
+                } else if (sym->elem == PARAMETRO) {
+                    incremento_parametro(ares_utils_T.fasm, sym->pos_param, num_parametros_actual);
+                } else {
+                    incremento_variable_local(ares_utils_T.fasm, sym->pos_var_loc);
+                }
+            }
+            | identificador_use TOK_DECREMENTO {
+                char err_msg[TAM_ERRMSG] = "";
+                sym_info* sym = NULL;
+                P_RULE(0,"<incremento> ::= <identificador_use> += <exp>");
+
+                sym = sym_t_get_symb($1.lexema);
+                sprintf(err_msg, "Auto-operador a variable no declarada (%s)", $1.lexema);
+                CHECK_ERROR(sym != NULL, err_msg);
+                CHECK_ERROR(sym->elem != FUNCION, "Asignacion incompatible");
+                CHECK_ERROR(sym->tipo == INT, "Operacion necesita expresion de tipo entero");
+                
+                if (sym->catg == VECTOR) {
+                    decremento_vector(ares_utils_T.fasm, $1.lexema, sym->size);
+                } else if (sym->is_var_loc == UNDEFINED) {
+                    decremento_variable_global(ares_utils_T.fasm, $1.lexema);
+                } else if (sym->elem == PARAMETRO) {
+                    decremento_parametro(ares_utils_T.fasm, sym->pos_param, num_parametros_actual);
+                } else {
+                    decremento_variable_local(ares_utils_T.fasm, sym->pos_var_loc);
+                }
+            }
+            ;
 
 modulo_vector : identificador_use TOK_MODULO_VECTOR exp {
                 char err_msg[TAM_ERRMSG] = "";

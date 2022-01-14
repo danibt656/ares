@@ -6,11 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 
 #define DEBUG_FILE "debug"
 
 /* Inicializar valores default */
-struct ALFA_UTILS ares_utils_T = {
+struct ARES_UTILS ares_utils_T = {
     .fin = NULL,
     .fin_name = NULL,
     .fasm = NULL,
@@ -46,28 +47,45 @@ void manage_error(char *msg, char *s)
         fprintf(stderr, "\n");
 }
 
-//void exec_sh(const char *cmd)
-//{
-//    char *output = (char*) calloc(1, sizeof(char));
-//    output[0] = '\0';
-//
-//    FILE *fp;
-//    char path[1035];
-//
-//    fp = popen(cmd, "r");
-//    if (!fp) {
-//        printf("[Tac]: Failed to run command `%s`\n", cmd);
-//        exit(1);
-//    }
-//
-//    while (fgets(path, sizeof(path), fp) != NULL) {
-//        output = (char*)realloc(output, (strlen(output) + strlen(path) + 1) * sizeof(char));
-//        strcat(output, path);
-//    }
-//
-//    pclose(fp);
-//    free(output);
-//}
+void exec_sh(const char *cmd)
+{
+   char *output = (char*) calloc(1, sizeof(char));
+   output[0] = '\0';
+
+   FILE *fp;
+   char path[1035];
+
+   fp = popen(cmd, "r");
+   if (!fp) {
+       printf("[Tac]: Failed to run command `%s`\n", cmd);
+       exit(1);
+   }
+
+   while (fgets(path, sizeof(path), fp) != NULL) {
+       output = (char*)realloc(output, (strlen(output) + strlen(path) + 1) * sizeof(char));
+       strcat(output, path);
+   }
+
+   pclose(fp);
+   free(output);
+}
+
+void print_help(const char *c)
+{
+    fprintf(stderr,
+"\nUSO: %s <entrada_ares> <salida>\n\
+    + entrada_ares: Fichero con codigo fuente ARES\n\
+    + salida_asm: Nombre fichero ejecutable\n\
+\nOpciones\n\
+    -h: muestra esta ayuda\n\n\
+    -f: nombre fichero de entrada con extesion `.ares`\n\n\
+    -o: nombre de fichero salida (ejecutable)\n\n\
+    -d: activa modo DEBUG. Se geera el ejecutable y el fichero con codigo NASM\n\n\
+    -u: desinstala el compilador del Lenguaje ARES\n\n\
+\nPara mas informacion, referirse al README.md\n\
+-----------------------------------------------------\n",
+        c);
+}
 
 extern FILE *yyout;
 extern FILE *yyin;
@@ -77,56 +95,89 @@ extern int yyparse(void);
 
 int main(int argc, char *argv[])
 {
-    int ret;
+    int ret = 1, opt;
+    int file_in_exists=-1, file_out_exists=-1, dbg_enabled=-1;
+    char cmd[128] = "", file_in[64] = "", file_out[64] = "";
+
     
-    if (argc != 3) {
-        fprintf(stderr,
-        "Numero de parametros incorrectos\n\
-    USO: %s <entrada_ares> <salida_asm>\n\
-        + entrada_ares: Fichero con codigo fuente ALFA\n\
-        + salida_asm: Nombre fichero donde se generara codigo NASM\n\
-\n\nPara mas informacion, referirse al README.md\n\
------------------------------------------------------\n",
-        argv[0]);
+    while((opt = getopt(argc, argv, "f:o:dh")) != -1) 
+    { 
+        switch(opt) 
+        { 
+            case 'f': 
+                sprintf(file_in, "%s", optarg);
+                file_in_exists = 1;
+                break; 
+            case 'o': 
+                sprintf(file_out, "%s", optarg);
+                file_out_exists = 1;
+                break; 
+            case 'd':
+                dbg_enabled = 1;
+                break;
+            case 'h':
+                print_help(argv[0]);
+                break;
+            case ':': 
+                printf("** la opcion necesita un valor\n"); 
+                break; 
+            case '?': 
+                printf("** opcion desconocida: %c\n", optopt);
+                break; 
+        } 
+    }
+
+    if (file_in_exists == -1) {
+        printf("** Se requiere un fichero de entrada con extension .ares\n");
+        return EXIT_FAILURE;
+    }
+
+    if (file_out_exists == -1) {
+        printf("** Se requiere nombre de fichero ejecutable\n");
         return EXIT_FAILURE;
     }
 
     /* Comprobar extension de fichero de entrada */
-    const char *dot = strrchr(argv[1], '.');
+    const char *dot = strrchr(file_in, '.');
     if(strcmp(dot, INPUT_EXTENSION) != 0) {
-        printf("** Los ficheros de entrada deben acabar en [%s]", INPUT_EXTENSION);
+        printf("** Los ficheros de entrada deben acabar en [%s]\n", INPUT_EXTENSION);
         return EXIT_FAILURE;
     }
 
     /* Abrir fichero entrada y guardar su nombre */
-    if (!(ares_utils_T.fin = fopen(argv[1], "r")))
+    if (!(ares_utils_T.fin = fopen(file_in, "r")))
         return EXIT_FAILURE;
-    ares_utils_T.fin_name = argv[1];
 
     /* Abrir fichero debug */
     if (!(ares_utils_T.fdbg = fopen(DEBUG_FILE, "w"))) {
         fclose(ares_utils_T.fin);
         return EXIT_FAILURE;
     }
-
     /* Abrir fichero salida ASM */
-    if (!(ares_utils_T.fasm = fopen(argv[2], "w"))) {
+    if (!(ares_utils_T.fasm = fopen("exe.asm", "w"))) {
         fclose(ares_utils_T.fin);
         fclose(ares_utils_T.fdbg);
         return EXIT_FAILURE;
     }
 
+    ares_utils_T.fin_name = file_in;
     ares_utils_T.ferr = stderr;
     yyin = ares_utils_T.fin;
     yyout = ares_utils_T.ferr;
 
     ret = yyparse();
 
-//    exec_sh("echo \"Hello world\"");
-
     fclose(ares_utils_T.fin);
     fclose(ares_utils_T.fdbg);
     fclose(ares_utils_T.fasm);
+
+    /* Compilar fichero NASM y borrarlo a menos que DEBUG este activado */
+    exec_sh("nasm -f elf32 exe.asm");
+    sprintf(cmd, "gcc -m32 -o %s exe.o obj/areslib.o", file_out);
+    exec_sh(cmd);
+
+    if (dbg_enabled == -1)
+        exec_sh("rm exe.o exe.asm");
 
     return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

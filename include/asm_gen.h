@@ -332,12 +332,38 @@ void salto_equal(FILE *fpasm, int etiqueta);
 void salto_greater(FILE *fpasm, int etiqueta);
 
 /*
-Para operador de incremento
+Para auto-operadores
 */
-void incremento_variable_global(FILE *fpasm, char *nombre, int es_direccion);
-void incremento_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
-void incremento_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
-void incremento_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
+/* Operador de incremento: ++ */
+void incremento_variable_global(FILE *fpasm, char *nombre);
+void incremento_parametro(FILE *fpasm, int pos_param, int num_params);
+void incremento_vector(FILE *fpasm, char *nombre, int tam_vector);
+void incremento_variable_local(FILE *fpasm, int pos_var_loc);
+/* Operador de decremento: -- */
+void decremento_variable_global(FILE *fpasm, char *nombre);
+void decremento_parametro(FILE *fpasm, int pos_param, int num_params);
+void decremento_vector(FILE *fpasm, char *nombre, int tam_vector);
+void decremento_variable_local(FILE *fpasm, int pos_var_loc);
+/* Operador de autosuma: += */
+void autosuma_variable_global(FILE *fpasm, char *nombre, int es_direccion);
+void autosuma_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
+void autosuma_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
+void autosuma_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
+/* Operador de autoresta: -= */
+void autoresta_variable_global(FILE *fpasm, char *nombre, int es_direccion);
+void autoresta_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
+void autoresta_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
+void autoresta_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
+/* Operador de automultiplicacion: *= */
+void automult_variable_global(FILE *fpasm, char *nombre, int es_direccion);
+void automult_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
+void automult_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
+void automult_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
+/* Operador de autodivision: /= */
+void autodiv_variable_global(FILE *fpasm, char *nombre, int es_direccion);
+void autodiv_parametro(FILE *fpasm, int es_direccion, int pos_param, int num_params);
+void autodiv_vector(FILE *fpasm, char *nombre, int es_direccion, int tam_vector);
+void autodiv_variable_local(FILE *fpasm, int es_direccion, int pos_var_loc);
 
 /*
 Modulo sobre vectores

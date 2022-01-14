@@ -1,5 +1,5 @@
-#ifndef ALFA_H
-#define ALFA_H 1
+#ifndef ARES_H
+#define ARES_H 1
 
 #include <stdio.h>
 
@@ -10,7 +10,7 @@
 #define MAX_LONG_ID 100
 #define MAX_LONG_VECTOR 64
 
-/* Extension de los ficheros en lenguaje ALFA */
+/* Extension de los ficheros en lenguaje ARES */
 #define INPUT_EXTENSION ".ares"
 
 /* Codigos de errores */
@@ -29,7 +29,7 @@ typedef enum
 } Tipo;
 
 /* Estructura para ficheros de entrada y salida */
-extern struct ALFA_UTILS
+extern struct ARES_UTILS
 {
     FILE *fin;          /* Fichero de entrada */
     char *fin_name;     /* Nombre de fichero de entrada */
@@ -62,8 +62,11 @@ void exec_sh(const char *cmd);
 /* Funcion para manejar errores */
 void manage_error(char *msg, char *s);
 
+/* Imprime ayuda */
+void print_help(const char *c);
+
 /* Funcion Principal que llama al analizador */
 int main(int argc, char *argv[]);
 
 
-#endif /* ALFA_H */
+#endif /* ARES_H */

@@ -1,7 +1,3 @@
-/******************************************************
-Nombre: tokens.h
-Descripcion: Definicion de tokens para el lenguaje ALFA
-******************************************************/
 #ifndef _TOKENS_H
 #define _TOKENS_H 1
 
@@ -51,7 +47,12 @@ Descripcion: Definicion de tokens para el lenguaje ALFA
 #define TOK_MENOR               220
 #define TOK_MAYOR               221
 #define TOK_INCREMENTO          222
-#define TOK_MODULO_VECTOR       223
+#define TOK_DECREMENTO          223
+#define TOK_MODULO_VECTOR       224
+#define TOK_AUTOSUMA            225
+#define TOK_AUTORESTA           226
+#define TOK_AUTOMULT            227
+#define TOK_AUTODIV             228
 
 
 /* Identificadores  */
