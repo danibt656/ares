@@ -1,39 +1,45 @@
 #include "asm_gen.h"
 #include "ares.h"
+#include <stdarg.h>
+
+
+#define PUT_ASM(...) _put_asm(fpasm, "\t", "\n", __VA_ARGS__)
+#define PUT_DIRECTIVE(...) _put_asm(fpasm, "", "\n", __VA_ARGS__)
+#define PUT_LABEL(...) _put_asm(fpasm, "", ":\n", __VA_ARGS__)
+#define PUT_COMMENT(...) _put_asm(fpasm, ";; ", "\n", __VA_ARGS__)
+
+
+static void _put_asm(FILE* fpasm, const char* prefix, const char* suffix, const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    if (prefix) fputs(prefix, fpasm);
+    vfprintf(fpasm, fmt, ap);
+    if (suffix) fputs(suffix, fpasm);
+    va_end(ap);
+}
 
 
 void escribir_cabecera_presentacion(FILE *fpasm, char *input_filename)
 {
-      if(!fpasm){
-                printf("Error fallo en compilador, fichero fpasm nulo");
-                return;
-        }
-        fprintf(fpasm, ";-------------------------------\n");
-        fprintf(fpasm, "; %s\n", input_filename);
-        fprintf(fpasm, ";   Author: Daniel Barahona\n");
-        fprintf(fpasm, ";-------------------------------\n");
+        PUT_COMMENT("-------------------------------\n");
+        PUT_COMMENT(" %s\n", input_filename);
+        PUT_COMMENT("   Author: Daniel Barahona\n");
+        PUT_COMMENT("-------------------------------\n");
 }
 
 void escribir_cabecera_bss(FILE *fpasm)
 {
-        if(!fpasm){
-                printf("Error fallo en compilador, fichero fpasm nulo");
-                return;
-        }
-        fprintf(fpasm, "segment .bss\n");
-        fprintf(fpasm, "__esp resd 1\n");
+        PUT_DIRECTIVE("segment .bss\n");
+        PUT_ASM("__esp resd 1\n");
 }
 
 void escribir_subseccion_data(FILE *fpasm)
 {
-        if(!fpasm){
-                printf("Error fallo en compilador, fichero fpasm nulo");
-                return;
-        }
-        fprintf(fpasm, "segment .data\n");
-        fprintf(fpasm, "msg_error_division db \"**** Division por 0 no permitida\", 0\n");
-        fprintf(fpasm, "msg_error_expte db \"**** Exponente negativo no permitido\", 0\n");
-        fprintf(fpasm, "msg_error_indice_vector db \"**** Indice fuera de rango\", 0\n");
+        PUT_DIRECTIVE("segment .data\n");
+        PUT_ASM("msg_error_division db \"**** Division por 0 no permitida\", 0\n");
+        PUT_ASM("msg_error_expte db \"**** Exponente negativo no permitido\", 0\n");
+        PUT_ASM("msg_error_indice_vector db \"**** Indice fuera de rango\", 0\n");
 }
 
 void declarar_variable(FILE *fpasm, char *nombre, int tipo, int tamano)
