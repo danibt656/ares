@@ -10,6 +10,8 @@
 
 #define DEBUG_FILE "debug"
 
+#define ARG_FLAGS "f:o:dhv"
+
 /* Inicializar valores default */
 struct ARES_UTILS ares_utils_T = {
     .fin = NULL,
@@ -47,6 +49,16 @@ void manage_error(char* msg, char* s)
     }
     else
         fprintf(stderr, "\n");
+}
+
+char* remove_quotes(char* s1) 
+{
+    size_t len = strlen(s1);
+    if (s1[0] == '"' && s1[len - 1] == '"') {
+        s1[len - 1] = '\0';
+        memmove(s1, s1 + 1, len - 1);
+    }
+    return s1;
 }
 
 void exec_sh(const char* cmd)
@@ -108,7 +120,7 @@ int main(int argc, char* argv[])
     char cmd[128] = "", file_in[64] = "", file_out[64] = "";
 
 
-    while ((opt = getopt(argc, argv, "f:o:dhv")) != -1) {
+    while ((opt = getopt(argc, argv, ARG_FLAGS)) != -1) {
         switch (opt) {
             case 'f':
                 sprintf(file_in, "%s", optarg);

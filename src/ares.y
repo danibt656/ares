@@ -121,10 +121,12 @@
 %token TOK_AUTOMULT
 %token TOK_AUTODIV
 
+/* Constantes*/
 %token <attributes> TOK_IDENTIFICADOR
 %token <attributes> TOK_CONSTANTE_ENTERA   
 %token TOK_TRUE               
 %token TOK_FALSE
+%token <attributes> TOK_STRING
 
 %token TOK_ERROR
 
@@ -135,6 +137,7 @@
 %type <attributes> constante
 %type <attributes> constante_entera
 %type <attributes> constante_logica
+%type <attributes> constante_string
 %type <attributes> identificador_new identificador_use idpf funcion fn_name fn_declaration
 %type <attributes> llamada_funcion
 %type <attributes> lista_expresiones resto_lista_expresiones
@@ -186,7 +189,10 @@ dec_vars:   {
 wrt_main:   {   escribir_inicio_main(ares_utils_T.fasm);}
 
 declaraciones : declaracion {P_RULE(2,"<declaraciones> ::= <declaracion>");}
-              |   declaracion declaraciones {P_RULE(3,"<declaraciones> ::= <declaracion> <declaraciones>");};
+              | declaracion declaraciones {P_RULE(3,"<declaraciones> ::= <declaracion> <declaraciones>");}
+              /* | lambda, programa sin declaraciones
+                {P_RULE(3,"<declaraciones> ::= ");} */
+              ;
 
 declaracion : clase identificadores ';' {P_RULE(4,"<declaracion> ::= <clase> <identificadores> ;");};
 
@@ -603,7 +609,7 @@ bucle : bucle_exp sentencias '}' {
 
             CHECK_ERROR($3.tipo == INT, "limite del rango de loop-in deben ser de tipo entero");
             CHECK_ERROR($3.valor_entero > $$.valor_entero, "limite superior del rango debe ser mayor al inferior");
-            printf("LEXEMA: %s\n\n", $1.lexema);
+            //printf("LEXEMA: %s\n\n", $1.lexema);
             loop_in_fin(ares_utils_T.fasm, $$.lexema, $3.valor_entero, $$.etiqueta);
         };
 
@@ -642,12 +648,12 @@ bucle_tok : TOK_WHILE {
             while_inicio(ares_utils_T.fasm, $$.etiqueta);
           }
 
-lectura : TOK_SCANF identificador_use ')' {
+lectura : TOK_SCANF '<' identificador_use {
             char err_msg[TAM_ERRMSG] = "";
-            P_RULE(54,"<lectura> ::= scanf identificador"); 
+            P_RULE(54,"<lectura> ::= input < identificador"); 
 
-            sprintf(err_msg, "Identificador [%s] no existe", $2.lexema);
-            sym_info* info = sym_t_check($2.lexema);
+            sprintf(err_msg, "Identificador [%s] no existe", $3.lexema);
+            sym_info* info = sym_t_check($3.lexema);
             CHECK_ERROR(info, err_msg);
             CHECK_ERROR(info->elem != FUNCION, "scanf no admite funciones como entrada");
             CHECK_ERROR(info->catg != VECTOR, "scanf no admite vectores como entrada");
@@ -664,9 +670,9 @@ lectura : TOK_SCANF identificador_use ')' {
             }
         };
 
-escritura : TOK_PRINTF exp ')' {
-                P_RULE(56,"<escritura> ::= printf <exp>");
-                escribir(ares_utils_T.fasm, $2.es_direccion, $2.tipo);
+escritura : TOK_PRINTF '>' exp {
+                P_RULE(56,"<escritura> ::= output > <exp>");
+                escribir(ares_utils_T.fasm, $3.es_direccion, $3.tipo);
           };
 
 retorno_funcion : TOK_RETURN exp {
@@ -954,6 +960,13 @@ constante : constante_logica {
                 P_RULE(100,"<comparacion> ::= <constante_entera>");
                 $$.tipo = $1.tipo;
                 $$.es_direccion = $1.es_direccion;
+            }
+          | constante_string {
+                P_RULE(0,"<comparacion> ::= <constante_string>");
+                $$.tipo = $1.tipo;
+                $$.es_direccion = $1.es_direccion;
+
+                printf("VALOR STRING: %s\n", $1.valor_string);
             };
 
 constante_logica : TOK_TRUE {
@@ -974,6 +987,13 @@ constante_entera : TOK_CONSTANTE_ENTERA {
                         $$.tipo = INT;
                         $$.es_direccion = 0;
                         $$.valor_entero = $1.valor_entero;
+                    };
+
+constante_string : TOK_STRING {
+                        P_RULE(104,"<constante_string> ::= TOK_STRING");
+                        $$.tipo = STRING;
+                        $$.es_direccion = 0;
+                        strcpy($$.valor_string, $1.valor_string);
                     };
 
 identificador_use: TOK_IDENTIFICADOR

@@ -8,9 +8,9 @@ main
  v5[3] = 40;
  v5[4] = 50;
  v5 += 8;
- printf v5[0];
- printf v5[1];
- printf v5[2];
- printf v5[3];
- printf v5[4];
+ output > v5[0];
+ output > v5[1];
+ output > v5[2];
+ output > v5[3];
+ output > v5[4];
 }

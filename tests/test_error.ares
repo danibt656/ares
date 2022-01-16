@@ -4,5 +4,5 @@ begin
 
     a[1] = 1;
 
-    output(a[1]);
+    output > a[1];
 }

@@ -8,8 +8,8 @@ main {
     v .% 2;
 
     @ debe imprimir 1,0,1,0
-    printf v[0];
-    printf v[1];
-    printf v[2];
-    printf v[3];
+    output > v[0];
+    output > v[1];
+    output > v[2];
+    output > v[3];
 }

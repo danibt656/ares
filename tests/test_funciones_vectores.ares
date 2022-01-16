@@ -3,7 +3,7 @@ begin
     bool resultado;
 	array bool[3] vector; 
 
-	fn bool or (bool b1; bool b2; bool b3)
+	proc bool or (bool b1; bool b2; bool b3)
 	{
 	    bool a;
         a  = b1 || b2 || b3;
@@ -15,6 +15,6 @@ begin
 	vector[2] = false;
 	
 	resultado = or (vector[0], vector [1], vector [2]);
-	output(resultado);
+	output > resultado;
 	
 }

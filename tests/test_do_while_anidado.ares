@@ -6,13 +6,13 @@ begin
     i32 x, y;
     x = 4;
     do {
-        output(x);
+        output > x;
         do {
             y = 0;
-            output(true);
+            output > true;
             x++;
             do {
-                output(y);
+                output > y;
                 y = y + 1;
             }
             while ((y < 3));

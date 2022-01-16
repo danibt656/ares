@@ -7,7 +7,7 @@ begin
     i32 x, resultado;
 
 // Funciones
-    fn i32 fibonacci (i32 num1)
+    proc i32 fibonacci (i32 num1)
     {
         // Declaraciones
 	    i32 res1, res2;
@@ -27,9 +27,9 @@ begin
 
 // Sentencias
 
-	input(x);
+	input < x;
 
 	resultado = fibonacci (x);
 
-	output(resultado);
+	output > resultado;
 }

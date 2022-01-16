@@ -5,9 +5,9 @@ main {
 
     vector[0] = 1;
     vector[2] = 3;
-    printf vector[2];
+    output > vector[2];
     vector[(1+                  1)] = 2;
-    printf vector[0];
-    printf vector[a];
-    printf vector[2];
+    output > vector[0];
+    output > vector[a];
+    output > vector[2];
 }

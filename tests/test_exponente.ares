@@ -4,5 +4,5 @@ begin {
     y = 3;
     z = x^y+2;
     @ Debe imprimir 10
-    output(z);
+    output > z;
 }

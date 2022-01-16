@@ -2,7 +2,7 @@ begin
 {
     i32 x, y, resultado;
 
-	fn i32 suma (i32 num1; i32 num2)
+	proc i32 suma (i32 num1; i32 num2)
 	{
 		return num1+num2;
 	}
@@ -11,16 +11,16 @@ begin
 	y = 3;
 	
 	resultado = suma (x,y);
-	output(resultado);
+	output > resultado;
 	
 	resultado = suma (x,1);
-	output(resultado);
+	output > resultado;
 	
 	resultado = suma (10,y);
-	output(resultado);
+	output > resultado;
 
 	resultado = suma (3,5);
-	output(resultado);	
+	output > resultado)	
 	
 }
 

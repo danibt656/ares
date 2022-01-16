@@ -3,9 +3,9 @@ begin
 {
     i32 x, y;
 
-    fn i32 bucle() {
+    proc i32 bucle() {
         do {
-            output(x);
+            output > x;
             x++;
             y = 0;
         }
@@ -15,5 +15,5 @@ begin
 
     x = 4;
     y = bucle();
-    output(y);
+    output > y;
 }

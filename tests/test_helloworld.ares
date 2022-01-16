@@ -1,0 +1,6 @@
+begin
+{
+    bool x;
+
+    output > x;
+}

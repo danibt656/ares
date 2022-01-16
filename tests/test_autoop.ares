@@ -2,17 +2,17 @@
 begin {
     i32 x;
     x = 3;
-    output(x);   // 3
+    output > x;   // 3
     x += 3;
-    output(x);   // 6
+    output > x;   // 6
     x -= 1;
-    output(x);   // 5
+    output > x;   // 5
     x *= 2;
-    output(x);   // 10
+    output > x;   // 10
     x /= 2;
-    output(x);   // 5
+    output > x;   // 5
     x++;
-    output(x);   // 6
+    output > x;   // 6
     x--;
-    output(x);   // 5
+    output > x;   // 5
 }

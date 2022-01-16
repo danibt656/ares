@@ -87,7 +87,8 @@ enum yytokentype {
     TOK_CONSTANTE_ENTERA = 294,
     TOK_TRUE = 295,
     TOK_FALSE = 296,
-    TOK_ERROR = 297
+    TOK_STRING = 297,
+    TOK_ERROR = 298
 };
 #endif
 /* Tokens.  */
@@ -130,7 +131,8 @@ enum yytokentype {
 #define TOK_CONSTANTE_ENTERA 294
 #define TOK_TRUE 295
 #define TOK_FALSE 296
-#define TOK_ERROR 297
+#define TOK_STRING 297
+#define TOK_ERROR 298
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

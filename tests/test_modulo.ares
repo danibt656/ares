@@ -6,5 +6,5 @@ main
     z = x % y;
 
     @ debe imprimir 3 (7%4)
-    printf z;
+    output > z;
 }

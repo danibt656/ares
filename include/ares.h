@@ -23,7 +23,8 @@ typedef enum ErrorCode {
 /* Tipos de variables*/
 typedef enum {
     BOOLEAN,
-    INT
+    INT,
+    STRING
 } Tipo;
 
 /* Estructura para ficheros de entrada y salida */
@@ -40,17 +41,20 @@ extern struct ARES_UTILS {
 } ares_utils_T;
 
 typedef struct {
-    char lexema[MAX_LONG_ID+1];    /* lexema de Identificador */
-    int valor_entero;               /* valor de constante entera */
-    int es_direccion;               /* Variable o Constante*/
+    char lexema[MAX_LONG_ID+1];         /* lexema de Identificador */
 
-    Tipo tipo;                      /* boolean o entero */
+    int valor_entero;                   /* valor de constante entera */
+    int es_direccion;                   /* Variable o Constante */
 
-    int etiqueta;                   /* para anidacion */
+    char valor_string[MAX_LONG_ID+1];   /* valor de la constante String */
 
-    int num_parametros_llamada_actual; /* Para llamadas a funciones */
+    Tipo tipo;                          /* boolean o entero */
 
-    int tam_inicializacion_vector;  /* Para inicializar vectores */
+    int etiqueta;                       /* para anidacion */
+
+    int num_parametros_llamada_actual;  /* Para llamadas a funciones */
+
+    int tam_inicializacion_vector;      /* Para inicializar vectores */
 } attribute_type;
 
 /* Ejecutar comandos de shell */
@@ -58,6 +62,9 @@ void exec_sh(const char* cmd);
 
 /* Manejar errores */
 void manage_error(char* msg, char* s);
+
+/* Quita las comillas dobles de los extremos de un String */
+char* remove_quotes(char* s1);
 
 /* Muestra ayuda */
 void print_help(const char* c);

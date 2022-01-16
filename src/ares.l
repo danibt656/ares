@@ -34,7 +34,7 @@ LETRA [a-zA-Z]
     /* Palabras reservadas */ 
 begin       { SHIFT(); return TOK_MAIN; }
 array       { SHIFT(); return TOK_ARRAY; }
-fn          { SHIFT(); return TOK_FUNCTION; }
+proc        { SHIFT(); return TOK_FUNCTION; }
 if          { SHIFT(); return TOK_IF; }
 else        { SHIFT(); return TOK_ELSE; }
 while       { SHIFT(); return TOK_WHILE; }
@@ -55,8 +55,8 @@ i32         { SHIFT(); return TOK_INT; }
 bool        { SHIFT(); return TOK_BOOLEAN; }
 
     /* Funciones del sistema */
-"output("   { SHIFT(); return TOK_PRINTF; }
-"input("    { SHIFT(); return TOK_SCANF; }
+output      { SHIFT(); return TOK_PRINTF; }
+input       { SHIFT(); return TOK_SCANF; }
 "len("      { SHIFT(); return TOK_LEN; }
 
     /* Simbolos */ 
@@ -99,7 +99,22 @@ false       { SHIFT(); return TOK_FALSE; }
                 #include "ares.h"
                 SHIFT(); yylval.attributes.valor_entero = atoi(yytext); 
                 return TOK_CONSTANTE_ENTERA; 
-            }   
+            }  
+             
+"\""({DIGITO}|{LETRA})*"\""   { 
+                                        #include "ares.h"
+                                        SHIFT();
+
+                                        /* Error de longitud (sumamos 2 por las comillas) */
+                                        if (yyleng > (MAX_LONG_ID + 2)) {
+                                            ares_utils_T.col -= yyleng;
+                                            ares_utils_T.error = ERR_MORFOLOGICO;
+                                            manage_error("cadena con longitud superior a 100", NULL);
+                                            return TOK_ERROR;
+                                        }
+                                        strcpy(yylval.attributes.valor_string, remove_quotes(yytext));
+                                        return TOK_STRING;
+                                    }
 
     /* Identificadores */
 {LETRA}({DIGITO}|{LETRA})*  {

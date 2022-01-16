@@ -66,6 +66,7 @@
 #define TOK_CONSTANTE_ENTERA    400
 #define TOK_TRUE                401
 #define TOK_FALSE               402
+#define TOK_STRING              403
 
 /* Errores */
 #define TOK_ERROR                -1

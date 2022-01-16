@@ -2,29 +2,29 @@ begin
 {
     i32 a,b,c;
 
-    input(a);
-    input(b);
-    input(c);
+    input < a;
+    input < b;
+    input < c;
 
     compare a with b
     {
         less
-            output(a-b);
-            output(-1);
+            output > a-b;
+            output > -1;
             compare a+b with c
             {
                 less
-                    output(-1000);
+                    output > -1000;
                 equal
-                    output(0);
+                    output > 0;
                 greater
-                    output(1000);
+                    output > 1000;
             }
         equal
-            output(a-b);
-            output(0);
+            output > a-b;
+            output > 0;
         greater
-            output(a-b);
-            output(1);
+            output > a-b;
+            output > 1;
     }
 } 

@@ -1,8 +1,8 @@
 main {
     int x, y;
     // Pedir input
-    scanf x;
+    input < x;
     y = x + 1;
     // Sacar el valor
-    printf y;
+    output > y;
 }
