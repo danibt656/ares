@@ -319,288 +319,221 @@ void no(FILE* fpasm, int es_variable, int cuantos_no)
 /* FUNCIONES COMPARATIVAS */
 void igual(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; comparación igual\n");
+    PUT_COMMENT("comparación igual");
     //lecuta de operandos
-    fprintf(fpasm, "pop dword eax\n"); // Op2
+    PUT_ASM("pop dword eax\n"); // Op2
     if (es_variable2)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-    fprintf(fpasm, "pop dword ebx\n"); // Op1
+        PUT_ASM("mov dword eax, [eax]\n");
+    PUT_ASM("pop dword ebx\n"); // Op1
     if (es_variable1)
-        fprintf(fpasm, "mov dword ebx, [ebx]\n");
+        PUT_ASM("mov dword ebx, [ebx]\n");
     //operación
-    fprintf(fpasm, "cmp ebx, eax\n"); // compara operando 1 y operando 2
-    fprintf(fpasm, "je igual_es_igual%d\n", etiqueta); //si se cumple la condición de igualdad salta
-    fprintf(fpasm, "mov dword eax, 0\n"); // si no salta es que no se cumple la condición
-    fprintf(fpasm, "push dword eax\n"); // mete un 0 en la pila para indicar que no se cumple la condicion
-    fprintf(fpasm, "jmp igual_fin%d\n", etiqueta); // saltamos al final para evitar el correcto
-    fprintf(fpasm, "igual_es_igual%d:\n", etiqueta); //salto de igualdad
-    fprintf(fpasm, "mov dword eax, 1\n"); //mete en la pila un 1 para indicar que se cumple
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "igual_fin%d:\n", etiqueta); //fin de la comprobación de igualdad
+    PUT_ASM("cmp ebx, eax\n"); // compara operando 1 y operando 2
+    PUT_ASM("je igual_es_igual%d\n", etiqueta); //si se cumple la condición de igualdad salta
+    PUT_ASM("mov dword eax, 0\n"); // si no salta es que no se cumple la condición
+    PUT_ASM("push dword eax\n"); // mete un 0 en la pila para indicar que no se cumple la condicion
+    PUT_ASM("jmp igual_fin%d\n", etiqueta); // saltamos al final para evitar el correcto
+    PUT_ASM("igual_es_igual%d:\n", etiqueta); //salto de igualdad
+    PUT_ASM("mov dword eax, 1\n"); //mete en la pila un 1 para indicar que se cumple
+    PUT_ASM("push dword eax\n");
+    PUT_ASM("igual_fin%d:\n", etiqueta); //fin de la comprobación de igualdad
 }
 
 void distinto(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; comparar distinto\n");
+    PUT_COMMENT("comparar distinto");
     //lectura de operandos
-    fprintf(fpasm, "pop dword eax\n"); // Op2
+    PUT_ASM("pop dword eax\n"); // Op2
     if (es_variable2)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-    fprintf(fpasm, "pop dword ebx\n"); // Op1
+        PUT_ASM("mov dword eax, [eax]\n");
+    PUT_ASM("pop dword ebx\n"); // Op1
     if (es_variable1)
-        fprintf(fpasm, "mov dword ebx, [ebx]\n");
+        PUT_ASM("mov dword ebx, [ebx]\n");
     //operación
-    fprintf(fpasm, "cmp ebx, eax\n"); // compara operando 1 y operando 2
-    fprintf(fpasm, "jne distinto_es_distinto%d\n", etiqueta); //si se cumple la condición de desigualdad salta
-    fprintf(fpasm, "mov dword eax, 0\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "jmp distinto_fin%d\n", etiqueta);
-    fprintf(fpasm, "distinto_es_distinto%d:\n", etiqueta);
-    fprintf(fpasm, "mov dword eax, 1\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "distinto_fin%d:\n", etiqueta);
+    PUT_ASM("cmp ebx, eax\n"); // compara operando 1 y operando 2
+    PUT_ASM("jne distinto_es_distinto%d\n", etiqueta); //si se cumple la condición de desigualdad salta
+    PUT_ASM("mov dword eax, 0\n");
+    PUT_ASM("push dword eax\n");
+    PUT_ASM("jmp distinto_fin%d\n", etiqueta);
+    PUT_ASM("distinto_es_distinto%d:\n", etiqueta);
+    PUT_ASM("mov dword eax, 1\n");
+    PUT_ASM("push dword eax\n");
+    PUT_ASM("distinto_fin%d:\n", etiqueta);
 }
 
 void menor_igual(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; comparación menor_igual\n");
-    fprintf(fpasm, "pop dword eax\n"); // Op2
+    PUT_COMMENT("comparación menor_igual");
+    PUT_ASM("pop dword eax"); // Op2
     if (es_variable2)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-    fprintf(fpasm, "pop dword ebx\n"); // Op1
+        PUT_ASM("mov dword eax, [eax]");
+    PUT_ASM("pop dword ebx"); // Op1
     if (es_variable1)
-        fprintf(fpasm, "mov dword ebx, [ebx]\n");
-    fprintf(fpasm, "cmp ebx, eax\n"); // Op1 <= Op2 ?
-    fprintf(fpasm, "jle mni_es_mni%d\n", etiqueta);
-    fprintf(fpasm, "mov dword eax, 0\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "jmp mni_fin%d\n", etiqueta);
-    fprintf(fpasm, "mni_es_mni%d:\n", etiqueta);
-    fprintf(fpasm, "mov dword eax, 1\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "mni_fin%d:\n", etiqueta);
+        PUT_ASM("mov dword ebx, [ebx]");
+    PUT_ASM("cmp ebx, eax"); // Op1 <= Op2 ?
+    PUT_ASM("jle mni_es_mni%d", etiqueta);
+    PUT_ASM("mov dword eax, 0");
+    PUT_ASM("push dword eax");
+    PUT_ASM("jmp mni_fin%d", etiqueta);
+    PUT_COMMENT("mni_es_mni%d", etiqueta);
+    PUT_ASM("mov dword eax, 1");
+    PUT_ASM("push dword eax");
+    PUT_COMMENT("mni_fin%d", etiqueta);
 }
 
 void mayor_igual(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; comparación mayor_igual\n");
-    fprintf(fpasm, "pop dword eax\n"); // Op2
+    PUT_COMMENT("comparación mayor_igual");
+    PUT_ASM("pop dword eax\n"); // Op2
     if (es_variable2)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-    fprintf(fpasm, "pop dword ebx\n"); // Op1
+        PUT_ASM("mov dword eax, [eax]");
+    PUT_ASM("pop dword ebx"); // Op1
     if (es_variable1)
-        fprintf(fpasm, "mov dword ebx, [ebx]\n");
-    fprintf(fpasm, "cmp ebx, eax\n"); // Op1 >= Op2 ?
-    fprintf(fpasm, "jge myi_es_myi%d\n", etiqueta);
-    fprintf(fpasm, "mov dword eax, 0\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "jmp myi_fin%d\n", etiqueta);
-    fprintf(fpasm, "myi_es_myi%d:\n", etiqueta);
-    fprintf(fpasm, "mov dword eax, 1\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "myi_fin%d:\n", etiqueta);
+        PUT_ASM("mov dword ebx, [ebx]");
+    PUT_ASM("cmp ebx, eax"); // Op1 >= Op2 ?
+    PUT_ASM("jge myi_es_myi%d", etiqueta);
+    PUT_ASM("mov dword eax, 0");
+    PUT_ASM("push dword eax");
+    PUT_ASM("jmp myi_fin%d", etiqueta);
+    PUT_COMMENT("myi_es_myi%d", etiqueta);
+    PUT_ASM("mov dword eax, 1");
+    PUT_ASM("push dword eax");
+    PUT_COMMENT("myi_fin%d", etiqueta);
 }
 
 void menor(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; comparación menor\n");
-    fprintf(fpasm, "pop dword eax\n"); // Op2
+    PUT_COMMENT("comparación menor");
+    PUT_ASM("pop dword eax"); // Op2
     if (es_variable2)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-    fprintf(fpasm, "pop dword ebx\n"); // Op1
+        PUT_ASM("mov dword eax, [eax]");
+    PUT_ASM("pop dword ebx"); // Op1
     if (es_variable1)
-        fprintf(fpasm, "mov dword ebx, [ebx]\n");
-    fprintf(fpasm, "cmp ebx, eax\n"); // Op1 < Op2 ?
-    fprintf(fpasm, "jl mn_es_mn%d\n", etiqueta);
-    fprintf(fpasm, "mov dword eax, 0\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "jmp mn_fin%d\n", etiqueta);
-    fprintf(fpasm, "mn_es_mn%d:\n", etiqueta);
-    fprintf(fpasm, "mov dword eax, 1\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "mn_fin%d:\n", etiqueta);
+        PUT_ASM("mov dword ebx, [ebx]");
+    PUT_ASM("cmp ebx, eax"); // Op1 < Op2 ?
+    PUT_ASM("jl mn_es_mn%d", etiqueta);
+    PUT_ASM("mov dword eax, 0");
+    PUT_ASM("push dword eax");
+    PUT_ASM("jmp mn_fin%d", etiqueta);
+    PUT_COMMENT("mn_es_mn%d", etiqueta);
+    PUT_ASM("mov dword eax, 1");
+    PUT_ASM("push dword eax");
+    PUT_COMMENT("mn_fin%d", etiqueta);
 }
 
 void mayor(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; comparación mayor\n");
-    fprintf(fpasm, "pop dword eax\n"); // Op2
+    PUT_COMMENT("comparación mayor");
+    PUT_ASM("pop dword eax"); // Op2
     if (es_variable2)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-    fprintf(fpasm, "pop dword ebx\n"); // Op1
+        PUT_ASM("mov dword eax, [eax]");
+    PUT_ASM("pop dword ebx"); // Op1
     if (es_variable1)
-        fprintf(fpasm, "mov dword ebx, [ebx]\n");
-    fprintf(fpasm, "cmp ebx, eax\n"); // Op1 > Op2 ?
-    fprintf(fpasm, "jg my_es_my%d\n", etiqueta);
-    fprintf(fpasm, "mov dword eax, 0\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "jmp my_fin%d\n", etiqueta);
-    fprintf(fpasm, "my_es_my%d:\n", etiqueta);
-    fprintf(fpasm, "mov dword eax, 1\n");
-    fprintf(fpasm, "push dword eax\n");
-    fprintf(fpasm, "my_fin%d:\n", etiqueta);
+        PUT_ASM("mov dword ebx, [ebx]");
+    PUT_ASM("cmp ebx, eax"); // Op1 > Op2 ?
+    PUT_ASM("jg my_es_my%d", etiqueta);
+    PUT_ASM("mov dword eax, 0");
+    PUT_ASM("push dword eax");
+    PUT_ASM("jmp my_fin%d", etiqueta);
+    PUT_COMMENT("my_es_my%d", etiqueta);
+    PUT_ASM("mov dword eax, 1");
+    PUT_ASM("push dword eax");
+    PUT_COMMENT("my_fin%d", etiqueta);
 }
 
 /* FUNCIONES DE ESCRITURA Y LECTURA */
 /* Hay que distinguir entre Global, y Parametro o Variable Local*/
 void leer(FILE* fpasm, char* nombre, int tipo, int es_global)
 {
-    if (!fpasm || !nombre) {
-        printf("Error fallo en compilador, fichero fpasm o nombre nulo");
-        return;
-    }
-    fprintf(fpasm, "; leer (scan)\n");
+
+    PUT_COMMENT("leer (input)");
     if (es_global)
-        fprintf(fpasm, "push dword _%s\n", nombre);
-    fprintf(fpasm, (tipo==INT) ? "call scan_int\n" : "call scan_boolean\n");
-    fprintf(fpasm, "add esp, 4\n");
+        PUT_ASM("push dword _%s", nombre);
+    PUT_ASM((tipo==INT) ? "call scan_int" : "call scan_boolean");
+    PUT_ASM("add esp, 4");
 }
 
 void escribir(FILE* fpasm, int es_variable, int tipo)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; escribir (print)\n");
+    PUT_COMMENT("escribir (output)");
     if (es_variable) {
-        fprintf(fpasm,
-                "pop eax\n"
-                "push dword [eax]\n");
+        PUT_ASM("pop eax");
+        PUT_ASM("push dword [eax]");
     }
-    if (tipo == INT) {
-        fprintf(fpasm, "call print_int\n");
-    }
-    else
-        if (tipo == BOOLEAN) {
-            fprintf(fpasm, "call print_boolean\n");
-        }
-    fprintf(fpasm, "call print_endofline\n");
-    fprintf(fpasm, "add esp, 4\n");
+    if (tipo == INT)
+        PUT_ASM("call print_int");
+    else if (tipo == BOOLEAN)
+        PUT_ASM("call print_boolean");
+    PUT_ASM("call print_endofline");
+    PUT_ASM("add esp, 4");
 }
 
 void ifthenelse_inicio(FILE* fpasm, int exp_es_variable, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; ifthenelse_inicio\n");
-    fprintf(fpasm, "pop eax\n");
+    PUT_COMMENT("ifthenelse_inicio");
+    PUT_ASM("pop eax");
     if (exp_es_variable)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-    fprintf(fpasm, "cmp eax, 0\n");
-    fprintf(fpasm, "je near fin_then%d\n", etiqueta);
+        PUT_ASM("mov dword eax, [eax]");
+    PUT_ASM("cmp eax, 0");
+    PUT_ASM("je near fin_then%d", etiqueta);
 }
 
 void ifthen_inicio(FILE* fpasm, int exp_es_variable, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; ifthen_inicio\n");
-    fprintf(fpasm, "pop eax\n");
+    PUT_COMMENT("ifthen_inicio");
+    PUT_ASM("pop eax");
     if (exp_es_variable)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-    fprintf(fpasm, "cmp eax, 0\n");
-    fprintf(fpasm, "je near fin_then%d\n", etiqueta);
+        PUT_ASM("mov dword eax, [eax]");
+    PUT_ASM("cmp eax, 0");
+    PUT_ASM("je near fin_then%d", etiqueta);
 }
 
 void ifthen_fin(FILE* fpasm, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; ifthen_fin\n");
-    fprintf(fpasm, "fin_then%d:\n", etiqueta);
+    PUT_COMMENT("ifthen_fin");
+    PUT_LABEL("fin_then%d", etiqueta);
 }
 
 void ifthenelse_fin_then(FILE* fpasm, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; ifthenelse_fin_then\n");
-    fprintf(fpasm, "jmp near fin_ifelse%d\n", etiqueta);
-    fprintf(fpasm, "fin_then%d:\n", etiqueta);
+    PUT_COMMENT("ifthenelse_fin_then");
+    PUT_ASM("jmp near fin_ifelse%d", etiqueta);
+    PUT_LABEL("fin_then%d", etiqueta);
 }
 
 void ifthenelse_fin(FILE* fpasm, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; ifthenelse_fin\n");
-    fprintf(fpasm, "fin_ifelse%d:\n", etiqueta);
+    PUT_COMMENT("ifthenelse_fin");
+    PUT_LABEL("fin_ifelse%d", etiqueta);
 }
 
 void while_inicio(FILE* fpasm, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; while_inicio\n");
-    fprintf(fpasm, "inicio_while%d:\n", etiqueta);
+    PUT_COMMENT("while_inicio");
+    PUT_LABEL("inicio_while%d", etiqueta);
     /* Ahora vendria una condicion (mayor, menor o igual, etc.) */
 }
 
 void while_exp_pila(FILE* fpasm, int exp_es_variable, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; while_exp_pila\n");
+    PUT_COMMENT("while_exp_pila");
 
-    fprintf(fpasm, "pop eax\n");
+    PUT_ASM("pop eax");
     if (exp_es_variable)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
+        PUT_ASM("mov dword eax, [eax]");
 
-    fprintf(fpasm,  "cmp eax, 0\n");
+    PUT_ASM("cmp eax, 0");
     /* Si la condicion no se cumple, salir del loop */
-    fprintf(fpasm, "je near fin_while%d\n", etiqueta);
+    PUT_ASM("je near fin_while%d", etiqueta);
     /* Aqui vendria el contenido del while */
 }
 
 void while_fin(FILE* fpasm, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; while_fin\n");
+    PUT_COMMENT("while_fin");
     /* Saltar al comienzo del loop */
-    fprintf(fpasm, "jmp near inicio_while%d\n", etiqueta);
-    fprintf(fpasm, "fin_while%d:\n", etiqueta);
+    PUT_ASM("jmp near inicio_while%d", etiqueta);
+    PUT_LABEL("fin_while%d", etiqueta);
     /* Codigo posterior al while */
 }
 
@@ -653,422 +586,314 @@ void loop_in_fin(FILE* fpasm, char *nombre, int fin_contador, int etiqueta)
 
 void escribir_elemento_vector(FILE* fpasm, char* nombre_vector, int tam_max, int exp_es_direccion)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; escribir_elemento_vector\n");
+    PUT_COMMENT("escribir_elemento_vector");
     NO_USO(nombre_vector);
     NO_USO(tam_max);
     // Extraemos de la pila el valor del índice a un registro
-    fprintf(fpasm, "pop dword eax\n");
+    PUT_ASM("pop dword eax");
 
     // En el caso en el que sea una dirección, accedemos al valor
-    if (exp_es_direccion == 1) {
-        fprintf(fpasm, "mov eax, dword [eax]\n");
-    }
+    if (exp_es_direccion == 1)
+        PUT_ASM("mov eax, dword [eax]");
 
-    fprintf(fpasm, "pop dword ebx\n");
-    fprintf(fpasm, "mov dword [ebx], eax\n");
+    PUT_ASM("pop dword ebx");
+    PUT_ASM("mov dword [ebx], eax");
 }
 
 void apilar_valor_elemento_vector(FILE* fpasm)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; apilar_valor_elemento_vector\n");
-    fprintf(fpasm, "pop dword eax\n");
-    fprintf(fpasm, "push dword [eax]\n");
+    PUT_COMMENT("apilar_valor_elemento_vector");
+    PUT_ASM("pop dword eax");
+    PUT_ASM("push dword [eax]");
 }
 
 void comprobar_indice_vector(FILE* fpasm, const char* nombre, int es_direccion, int tam)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; comprobar_indice_vector\n");
-    fprintf(fpasm, "pop dword eax\n");
+    PUT_COMMENT("comprobar_indice_vector");
+    PUT_ASM("pop dword eax");
 
     if (es_direccion)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
+        PUT_ASM("mov dword eax, [eax]");
     /* Mirar que indice no sea negativo */
-    fprintf(fpasm, "cmp eax, 0\n");
-    fprintf(fpasm, "jl fin_indice_fuera_rango\n");
+    PUT_ASM("cmp eax, 0");
+    PUT_ASM("jl fin_indice_fuera_rango");
 
     /* Mirar que indice no sea mayor que tam vector */
-    fprintf(fpasm, "cmp eax, %d\n", tam);
-    fprintf(fpasm, "jge fin_indice_fuera_rango\n");
+    PUT_ASM("cmp eax, %d", tam);
+    PUT_ASM("jge fin_indice_fuera_rango");
 
-    fprintf(fpasm, "lea eax, [4*eax + _%s]\n", nombre); // Dirección del elemento indexado en eax
-    fprintf(fpasm, "push dword eax\n");         // Almacenamos la dirección al elemento
+    PUT_ASM("lea eax, [4*eax + _%s]", nombre);  // Dirección del elemento indexado en eax
+    PUT_ASM("push dword eax");                  // Almacenamos la dirección al elemento
 }
 
 void declararFuncion(FILE* fpasm, char* nombre_funcion, int num_var_loc)
 {
-    if (!fpasm || !nombre_funcion) {
-        printf("Error fallo en compilador, fichero fpasm o nombre_funcion nulo");
-        return;
-    }
-    fprintf(fpasm, "; declararFuncion\n");
-    fprintf(fpasm, "_%s:\n", nombre_funcion);
-    fprintf(fpasm, "push ebp\n");
-    fprintf(fpasm, "mov dword ebp, esp\n");
-    fprintf(fpasm, "sub esp, %d\n", 4 * num_var_loc);
+    PUT_COMMENT("declararFuncion");
+    PUT_LABEL("_%s", nombre_funcion);
+    PUT_ASM("push ebp");
+    PUT_ASM("mov dword ebp, esp");
+    PUT_ASM("sub esp, %d", 4 * num_var_loc);
 }
 
 void retornarFuncion(FILE* fpasm, int es_variable)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; retornarFuncion\n");
-    fprintf(fpasm, "pop dword eax\n");
+    PUT_COMMENT("retornarFuncion");
+    PUT_ASM("pop dword eax");
     if (es_variable == 1)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
-    fprintf(fpasm, "mov dword esp, ebp\n");
-    fprintf(fpasm, "pop dword ebp\n");
-    fprintf(fpasm, "ret\n");
+        PUT_ASM("mov dword eax, [eax]");
+    PUT_ASM("mov dword esp, ebp");
+    PUT_ASM("pop dword ebp");
+    PUT_ASM("ret");
 }
 
 void escribirParametro(FILE* fpasm, int direccion, int pos_parametro, int num_total_parametros)
 {
     int d_ebp = 4 + 4*(num_total_parametros - pos_parametro);
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; escribirParametro\n");
-    if (direccion == 1) {
-        fprintf(fpasm, "lea eax, [ebp + %d]\n", d_ebp);
-    }
-    else {
-        fprintf(fpasm, "mov eax, dword [ebp + %d]\n", d_ebp);
-    }
-    fprintf(fpasm, "push dword eax\n");
+
+    PUT_COMMENT("; escribirParametro");
+    if (direccion == 1)
+        PUT_ASM("lea eax, [ebp + %d]", d_ebp);
+    else
+        PUT_ASM("mov eax, dword [ebp + %d]", d_ebp);
+    PUT_ASM("push dword eax");
 }
 
 void escribirVariableLocal(FILE* fpasm, int direccion, int posicion_variable_local)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; escribirVariableLocal\n");
     int d_ebp = 4 * posicion_variable_local;
-    if (direccion == 1) {
-        fprintf(fpasm, "lea eax, [ebp - %d]\n", d_ebp);
-    }
-    else {
-        fprintf(fpasm, "mov eax, dword [ebp - %d]\n", d_ebp);
-    }
-    fprintf(fpasm, "push dword eax\n");
+
+    PUT_COMMENT("; escribirVariableLocal");
+    if (direccion == 1)
+        PUT_ASM("lea eax, [ebp - %d]", d_ebp);
+    else
+        PUT_ASM("mov eax, dword [ebp - %d]", d_ebp);
+    PUT_ASM("push dword eax");
 }
 
 void asignarParametro(FILE* fpasm, int es_variable, int pos_param, int num_params)
 {
     int d_ebp = 4 + 4*(num_params - pos_param);
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; asignarParametro\n");
 
-    fprintf(fpasm, "pop dword eax\n");
+    PUT_COMMENT("; asignarParametro");
+
+    PUT_ASM("pop dword eax");
     if (es_variable)
-        fprintf(fpasm, "mov eax, dword [eax]\n");
+        PUT_ASM("mov eax, dword [eax]");
 
-    fprintf(fpasm, "lea ebx, [ebp + %d]\n", d_ebp);
-    fprintf(fpasm, "mov [ebx], eax\n");
+    PUT_ASM("lea ebx, [ebp + %d]", d_ebp);
+    PUT_ASM("mov [ebx], eax");
 }
 
 void asignarVariableLocal(FILE* fpasm, int es_variable, int pos_var_loc)
 {
     int d_ebp = 4*pos_var_loc;
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; asignarVariableLocal\n");
 
-    fprintf(fpasm, "pop dword eax\n");
+    PUT_COMMENT("; asignarVariableLocal");
+
+    PUT_ASM("pop dword eax");
     if (es_variable)
-        fprintf(fpasm, "mov eax, dword [eax]\n");
+        PUT_ASM("mov eax, dword [eax]");
 
-    fprintf(fpasm, "lea ebx, [ebp - %d]\n", d_ebp);
-    fprintf(fpasm, "mov [ebx], eax\n");
+    PUT_ASM("lea ebx, [ebp - %d]", d_ebp);
+    PUT_ASM("mov [ebx], eax");
 }
 
 void operandoEnPilaAArgumento(FILE* fpasm, int es_variable)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo\n");
-        return;
-    }
-    fprintf(fpasm, "; operandoEnPilaAArgumento\n");
+    PUT_COMMENT("; operandoEnPilaAArgumento");
     if (es_variable == 1) {
-        fprintf(fpasm, "pop dword eax\n"
-                "mov dword eax, [eax]\n"
-                "push dword eax\n");
+        PUT_ASM("pop dword eax");
+        PUT_ASM("mov dword eax, [eax]");
+        PUT_ASM("push dword eax");
     }
 }
 
 void llamarFuncion(FILE* fpasm, char* nombre_funcion, int num_argumentos)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; llamarFuncion\n");
-    fprintf(fpasm, "call _%s\n", nombre_funcion);
+    PUT_COMMENT("llamarFuncion");
+    PUT_ASM("call _%s", nombre_funcion);
     limpiarPila(fpasm, num_argumentos);
-    fprintf(fpasm, "push dword eax\n");
+    PUT_ASM("push dword eax");
 }
 
 void limpiarPila(FILE* fpasm, int num_argumentos)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; limpiar pila\n");
+    PUT_COMMENT("limpiar pila");
 
-    fprintf(fpasm, "add esp, %d\n", num_argumentos * 4);
+    PUT_ASM("add esp, %d", num_argumentos * 4);
 }
 
 void init_vector(FILE* fpasm, char* nombre, int tam_inicializacion, int tam_vector)
 {
     int i;
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; inicializar vector\n");
+    PUT_COMMENT("inicializar vector");
 
-    fprintf(fpasm, "mov ebx, _%s\n", nombre);
-    fprintf(fpasm, "add ebx, %d\n", 4 * (tam_vector - 1));
+    PUT_ASM("mov ebx, _%s", nombre);
+    PUT_ASM("add ebx, %d", 4 * (tam_vector - 1));
 
     for (i = tam_vector; i > tam_inicializacion; i--) {
-        fprintf(fpasm, "mov dword [ebx], 0\n");
-        fprintf(fpasm, "sub ebx, 4\n");
+        PUT_ASM("mov dword [ebx], 0");
+        PUT_ASM("sub ebx, 4");
     }
 
     for (; i > 0; i--) {
-        fprintf(fpasm, "pop dword eax\n");
-        fprintf(fpasm, "mov dword [ebx], eax\n");
+        PUT_ASM("pop dword eax");
+        PUT_ASM("mov dword [ebx], eax");
 
         if (i != 1)
-            fprintf(fpasm, "sub ebx, 4\n");
+            PUT_ASM("sub ebx, 4");
     }
 }
 
 void compare_with(FILE* fpasm, int es_dir_1, int es_dir2, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; compare-with %d\n", etiqueta);
+    PUT_COMMENT("compare-with %d", etiqueta);
 
     /* Extraer expresiones a evaluar, primero exp2 y luego exp1 */
-    fprintf(fpasm, "pop dword ebx\n");
+    PUT_ASM("pop dword ebx");
     if (es_dir2)
-        fprintf(fpasm, "mov dword ebx, [ebx]\n");
-    fprintf(fpasm, "pop dword eax\n");
+        PUT_ASM("mov dword ebx, [ebx]");
+    PUT_ASM("pop dword eax");
     if (es_dir_1)
-        fprintf(fpasm, "mov dword eax, [eax]\n");
+        PUT_ASM("mov dword eax, [eax]");
 
-    /* Compararlos */
-    fprintf(fpasm, "cmp eax, ebx\n");
-    fprintf(fpasm, "jl cmpw_less%d\n", etiqueta);
-    fprintf(fpasm, "je cmpw_equal%d\n", etiqueta);
-    fprintf(fpasm, "jg cmpw_greater%d\n", etiqueta);
+    /* Comparar */
+    PUT_ASM("cmp eax, ebx");
+    PUT_ASM("jl cmpw_less%d", etiqueta);
+    PUT_ASM("je cmpw_equal%d", etiqueta);
+    PUT_ASM("jg cmpw_greater%d", etiqueta);
 }
 
 void salto_less(FILE* fpasm, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; LESS %d\n", etiqueta);
-    fprintf(fpasm, "cmpw_less%d:\n", etiqueta);
+    PUT_COMMENT("LESS %d", etiqueta);
+    PUT_LABEL("cmpw_less%d", etiqueta);
 }
 
 void salto_equal(FILE* fpasm, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "jmp fin_cmpw%d\n", etiqueta);
-    fprintf(fpasm, "; EQUAL %d\n", etiqueta);
-    fprintf(fpasm, "cmpw_equal%d:\n", etiqueta);
+    PUT_ASM("jmp fin_cmpw%d", etiqueta);
+    PUT_COMMENT("EQUAL %d", etiqueta);
+    PUT_LABEL("cmpw_equal%d", etiqueta);
 }
 
 void salto_greater(FILE* fpasm, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "jmp fin_cmpw%d\n", etiqueta);
-    fprintf(fpasm, "; GREATER %d\n", etiqueta);
-    fprintf(fpasm, "cmpw_greater%d:\n", etiqueta);
+    PUT_ASM("jmp fin_cmpw%d", etiqueta);
+    PUT_COMMENT("GREATER %d", etiqueta);
+    PUT_LABEL("cmpw_greater%d", etiqueta);
 }
 
 void fin_compare(FILE* fpasm, int etiqueta)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; fin del compare-with %d\n", etiqueta);
-    fprintf(fpasm, "fin_cmpw%d:\n", etiqueta);
+    PUT_COMMENT("fin compare-with%d", etiqueta);
+    PUT_LABEL("fin_cmpw%d", etiqueta);
 }
 
 /* Operador de incremento: ++ */
 void incremento_variable_global(FILE* fpasm, char* nombre)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; Inc variable global [%s]\n", nombre);
+    PUT_COMMENT("Inc variable global [%s]", nombre);
 
-    fprintf(fpasm, "mov dword ebx, [_%s]\n", nombre);
-    fprintf(fpasm, "inc ebx\n");
-    fprintf(fpasm, "mov dword [_%s], ebx\n", nombre);
+    PUT_ASM("mov dword ebx, [_%s]", nombre);
+    PUT_ASM("inc ebx");
+    PUT_ASM("mov dword [_%s], ebx", nombre);
 }
 
 void incremento_parametro(FILE* fpasm, int pos_param, int num_params)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; Inc parametro funcion\n");
+    PUT_COMMENT("Inc parametro funcion");
 
-    fprintf(fpasm, "mov dword eax, 1\n");
+    PUT_ASM("mov dword eax, 1");
 
-    fprintf(fpasm, "lea ebx, [ebp + %d]\n", 4 + 4*(num_params - pos_param));
-    fprintf(fpasm, "add eax, [ebx]\n");
-    fprintf(fpasm, "mov dword [ebx], eax\n");
+    PUT_ASM("lea ebx, [ebp + %d]", 4 + 4*(num_params - pos_param));
+    PUT_ASM("add eax, [ebx]");
+    PUT_ASM("mov dword [ebx], eax");
 }
 
 void incremento_vector(FILE* fpasm, char* nombre, int tam_vector)
 {
     int i;
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; Inc elementos vector [%s]\n", nombre);
-
-    fprintf(fpasm, "mov eax, 1\n");
-
-    fprintf(fpasm, "mov edx, eax\n");
-
-    fprintf(fpasm, "mov ebx, _%s\n", nombre);
+    PUT_COMMENT("Inc elementos vector [%s]", nombre);
+    PUT_ASM("mov eax, 1");
+    PUT_ASM("mov edx, eax");
+    PUT_ASM("mov ebx, _%s", nombre);
 
     for (i = 0; i < tam_vector; i++) {
         if (i != 0)
-            fprintf(fpasm, "mov eax, edx\n");
+            PUT_ASM("mov eax, edx");
 
-        fprintf(fpasm, "add eax, [ebx]\n");
-        fprintf(fpasm, "mov [ebx], eax\n");
+        PUT_ASM("add eax, [ebx]");
+        PUT_ASM("mov [ebx], eax");
 
         if (i != (tam_vector - 1))
-            fprintf(fpasm, "add ebx, 4\n");
+            PUT_ASM("add ebx, 4");
     }
 }
 
 void incremento_variable_local(FILE* fpasm, int pos_var_loc)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; Inc variable local\n");
+    PUT_COMMENT("Inc variable local");
 
-    fprintf(fpasm, "mov eax, 1\n");
+    PUT_ASM("mov eax, 1");
 
-    fprintf(fpasm, "lea ebx, [ebp - %d]\n", 4 * pos_var_loc);
-    fprintf(fpasm, "add eax, [ebx]\n");
-    fprintf(fpasm, "mov dword [ebx], eax\n");
+    PUT_ASM("lea ebx, [ebp - %d]", 4 * pos_var_loc);
+    PUT_ASM("add eax, [ebx]");
+    PUT_ASM("mov dword [ebx], eax");
 }
 
 /* Operador de decremento: -- */
 void decremento_variable_global(FILE* fpasm, char* nombre)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; Dec variable global [%s]\n", nombre);
+    PUT_COMMENT("Dec variable global [%s]", nombre);
 
-    fprintf(fpasm, "mov dword ebx, [_%s]\n", nombre);
-    fprintf(fpasm, "dec ebx\n");
-    fprintf(fpasm, "mov dword [_%s], ebx\n", nombre);
+    PUT_ASM("mov dword ebx, [_%s]", nombre);
+    PUT_ASM("dec ebx");
+    PUT_ASM("mov dword [_%s], ebx", nombre);
 }
 
 void decremento_parametro(FILE* fpasm, int pos_param, int num_params)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; Dec parametro funcion\n");
+    PUT_COMMENT("Dec parametro funcion");
 
-    fprintf(fpasm, "mov eax, -1\n");
+    PUT_ASM("mov eax, -1");
 
-    fprintf(fpasm, "lea ebx, [ebp + %d]\n", 4 + 4*(num_params - pos_param));
-    fprintf(fpasm, "add eax, [ebx]\n");
-    fprintf(fpasm, "mov dword [ebx], eax\n");
+    PUT_ASM("lea ebx, [ebp + %d]", 4 + 4*(num_params - pos_param));
+    PUT_ASM("add eax, [ebx]");
+    PUT_ASM("mov dword [ebx], eax");
 }
 
 void decremento_vector(FILE* fpasm, char* nombre, int tam_vector)
 {
     int i;
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; Dec elementos vector [%s]\n", nombre);
+    PUT_COMMENT("Dec elementos vector [%s]", nombre);
 
-    fprintf(fpasm, "mov eax, -1\n");
-    fprintf(fpasm, "mov edx, eax\n");
+    PUT_ASM("mov eax, -1");
+    PUT_ASM("mov edx, eax");
 
-    fprintf(fpasm, "mov ebx, _%s\n", nombre);
+    PUT_ASM("mov ebx, _%s", nombre);
 
     for (i = 0; i < tam_vector; i++) {
         if (i != 0)
-            fprintf(fpasm, "mov eax, edx\n");
+            PUT_ASM("mov eax, edx");
 
-        fprintf(fpasm, "add eax, [ebx]\n");
-        fprintf(fpasm, "mov [ebx], eax\n");
+        PUT_ASM("add eax, [ebx]");
+        PUT_ASM("mov [ebx], eax");
 
         if (i != (tam_vector - 1))
-            fprintf(fpasm, "add ebx, 4\n");
+            PUT_ASM("add ebx, 4");
     }
 }
 
 void decremento_variable_local(FILE* fpasm, int pos_var_loc)
 {
-    if (!fpasm) {
-        printf("Error fallo en compilador, fichero fpasm nulo");
-        return;
-    }
-    fprintf(fpasm, "; Dec variable local\n");
+    PUT_COMMENT("Dec variable local");
 
-    fprintf(fpasm, "mov eax, -1\n");
+    PUT_ASM("mov eax, -1");
 
-    fprintf(fpasm, "lea ebx, [ebp - %d]\n", 4 * pos_var_loc);
-    fprintf(fpasm, "add eax, [ebx]\n");
-    fprintf(fpasm, "mov dword [ebx], eax\n");
+    PUT_ASM("lea ebx, [ebp - %d]", 4 * pos_var_loc);
+    PUT_ASM("add eax, [ebx]");
+    PUT_ASM("mov dword [ebx], eax");
 }
 
 /* Operador de autosuma: += */

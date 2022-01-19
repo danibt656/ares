@@ -1,6 +1,6 @@
-main
+begin
 {
- array int[5] v5;
+ list i32[5] v5;
 
  v5[0] = 10;
  v5[1] = 20;

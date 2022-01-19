@@ -1,6 +1,6 @@
-main
+begin
 {
-    int x, y, z;
+    i32 x, y, z;
 
 	input < x;
 	input < y;

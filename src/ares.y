@@ -608,7 +608,6 @@ bucle : bucle_exp sentencias '}' {
             P_RULE(0,"<bucle> ::=  loop <identificador_use> in [<exp> to <exp>] { <sentencias> }");
 
             CHECK_ERROR($3.tipo == INT, "limite del rango de loop-in deben ser de tipo entero");
-            CHECK_ERROR($3.valor_entero > $$.valor_entero, "limite superior del rango debe ser mayor al inferior");
             //printf("LEXEMA: %s\n\n", $1.lexema);
             loop_in_fin(ares_utils_T.fasm, $$.lexema, $3.valor_entero, $$.etiqueta);
         };

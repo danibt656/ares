@@ -2,5 +2,5 @@ begin
 {
     bool x;
 
-    output > x;
+    output > "Hola";
 }

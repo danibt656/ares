@@ -1,5 +1,5 @@
-main {
-    int x, y;
+begin {
+    i32 x, y;
     x = 1;
     y = 0;
     if ((x > y)){

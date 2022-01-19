@@ -20,11 +20,6 @@ begin
 	output > resultado;
 
 	resultado = suma (3,5);
-	output > resultado)	
-	
+	output > resultado;
 }
-
-
-
-
 

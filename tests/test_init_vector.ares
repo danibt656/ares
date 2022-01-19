@@ -1,7 +1,7 @@
-main
+begin
 {
     // Declarar vector
-    array int[4] v;
+    list i32[4] v;
 
     // Inicializar vector
     init v {-10;-20;-30;-40};

@@ -1,8 +1,5 @@
-main {
-    int x, y;
-    // Pedir input
-    input < x;
-    y = x + 1;
-    // Sacar el valor
-    output > y;
+begin {
+    i32 x;
+    x = 2;
+    output > x;
 }

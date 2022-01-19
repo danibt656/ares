@@ -1,6 +1,6 @@
-main {
-    array int[3] vector; 
-    int a;
+begin {
+    list i32[3] vector; 
+    i32 a;
     a = 1;
 
     vector[0] = 1;

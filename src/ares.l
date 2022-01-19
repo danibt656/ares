@@ -33,7 +33,7 @@ LETRA [a-zA-Z]
 
     /* Palabras reservadas */ 
 begin       { SHIFT(); return TOK_MAIN; }
-array       { SHIFT(); return TOK_ARRAY; }
+list        { SHIFT(); return TOK_ARRAY; }
 proc        { SHIFT(); return TOK_FUNCTION; }
 if          { SHIFT(); return TOK_IF; }
 else        { SHIFT(); return TOK_ELSE; }

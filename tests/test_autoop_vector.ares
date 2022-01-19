@@ -1,0 +1,27 @@
+@ Test para los auto-operadores con vectores
+begin {
+    list i32[4] l;
+    i32 i, length;
+
+    init l {1; 2; 3};
+
+    length = len(l);
+    loop i in [0 to length] {
+        output > l[i];          // 1, 2, 3, 0
+    }
+
+    l++;
+    loop i in [0 to 4] {
+        output > l[i];          // 2, 3, 4, 1
+    }
+
+    l-=3;
+    loop i in [0 to 4] {
+        output > l[i];          // -1, 0, 1, -2
+    }
+
+    l*=2;
+    loop i in [0 to 4] {
+        output > l[i];          // -2, 0, 2, -4
+    }
+}
