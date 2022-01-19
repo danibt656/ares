@@ -1,57 +1,79 @@
-# Ares
-### *The* Ares *Programming Language*
+# ares
+> *The* Ares *Programming Language*
 
 ***
 
-## Makefile
+## What is this?
 
-Se incluye un fichero Makefile con las siguientes reglas (para verlas por terminal se puede ejecutar el comando `make help`):
+> This started as a school project, but after that I used some of my free time to expand it with more features
 
-+ all: compila todo y genera el ejecutable `ares`. Genera un fichero debug con las trazas de flex y bison llamado `debug`
-+ clean: borra todos los ficheros generados
-+ runf: compila un fichero de prueba en ARES y lo ejecuta. 
-  
-  Uso: `make runf src=<FICHERO_ARES>`
++ It is a compiled language for writing basic scripts.
++ Support for Numeric & Boolean data types.
++ 1 level of scope for functions, but hey there's 3 kinds of loops.
++ I know, that's pretty lame for calling it a 'Programming Language'
++ Because of that I tried to make it cooler by naming it like a Greek God
++ You probably don't want to use it for any serious thing. I really wouldn't.
 
-  El fichero ejecutable generado se llama 'exe'
-+ valgrind: ejecuta valgrind en el compilador sobre un fichero dado
-+ reset: versión concisa que ejecuta primero la regla `make clean` y después la regla `make all`
 
-## Generacion del ejecutable `./ares`
+## How to install?
 
-Para generar el ejecutable con el compilador de ARES, basta con ejecutar la correspondiente regla del makefile (conviene asegurarse antes de que todos los ficheros objeto y ejecutables antiguos estén eliminados con `make clean`):
+> In order to *compile the compiler*, just run `make all` on your terminal. 
 
-```
-make clean; make all
-```
-
-## Compilación de programas ARES
-
-> **Es ***muy*** importante que los programas de entrada acaben con la extensión `.ares`**
-
-Si se prefiere dar un nombre propio al ejecutable y no usar la regla `make runf` (ver más abajo, *"Ejecución de tests"*), se puede hacer uso del ejecutable `ares`:
+Or you can run `make help` for more information:
 
 ```
-./ares <entrada_source> <salida>
+Makefile Options:
+    all              - compiles everything & generates the ares executable
+    clean               - deletes all files generated during compiling
+    runf                - compiles an ARES file and executes it
+                             -> Usage: make runf src=<SOURCECODE_ARES>
+                             -> Generates an executable file called 'exe'
+    valgrind            - runs valgrind over the compiler through a source file
+                             -> Usage: make valgrind src=<SOURCECODE_ARES>
+    astyle              - styles code according to .astylerc file
+    reset               - runs the rule 'make clean' first, and then 'make all'
 ```
 
-Los argumentos de este programa son los siguientes:
+I'm genuinely surprised you made it this far and went to download my quirky compiler. Thanks! :D
 
-+ **entrada_source**: Fichero fuente escrito en lenguaje ARES
-+ **salida**: fichero donde se genera el ejecutable. Para ejecutarlo, utilizar `./<salida>`
+## How to compile files?
 
-## Ejecucion de tests
+> Just compile the compiler's executable file, and then run:
 
-En el directorio tests/ hay varios programas ARES que se pueden compilar con el ejecutable generado. Para compilar un programa ARES y ejecutarlo, se puede usar la regla del makefile para ello:
+```
+./ares -f <SOURCECODE_ARES> -o <OUTPUT_FILE>
+```
+
+1. `<SOURCECODE_ARES>`: Contains the program written in Ares code
+2. `<OUTPUT_FILE>`: Name of the executable file to be generated
+
+To get a full list of the Ares executable flags, run `./ares -h`:
+
+```
+Options
+    -h: shows this help
+    -f: source code file with `.ares` extension
+    -o: output executable file name
+    -d: enables DEBUG mode. Generates executable from source code AND the x86 NASM intermediate code
+    -u: uninstalls the ARES compiler
+```
+
+## How do I run the tests?
+
+> Just compile & run them like you would run any other Ares program
+
+In the `tests/` directory there is a vast battery of test programs to check how to code in Ares.
+
+In order to compile them, you can use the `./ares` executable or the makefile rule:
 
 ```
 make runf src=<SOURCECODE_ARES>
 ```
 
-Por ejemplo, para ejecutar el test **fibonacci.ares** contenido en la carpeta tests/:
+For example, in order to run the **fibonacci.ares** test file, which is in the `tests/` folder:
 
 ```
 make runf src=tests/fibonacci.ares
 ```
 
-Esto generará un archivoejecutable llamado 'exe' y lo ejecutará automáticamente.
+This will generate an executable called 'exe' and run it automatically for you.
