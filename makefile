@@ -97,16 +97,16 @@ reset:
 
 # Ayuda
 help:
-	@echo "Flags de Makefile:"
-	@echo "    all              - compila todo y genera el ejecutable ares"
-	@echo "                             -> Genera un fichero debug con las trazas de flex y bison"
-	@echo "    clean               - borra todos los ficheros generados"
-	@echo "    runf                - compila un fichero de prueba en ARES y lo ejecuta"
-	@echo "                             -> Uso: make runf src=<FICHERO_ARES>"
-	@echo "                             -> El fichero ejecutable se llama 'exe' y se encuentra en el directorio /ares/build"
-	@echo "    valgrind            - ejecuta valgrind en el compilador sobre un fichero dado"
-	@echo "    astyle              - estiliza el codigo acorde al fichero fichero $(ARTISTIC_STYLE_OPTIONS)"
-	@echo "    reset               - ejecuta primero la regla 'make clean' y luego 'make all'"
+	@echo "Makefile Options:"
+	@echo "    all              - compiles everything & generates the ares executable"
+	@echo "    clean               - deletes all files generated during compiling"
+	@echo "    runf                - compiles an ARES file and executes it"
+	@echo "                             -> Usage: make runf src=<SOURCECODE_ARES>"
+	@echo "                             -> Generates an executable file called 'exe'"
+	@echo "    valgrind            - runs valgrind over the compiler through a source file"
+	@echo "                             -> Usage: make valgrind src=<SOURCECODE_ARES>"
+	@echo "    astyle              - styles code according to $(ARTISTIC_STYLE_OPTIONS) file"
+	@echo "    reset               - runs the rule 'make clean' first, and then 'make all'"
 
 runf:
 	@echo "-------------------------------"

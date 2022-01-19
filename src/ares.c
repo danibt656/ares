@@ -87,16 +87,16 @@ void exec_sh(const char* cmd)
 void print_help(const char* c)
 {
     fprintf(stderr,
-            "\nUSO: %s <entrada_ares> <salida>\n\
-    + entrada_ares: Fichero con codigo fuente ARES\n\
-    + salida_asm: Nombre fichero ejecutable\n\
-\nOpciones\n\
-    -h: muestra esta ayuda\n\n\
-    -f: nombre fichero de entrada con extesion `.ares`\n\n\
-    -o: nombre de fichero salida (ejecutable)\n\n\
-    -d: activa modo DEBUG. Se geera el ejecutable y el fichero con codigo NASM\n\n\
-    -u: desinstala el compilador del Lenguaje ARES\n\n\
-\nPara mas informacion, referirse al README.md\n\
+            "\nUSAGE: %s <SOURCECODE_ARES> <OUTPUT>\n\
+    + <SOURCECODE_ARES>: Source code program written in ARES\n\
+    + <OUTPUT>: Name for the executable to be generated\n\
+\nOptions\n\
+    -h: shows this help\n\n\
+    -f: source code file with `.ares` extension\n\n\
+    -o: output executable file name\n\n\
+    -d: enables DEBUG mode. Generates executable from source code AND the x86 NASM intermediate code\n\n\
+    -u: uninstalls the ARES compiler\n\n\
+\nFor more information, refer to the README.md file\n\
 -----------------------------------------------------\n",
             c);
 }
