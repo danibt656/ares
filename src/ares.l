@@ -75,8 +75,8 @@ input       { SHIFT(); return TOK_SCANF; }
 "*"         { SHIFT(); return yytext[0]; }
 "^"         { SHIFT(); return yytext[0]; }
 "%"         { SHIFT(); return yytext[0]; }
-"&&"        { SHIFT(); return TOK_AND; }
-"||"        { SHIFT(); return TOK_OR; }
+"and"       { SHIFT(); return TOK_AND; }
+"or"        { SHIFT(); return TOK_OR; }
 "!"         { SHIFT(); return yytext[0]; }
 "=="        { SHIFT(); return TOK_IGUAL; }
 "!="        { SHIFT(); return TOK_DISTINTO; }

@@ -40,6 +40,7 @@ void escribir_subseccion_data(FILE* fpasm)
     PUT_ASM("msg_error_division db \"**** Division por 0 no permitida\", 0");
     PUT_ASM("msg_error_expte db \"**** Exponente negativo no permitido\", 0");
     PUT_ASM("msg_error_indice_vector db \"**** Indice fuera de rango\", 0");
+    PUT_ASM("msg_error_loop_in db \"**** Limites de rango invalidos\", 0");
 }
 
 void declarar_variable(FILE* fpasm, char* nombre, int tipo, int tamano)
@@ -81,6 +82,13 @@ void escribir_fin(FILE* fpasm)
 
     PUT_LABEL("fin_error_expte");
     PUT_ASM("push dword msg_error_expte");
+    PUT_ASM("call print_string");
+    PUT_ASM("call print_endofline");
+    PUT_ASM("add esp, 4");
+    PUT_ASM("jmp near fin");
+
+    PUT_LABEL("fin_error_loop_in");
+    PUT_ASM("push dword msg_error_loop_in");
     PUT_ASM("call print_string");
     PUT_ASM("call print_endofline");
     PUT_ASM("add esp, 4");
@@ -565,13 +573,23 @@ void loop_in_inicio(FILE* fpasm, char *nombre, int inicio_contador, int etiqueta
     PUT_ASM("push eax");
     PUT_ASM("push eax");
     PUT_ASM("mov dword [_%s], eax", nombre, inicio_contador);
+    /* Comprobar indice inferior */
+    PUT_ASM("mov ebx, %d", inicio_contador);
+    PUT_ASM("cmp ebx, 0");
+    PUT_ASM("jl fin_error_loop_in");
+
     PUT_LABEL("inicio_loop_in%d", etiqueta);
 }
 
-void loop_in_fin(FILE* fpasm, char *nombre, int fin_contador, int etiqueta)
+void loop_in_fin(FILE* fpasm, char *nombre, int inicio_contador, int fin_contador, int etiqueta)
 {
     PUT_COMMENT("loop_in_fin%d", etiqueta);
     
+    /* Comprobar indice superior */
+    PUT_ASM("mov ebx, %d", fin_contador);
+    PUT_ASM("cmp ebx, %d", inicio_contador);
+    PUT_ASM("jle fin_error_loop_in");
+
     /* Incrementamos contador */
     PUT_ASM("mov ecx, dword [_%s]", nombre);
     PUT_ASM("push dword ecx");

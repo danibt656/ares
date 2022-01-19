@@ -235,7 +235,7 @@ void do_while_inicio(FILE* fpasm, int etiqueta);
 void do_while_fin(FILE* fpasm, int exp_es_variable, int etiqueta);
 
 void loop_in_inicio(FILE* fpasm, char *nombre, int inicio_contador, int etiqueta);
-void loop_in_fin(FILE* fpasm, char *nombre, int fin_contador, int etiqueta);
+void loop_in_fin(FILE* fpasm, char *nombre, int inicio_contador, int fin_contador, int etiqueta);
 
 /* FUNCIONES DE VECTORES Y FUNCIONES */
 /*

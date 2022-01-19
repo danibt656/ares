@@ -608,8 +608,7 @@ bucle : bucle_exp sentencias '}' {
             P_RULE(0,"<bucle> ::=  loop <identificador_use> in [<exp> to <exp>] { <sentencias> }");
 
             CHECK_ERROR($3.tipo == INT, "limite del rango de loop-in deben ser de tipo entero");
-            //printf("LEXEMA: %s\n\n", $1.lexema);
-            loop_in_fin(ares_utils_T.fasm, $$.lexema, $3.valor_entero, $$.etiqueta);
+            loop_in_fin(ares_utils_T.fasm, $$.lexema, $$.valor_entero, $3.valor_entero, $$.etiqueta);
         };
 
 do_tok : TOK_DO {
@@ -628,7 +627,6 @@ loop_in_tok : TOK_LOOP identificador_use TOK_IN '[' exp {
                 CHECK_ERROR(info->elem != FUNCION, "iterador de loop-in no puede ser una funcion");
                 CHECK_ERROR(info->catg != VECTOR, "iterador de loop-in no puede ser un vector");
                 CHECK_ERROR($5.tipo == INT, "limite del rango de loop-in deben ser de tipo entero");
-                //CHECK_ERROR($5.valor_entero < 0, "limite inferior del rango no puede ser negativo");
 
                 $$.etiqueta = etiqueta++;
                 $$.valor_entero = $5.valor_entero;
