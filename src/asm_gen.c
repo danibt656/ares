@@ -5,7 +5,7 @@
 
 #define PUT_ASM(...) _put_asm(fpasm, "\t", "\n", __VA_ARGS__)
 #define PUT_DIRECTIVE(...) _put_asm(fpasm, "", "\n", __VA_ARGS__)
-#define PUT_LABEL(...) _put_asm(fpasm, "", ":\n", __VA_ARGS__)
+#define PUT_LABEL(...) _put_asm(fpasm, "", ":eeeee\n", __VA_ARGS__)
 #define PUT_COMMENT(...) _put_asm(fpasm, ";; ", "\n", __VA_ARGS__)
 
 
@@ -443,10 +443,10 @@ void mayor(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta)
     PUT_ASM("mov dword eax, 0");
     PUT_ASM("push dword eax");
     PUT_ASM("jmp my_fin%d", etiqueta);
-    PUT_COMMENT("my_es_my%d", etiqueta);
+    PUT_LABEL("my_es_my%d", etiqueta);
     PUT_ASM("mov dword eax, 1");
     PUT_ASM("push dword eax");
-    PUT_COMMENT("my_fin%d", etiqueta);
+    PUT_LABEL("my_fin%d", etiqueta);
 }
 
 /* FUNCIONES DE ESCRITURA Y LECTURA */
